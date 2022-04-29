@@ -1,0 +1,7 @@
+{
+  "name": "EPRMS",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}
