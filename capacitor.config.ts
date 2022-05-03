@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'io.ionic.starter',
-  appName: 'EPRMS',
+  appName: 'AMR',
   webDir: 'build',
   bundledWebRuntime: false
 };

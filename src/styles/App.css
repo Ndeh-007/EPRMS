@@ -1,0 +1,20 @@
+
+.text-bold{
+    font-weight: bold;
+}
+
+.text-regular{
+    font-weight: 100;
+}
+
+.text-small{
+    font-size: small;
+} 
+
+.text-smaller{
+    font-size: x-small;
+} 
+
+ion-split-pane{ 
+    --side-width:20%;
+}

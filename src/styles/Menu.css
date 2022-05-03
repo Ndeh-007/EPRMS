@@ -111,3 +111,11 @@ ion-note {
 ion-item.selected {
   --color: var(--ion-color-primary);
 } 
+
+
+div.menu-logo{
+  width: 50%;
+  margin: 0px auto;
+  padding-top: 2rem;
+  /* padding-left: ; */
+}

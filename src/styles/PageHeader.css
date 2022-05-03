@@ -1,0 +1,21 @@
+.custom-button {
+  border-radius: 10px;
+}
+
+.button-danger {
+  background-color: var(--ion-color-danger-tint);
+}
+
+.ion-custom-button {
+  text-transform: capitalize;
+  --border-width: 0.1rem; 
+  --background-color: var(--ion-color-tertiary-tint);
+}
+
+
+.card-header-button{
+    width: max-content;
+    height: max-content;
+    /* padding:-10px 0px; */
+    /* --background:#5261ff2d; */
+}
