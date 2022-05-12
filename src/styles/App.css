@@ -18,3 +18,15 @@
 ion-split-pane{ 
     --side-width:20%;
 }
+
+.capitalize{
+    text-transform: capitalize;
+}
+
+.br-0{
+    --border-radius: none;
+}
+
+.br-2{
+    --border-radius: 2px;
+}

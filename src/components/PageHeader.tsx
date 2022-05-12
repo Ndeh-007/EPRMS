@@ -14,23 +14,57 @@ import {
   IonText,
   IonToolbar,
 } from "@ionic/react";
-import { add, addCircle, alert, barbell, notifications } from "ionicons/icons";
-import React from "react";
-import { useParams } from "react-router";
+import {
+  add,
+  addCircle,
+  alert,
+  arrowBack,
+  barbell,
+  notifications,
+} from "ionicons/icons";
+import React, { useEffect, useState } from "react";
+import { useHistory, useLocation, useParams } from "react-router";
 import { capitalizeString } from "../Functions/functions";
 import { localImages } from "../images/images";
 import "../styles/PageHeader.css";
 const PageHeader: React.FC<{ name: string }> = (props) => {
+  const [backButton, setShowBackButton] = useState(true);
+  const location = useLocation();
+  const history = useHistory();
+
+  function goBack() {
+    if (location.pathname !== "/dashboard") {
+      history.goBack();
+      setShowBackButton(false);
+    }
+  }
+
+  useEffect(() => {
+    if (location.pathname === "/dashboard") {
+      setShowBackButton(false);
+    }
+  }, []);
+
   return (
     <IonHeader>
       <IonToolbar>
         <IonButtons slot="start">
           <IonMenuButton />
         </IonButtons>
+        {backButton && (
+          <IonButtons slot="start" className="d-lg-block d-none">
+            <IonButton
+              color="primary"
+              onClick={() => {
+                goBack();
+              }}
+            >
+              <IonIcon icon={arrowBack} slot="icon-only"></IonIcon>
+            </IonButton>
+          </IonButtons>
+        )}
         {/* <IonTitle slot="start">{capitalizeString(props.name)}</IonTitle> */}
-        {/* <div className="ripple-action custom-button button-danger">
-          <IonRippleEffect></IonRippleEffect>
-        </div> */}
+      
 
         {/*  <IonCard button color="tertiary" mode="ios" className="card-header-button">
            <IonIcon className="ion-padding" icon={addCircle}></IonIcon> 
@@ -39,17 +73,14 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
           </IonText>
         </IonCard>
           */}
-        {/* <IonButton
-          slot="start"
-          fill="outline"
-          color="tertiary"
-          className="ion-custom-button"
-        >
-          <IonLabel className="ion-padding">Announcements</IonLabel>
-          <IonIcon slot="start" icon={addCircle}></IonIcon>
-        </IonButton> */}
+        {!backButton && (
+          <IonButton slot="start" className="ion-padding-start" color="primary">
+            <IonLabel className="ion-padding">New Patient</IonLabel>
+            <IonIcon slot="start" icon={add}></IonIcon>
+          </IonButton> 
+        )}
 
-        <IonCard color="light" slot="end" mode="ios">
+        <IonCard color="light" slot="end" mode="md">
           <IonButtons>
             <IonButton color="warning">
               <IonIcon icon={notifications}></IonIcon>
@@ -57,7 +88,7 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
           </IonButtons>
         </IonCard>
 
-        <IonCard color="light" slot="end" mode="ios">
+        <IonCard color="light" slot="end" mode="md">
           <IonItem lines="none" color="light">
             <IonLabel>
               <span>Ns. Comfort</span> <br />
@@ -71,7 +102,7 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
               </span>
             </IonLabel>
             <IonAvatar slot="end">
-              <IonImg src={localImages.commy}></IonImg>
+              <IonImg className="br-2" src={localImages.commy}></IonImg>
             </IonAvatar>
           </IonItem>
         </IonCard>

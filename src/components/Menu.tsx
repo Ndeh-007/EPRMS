@@ -15,71 +15,63 @@ import {
 } from "@ionic/react";
 
 import { useLocation } from "react-router-dom";
-import {
-  archiveOutline,
-  archiveSharp,
-  bookmarkOutline,
-  heartOutline,
-  heartSharp,
-  mailOutline,
-  mailSharp,
-  paperPlaneOutline,
-  paperPlaneSharp,
+import { 
+  peopleCircleSharp,
+  peopleSharp,
   person,
-  personSharp,
-  trashOutline,
-  trashSharp,
-  warningOutline,
-  warningSharp,
+  personAddSharp,
+  personCircleSharp,
+  personSharp, 
 } from "ionicons/icons";
 import "../styles/Menu.css";
 import { customIcons, localImages } from "../images/images";
 import { useEffect } from "react";
+import { AppPage } from "../interfaces/types";
 
-interface AppPage {
-  url: string;
-  iosIcon: string;
-  mdIcon: string;
-  title: string;
-}
 
 const appPages: AppPage[] = [
   {
     title: "Dashboard",
-    url: "/admin/dashboard",
+    url: "/dashboard",
     iosIcon: customIcons.dashboard,
     mdIcon: customIcons.dashboard,
   },
   {
     title: "Patients",
-    url: "/admin/patients",
-    iosIcon: person,
-    mdIcon: personSharp,
+    url: "/patients",
+    iosIcon: personCircleSharp,
+    mdIcon: personCircleSharp,
   },
   {
-    title: "Doctor",
-    url: "/admin/doctor",
-    iosIcon: customIcons.doctor,
-    mdIcon: customIcons.doctor,
-  },
-  {
-    title: "Nurse",
-    url: "/admin/nurse",
-    iosIcon: customIcons.nurse,
-    mdIcon: customIcons.nurse,
-  },
-  {
-    title: "Lab",
-    url: "/admin/lab",
-    iosIcon: customIcons.labsci,
-    mdIcon: customIcons.labsci,
+    title: "Staff",
+    url: "/staff",
+    iosIcon: peopleCircleSharp,
+    mdIcon: peopleCircleSharp,
   },
   // {
-  //   title: 'Spam',
-  //   url: '/admin/Spam',
-  //   iosIcon: warningOutline,
-  //   mdIcon: warningSharp
-  // }
+  //   title: 'New Patient',
+  //   url: '/new-patient',
+  //   iosIcon: personAddSharp,
+  //   mdIcon: personAddSharp
+  // },
+  // {
+  //   title: "Doctor",
+  //   url: "/doctor",
+  //   iosIcon: customIcons.doctor,
+  //   mdIcon: customIcons.doctor,
+  // },
+  // {
+  //   title: "Nurse",
+  //   url: "/nurse",
+  //   iosIcon: customIcons.nurse,
+  //   mdIcon: customIcons.nurse,
+  // },
+  // {
+  //   title: "Lab",
+  //   url: "/lab",
+  //   iosIcon: customIcons.labsci,
+  //   mdIcon: customIcons.labsci,
+  // },
 ];
 
 const labels = ["Family", "Friends", "Notes", "Work", "Travel", "Reminders"];

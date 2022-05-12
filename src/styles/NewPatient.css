@@ -1,0 +1,22 @@
+.drag-n-drop{
+    height: 100%;
+    width: 100%;
+    background: var(--ion-color-light-tint);
+    /* padding: 3rem; */   
+}
+
+.drag-n-drop>p{
+  text-align: center;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+
+.alert-discharge, .alert-admit{
+  --background: var(--ion-color-light); 
+  font-size: small;
+}
+ 

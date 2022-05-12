@@ -27,6 +27,7 @@ import {
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
+import { chevronForward } from "ionicons/icons";
 import { useParams } from "react-router";
 import BarChart from "../components/BarChart";
 import DoughnutChart from "../components/DoughnutChart";
@@ -205,11 +206,11 @@ const Dashboard: React.FC = () => {
                       (patient: any, index: number) => {
                         let number = Math.floor((Math.random() * 10) / 2);
                         return (
-                          <IonItem lines="inset" key={index}>
+                          <IonItem lines="inset" key={index} button>
                             <IonAvatar slot="start">
                               <IonImg src={localImages.doc}></IonImg>
                             </IonAvatar>
-                            <IonToolbar>
+                            <div>
                               <IonLabel color="dark" className="fw-bold">
                                 {faker.name.findName()}
                               </IonLabel>
@@ -224,7 +225,12 @@ const Dashboard: React.FC = () => {
                                   - Dr. {faker.name.findName()}
                                 </span>
                               </IonLabel>
-                            </IonToolbar>
+                            </div>
+                            <IonButtons slot="end">
+                              <IonButton>
+                                <IonIcon icon={chevronForward} slot="icon-only"></IonIcon>
+                              </IonButton>
+                            </IonButtons>
                           </IonItem>
                         );
                       }

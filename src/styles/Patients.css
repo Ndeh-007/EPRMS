@@ -1,0 +1,9 @@
+.label-color ion-col>ion-text{
+    color: var(--ion-color-medium-dark);
+    font-weight: 100;
+    font-size: smaller;
+}
+
+.table-title ion-col>ion-text{
+    font-weight: 900;
+}

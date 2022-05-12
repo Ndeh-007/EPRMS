@@ -4,8 +4,15 @@ import React from "react";
 import { Redirect, Route } from "react-router-dom";
 import Menu from "../components/Menu";
 import Dashboard from "../pages/Dashboard";
+import EditPatient from "../pages/EditPatient";
+import EditStaff from "../pages/EditStaff";
 import Login from "../pages/Login";
+import NewPatient from "../pages/NewPatient";
 import Page from "../pages/Page";
+import PatientRecord from "../pages/PatientRecord";
+import Patients from "../pages/Patients";
+import Staff from "../pages/Staff";
+import ViewPatient from "../pages/ViewPatient";
 
 const Routes: React.FC = () => {
   return (
@@ -15,15 +22,33 @@ const Routes: React.FC = () => {
         <Route path="/" exact={true}>
           <Redirect to="/login" />
         </Route>
-        {/* <Route path="/admin/:name" exact={true}>
-          <Page />
-        </Route> */}
-        <Route path="/admin/dashboard" exact={true}>
+        <Route path="/dashboard" exact={true}>
           <Dashboard />
         </Route>
+        <Route path="/patients" exact={true}>
+          <Patients />
+        </Route>
+        <Route path="/new-patient" exact={true}>
+          <NewPatient />
+        </Route>
+        <Route path="/edit-patient" exact={true}>
+          <EditPatient></EditPatient>
+        </Route>
+        <Route path="/view-patient" exact={true}>
+          <ViewPatient></ViewPatient>
+        </Route>
+        <Route path="/patient-record" exact={true}>
+          <PatientRecord></PatientRecord>
+        </Route>
+        <Route path="/staff" exact={true}>
+          <Staff/>
+        </Route>
+        <Route path={"/edit-staff"} exact={true}>
+          <EditStaff/>
+        </Route> 
         <Route path={"/login"} exact={true}>
           <Login></Login>
-        </Route>
+        </Route> 
       </IonRouterOutlet>
     </IonSplitPane>
   );
