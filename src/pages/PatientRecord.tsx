@@ -43,8 +43,7 @@ const PatientRecord: React.FC = () => {
           <IonText slot="start" color="primary">
             <IonTitle className="ion-padding-horizontal">
               <p className="text-bold">
-                <span>
-                    {faker.name.findName()}</span>{" "}
+                <span>{faker.name.findName()}</span>{" "}
                 <span className="fw-light">
                   <IonText>~</IonText>
                 </span>{" "}
@@ -60,8 +59,7 @@ const PatientRecord: React.FC = () => {
             <IonCol size="12" sizeLg="4">
               <IonCard>
                 <IonCardHeader>
-                  <IonCardTitle color="primary">
-                  </IonCardTitle>
+                  <IonCardTitle color="primary"></IonCardTitle>
                   <IonCardSubtitle className="pt-1">
                     <span>Male</span> ~{" "}
                     <span>{faker.date.recent().toLocaleDateString()}</span>
@@ -80,12 +78,22 @@ const PatientRecord: React.FC = () => {
               <IonCard>
                 <IonCardHeader>
                   <IonCardTitle color="primary">Medical</IonCardTitle>
+                  <IonCardSubtitle></IonCardSubtitle>
                   <IonCardSubtitle>
-                    </IonCardSubtitle>
-                  <IonCardSubtitle><b>On Call :</b> Dr. {faker.name.findName()}</IonCardSubtitle>
-                  <IonCardSubtitle><b>Admission Date :</b> <IonText>{faker.date.recent().toLocaleString()}</IonText></IonCardSubtitle>
-                  <IonCardSubtitle><b>Discharge Date :</b> <IonText>{faker.date.recent().toLocaleString()}</IonText></IonCardSubtitle>
-                  <IonCardSubtitle><b>Discharge Status :</b> <IonText color="success">Alive</IonText></IonCardSubtitle>
+                    <b>On Call :</b> Dr. {faker.name.findName()}
+                  </IonCardSubtitle>
+                  <IonCardSubtitle>
+                    <b>Admission Date :</b>{" "}
+                    <IonText>{faker.date.recent().toLocaleString()}</IonText>
+                  </IonCardSubtitle>
+                  <IonCardSubtitle>
+                    <b>Discharge Date :</b>{" "}
+                    <IonText>{faker.date.recent().toLocaleString()}</IonText>
+                  </IonCardSubtitle>
+                  <IonCardSubtitle>
+                    <b>Discharge Status :</b>{" "}
+                    <IonText color="success">Alive</IonText>
+                  </IonCardSubtitle>
                 </IonCardHeader>
               </IonCard>
             </IonCol>
@@ -95,12 +103,18 @@ const PatientRecord: React.FC = () => {
                   <IonCardTitle
                     color="primary"
                     // className="ion-padding-start ion-padding-vertical"
-                  > 
-                  Finance
+                  >
+                    Finance
                   </IonCardTitle>
-                  <IonCardSubtitle><b>Mode :</b> Bank</IonCardSubtitle>
-                  <IonCardSubtitle><b>Details :</b> [Card Number]</IonCardSubtitle>
-                  <IonCardSubtitle><b>status :</b> <IonText color="success">complete</IonText></IonCardSubtitle>
+                  <IonCardSubtitle>
+                    <b>Mode :</b> Bank
+                  </IonCardSubtitle>
+                  <IonCardSubtitle>
+                    <b>Details :</b> [Card Number]
+                  </IonCardSubtitle>
+                  <IonCardSubtitle>
+                    <b>status :</b> <IonText color="success">complete</IonText>
+                  </IonCardSubtitle>
                 </IonCardHeader>
               </IonCard>
             </IonCol>
@@ -217,21 +231,21 @@ const PatientRecord: React.FC = () => {
                   <IonCardTitle color="primary">Lab Results</IonCardTitle>
                 </IonCardHeader>
                 <IonCardContent>
-                  <IonRow className="text-center">
-                    <IonCol color="primary">
-                      <IonText color="primary">Test</IonText>
+                  <IonRow className="text-center row-header">
+                    <IonCol className="border">
+                      <IonText>Test</IonText>
                     </IonCol>
-                    <IonCol color="primary">
-                      <IonText color="primary">Result</IonText>
+                    <IonCol className="border">
+                      <IonText>Result</IonText>
                     </IonCol>
-                    <IonCol color="primary">
-                      <IonText color="primary">Handler</IonText>
+                    <IonCol className="border">
+                      <IonText>Handler</IonText>
                     </IonCol>
                   </IonRow>
                   <IonRow className="text-center">
-                    <IonCol>Test 1</IonCol>
-                    <IonCol>Test result 1</IonCol>
-                    <IonCol>Handler 1</IonCol>
+                    <IonCol className="border">Test 1</IonCol>
+                    <IonCol className="border">Test result 1</IonCol>
+                    <IonCol className="border">Handler 1</IonCol>
                   </IonRow>
                 </IonCardContent>
               </IonCard>
@@ -241,20 +255,27 @@ const PatientRecord: React.FC = () => {
                 <IonCardHeader>
                   <IonCardTitle color="primary">Management</IonCardTitle>
                 </IonCardHeader>
-                <IonCardContent> 
-                  <IonGrid> 
-                  <IonRow className="text-center">
-                    <IonCol color="primary">
-                      <IonText color="primary">Problem</IonText>
-                    </IonCol>
-                    <IonCol color="primary">
-                      <IonText color="primary">Solution</IonText>
-                    </IonCol> 
-                  </IonRow>
-                  <IonRow>
-                    <IonCol>Lorem ipsum dolor sit amet.</IonCol>
-                    <IonCol> Lorem ipsum dolor sit amet, consectetur adipisicing elit. Obcaecati asperiores est natus perferendis soluta dolores.</IonCol> 
-                  </IonRow>
+                <IonCardContent>
+                  <IonGrid>
+                    <IonRow className="text-center row-header">
+                      <IonCol className="border">
+                        <IonText>Problem</IonText>
+                      </IonCol>
+                      <IonCol className="border">
+                        <IonText>Solution</IonText>
+                      </IonCol>
+                    </IonRow>
+                    <IonRow>
+                      <IonCol className="border">
+                        Lorem ipsum dolor sit amet.
+                      </IonCol>
+                      <IonCol className="border">
+                        {" "}
+                        Lorem ipsum dolor sit amet, consectetur adipisicing
+                        elit. Obcaecati asperiores est natus perferendis soluta
+                        dolores.
+                      </IonCol>
+                    </IonRow>
                   </IonGrid>
                 </IonCardContent>
               </IonCard>

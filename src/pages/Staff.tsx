@@ -28,7 +28,7 @@ import {
   IonToolbar,
 } from "@ionic/react";
 import { chevronForward, pencil, peopleCircle } from "ionicons/icons";
-import { useParams } from "react-router";
+import { useHistory, useLocation, useParams } from "react-router";
 import BarChart from "../components/BarChart";
 import DoughnutChart from "../components/DoughnutChart";
 import ExploreContainer from "../components/ExploreContainer";
@@ -40,6 +40,8 @@ import "../styles/Page.css";
 
 const Staff: React.FC = () => {
   const { name } = useParams<{ name: string; mode?: string }>();
+  const location = useLocation();
+  const history = useHistory();
 
   function checkPatientState(value: number) {
     if (value === 0) {
@@ -51,6 +53,10 @@ const Staff: React.FC = () => {
     } else {
       return { color: "warning", state: "Waiting" };
     }
+  }
+
+  function viewStaffProfile() {
+    history.push("/view-staff");
   }
 
   return (
@@ -205,7 +211,7 @@ const Staff: React.FC = () => {
         <IonGrid>
           <IonRow>
             <IonCol size="12" sizeLg="3">
-              <IonCard>
+              <IonCard button onClick={()=>viewStaffProfile()}>
                 <IonItem lines="none">
                   <IonAvatar slot="start">
                     <IonImg src={localImages.doc}></IonImg>

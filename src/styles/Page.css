@@ -1,0 +1,33 @@
+.thumbnail-sm {
+  height: 100%;
+  object-fit: cover;
+  border: 1px solid var(--ion-color-medium-tint);
+  padding: 3px;
+  border-radius: 5px;
+}
+
+.thumbnail {
+  min-width: 10%;
+  max-width: 10%;
+  height: 100%;
+  object-fit: cover;
+  border: 1px solid var(--ion-color-medium-tint);
+  padding: 3px;
+  border-radius: 5px;
+}
+
+ion-item.custom-height {
+  --min-height: 100px;
+}
+
+@media only screen and (max-width: 600px) {
+  .thumbnail {
+    min-width: 40%;
+    max-width: 40%;
+    height: 100%;
+    object-fit: cover;
+    border: 1px solid var(--ion-color-medium-tint);
+    /* padding: 3px; */
+    border-radius: 5px;
+  }
+}

@@ -11,6 +11,7 @@ import {
   IonLabel,
   IonList,
   IonMenuButton,
+  IonModal,
   IonNote,
   IonPopover,
   IonRippleEffect,
@@ -24,6 +25,7 @@ import {
   alert,
   arrowBack,
   barbell,
+  chevronForward,
   logOut,
   mail,
   notifications,
@@ -42,6 +44,11 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
   const [backButton, setShowBackButton] = useState(true);
   const location = useLocation();
   const history = useHistory();
+  const [showModal, setShowModal] = useState(false);
+
+  function logOutUser() {
+    history.push("/login");
+  }
 
   function goBack() {
     if (location.pathname !== "/dashboard") {
@@ -141,24 +148,60 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
         onDidDismiss={() =>
           setShowPopover({ showPopover: false, event: undefined })
         }
-      > 
-      <IonContent>
-        <IonList mode="md">
-          <IonItem lines="full" button>
-            <IonIcon icon={person} slot="start" size="small"></IonIcon>
-            <IonLabel>Profile</IonLabel>
-          </IonItem>
-          <IonItem lines="full" button>
-            <IonIcon icon={mail} slot="start" size="small"></IonIcon>
-            <IonLabel>Mail</IonLabel>
-          </IonItem>
-          <IonItem lines="none" button>
-            <IonIcon icon={logOut} slot="start" size="small"></IonIcon>
-            <IonLabel>Logout</IonLabel>
-          </IonItem>
-        </IonList>
-      </IonContent>
+      >
+        <IonContent>
+          <IonList mode="md">
+            <IonItem lines="full" button>
+              <IonIcon icon={person} slot="start" size="small"></IonIcon>
+              <IonLabel>Profile</IonLabel>
+            </IonItem>
+            <IonItem lines="full" button onClick={() => setShowModal(true)}>
+              <IonIcon icon={mail} slot="start" size="small"></IonIcon>
+              <IonLabel>Mail</IonLabel>
+            </IonItem>
+            <IonItem lines="none" button onClick={()=>logOutUser()}>
+              <IonIcon icon={logOut} slot="start" size="small"></IonIcon>
+              <IonLabel>Logout</IonLabel>
+            </IonItem>
+          </IonList>
+        </IonContent>
       </IonPopover>
+
+      <IonModal isOpen={showModal} onDidDismiss={() => setShowModal(false)}>
+        <IonHeader>
+          <IonToolbar>
+            <IonButtons slot="start">
+              <IonButton onClick={() => setShowModal(false)} color="primary">
+                <IonIcon slot="icon-only" icon={arrowBack}></IonIcon>
+              </IonButton>
+            </IonButtons>
+            <IonTitle>Mail</IonTitle>
+          </IonToolbar>
+        </IonHeader> 
+        <IonContent>
+          <IonList>
+            {Array.from(Array(10).keys()).map((i,index) => {
+              return (
+                <IonItem lines="full" button key={index}>
+                  <IonLabel >
+                    <IonText >
+                      <span className="ion-padding-top">Lorem Subject</span>
+                    </IonText>
+                    <br />
+                    <IonText color="dark" className="text-small">
+                      <span>
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                        Nihil, ratione?
+                      </span>
+                    </IonText>
+                  </IonLabel>
+                  <IonIcon slot="end" icon={chevronForward}></IonIcon>
+                </IonItem>
+              );
+            })}
+          </IonList>
+        </IonContent>
+      </IonModal>
     </IonHeader>
   );
 };

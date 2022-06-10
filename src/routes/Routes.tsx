@@ -13,6 +13,7 @@ import PatientRecord from "../pages/PatientRecord";
 import Patients from "../pages/Patients";
 import Staff from "../pages/Staff";
 import ViewPatient from "../pages/ViewPatient";
+import ViewStaff from "../pages/ViewStaff";
 
 const Routes: React.FC = () => {
   return (
@@ -42,6 +43,9 @@ const Routes: React.FC = () => {
         </Route>
         <Route path={"/edit-staff"} exact={true}>
           <EditStaff/>
+        </Route> 
+        <Route path={"/view-staff"} exact={true}>
+          <ViewStaff/>
         </Route> 
       </IonRouterOutlet>
     </IonSplitPane>
