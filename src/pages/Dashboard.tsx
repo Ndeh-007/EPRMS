@@ -202,11 +202,11 @@ const Dashboard: React.FC = () => {
                 <hr className="p-none m-0" />
                 <IonCardContent mode="md">
                   <IonList>
-                    {Array.from([5, 5, 5, 5, 5, 5, 5, 0]).map(
+                    {Array.from(Array(8).keys()).map(
                       (patient: any, index: number) => {
                         let number = Math.floor((Math.random() * 10) / 2);
                         return (
-                          <IonItem lines="inset" key={index} button>
+                          <IonItem lines="inset" key={index} button routerLink="/view-patient">
                             <IonAvatar slot="start">
                               <IonImg src={localImages.doc}></IonImg>
                             </IonAvatar>

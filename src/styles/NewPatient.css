@@ -19,4 +19,8 @@
   --background: var(--ion-color-light); 
   font-size: small;
 }
- 
+
+.view-patient-image ion-img{
+  object-fit: contain;
+}
+

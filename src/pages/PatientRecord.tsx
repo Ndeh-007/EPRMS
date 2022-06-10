@@ -137,7 +137,7 @@ const PatientRecord: React.FC = () => {
                   <IonAccordionGroup>
                     <IonAccordion value="Medical History">
                       <IonItem slot="header">
-                        <IonLabel>Medical History</IonLabel>
+                        <IonLabel>Medication History</IonLabel>
                       </IonItem>
                       <p slot="content" className="p-3">
                         <IonText>

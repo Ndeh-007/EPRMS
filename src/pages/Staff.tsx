@@ -61,7 +61,9 @@ const Staff: React.FC = () => {
           <IonText slot="start" color="primary">
             <IonTitle className="ion-padding-top ion-padding-horizontal">
               <p className="text-bold">
-                <span>Staff</span>
+                <IonText>
+                <span className="display-6 text-bold">Staff</span>
+                </IonText>
                 <br />
                 <span className="text-regular">
                   <IonNote className="text-small">

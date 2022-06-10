@@ -9,6 +9,7 @@ import {
   IonIcon,
   IonImg,
   IonItem,
+  IonLabel,
   IonRow,
   IonText,
   IonTitle,
@@ -29,7 +30,7 @@ import "../styles/Patients.css";
 const PatientItem: React.FC<{ patient: MPI }> = (props) => {
   return (
     <IonItem lines="full" routerLink="/view-patient" mode="md">
-      <IonGrid>
+      <IonGrid className="d-none d-lg-block d-md-none">
         <IonRow className="align-items-center label-color">
           <IonCol sizeLg="1">
             <IonAvatar className="br-2 border-primary">
@@ -51,8 +52,13 @@ const PatientItem: React.FC<{ patient: MPI }> = (props) => {
           <IonCol className="text-center">
             <IonText>F</IonText>
           </IonCol>
-          <IonCol> 
-              {/* <IonButtons>
+          <IonCol className="text-center">
+            <IonText>
+              wm-o
+            </IonText>
+          </IonCol>
+          <IonCol>
+            {/* <IonButtons>
                 <IonButton mode="md" color="primary">
                   <IonIcon slot="icon-only" icon={chevronForward}></IonIcon>
                 </IonButton>
@@ -67,6 +73,15 @@ const PatientItem: React.FC<{ patient: MPI }> = (props) => {
           </IonCol>
         </IonRow>
       </IonGrid>
+      <IonAvatar slot="start" className="br-2 border-priblock d-none d-sm-block d-md-block d-lg-none" >
+        <IonImg src={localImages.commy}></IonImg>
+      </IonAvatar>
+      <IonLabel className="d-block d-sm-block d-md-block d-lg-none">{props.patient.name}</IonLabel>
+      <IonButtons slot="end">
+        <IonButton color="primary">
+          <IonIcon slot="icon-only" icon={chevronForward}></IonIcon>
+        </IonButton>
+      </IonButtons>
     </IonItem>
   );
 };

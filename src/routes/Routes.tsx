@@ -19,9 +19,6 @@ const Routes: React.FC = () => {
     <IonSplitPane contentId="main">
       <Menu></Menu>
       <IonRouterOutlet id="main">
-        <Route path="/" exact={true}>
-          <Redirect to="/login" />
-        </Route>
         <Route path="/dashboard" exact={true}>
           <Dashboard />
         </Route>
@@ -45,9 +42,6 @@ const Routes: React.FC = () => {
         </Route>
         <Route path={"/edit-staff"} exact={true}>
           <EditStaff/>
-        </Route> 
-        <Route path={"/login"} exact={true}>
-          <Login></Login>
         </Route> 
       </IonRouterOutlet>
     </IonSplitPane>

@@ -28,6 +28,7 @@ import {
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
+import { add, chevronForward } from "ionicons/icons";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import BarChart from "../components/BarChart";
@@ -58,7 +59,7 @@ const Patients: React.FC = () => {
   }
 
   function createDummy() {
-    let res = Array.from(Array(20).keys()).map((e, i) => {
+    let res = Array.from(Array(5).keys()).map((e, i) => {
       let patientMPI: MPI = {
         name: faker.name.findName(),
         tel: faker.phone.phoneNumber(),
@@ -82,66 +83,86 @@ const Patients: React.FC = () => {
     <IonPage>
       <PageHeader name={name}></PageHeader>
       <IonContent color="light">
-        <IonToolbar color="light" className="pt-4">
-          <IonText slot="start" color="primary">
-            <IonTitle className="ion-padding-horizontal">
-              <p className="text-bold">
-                <span>All Patients</span>
-                <br />
-                <span className="text-regular">
-                  <IonNote className="text-small">
-                    [Total Number of Patients]
-                  </IonNote>
-                </span>
-              </p>
-            </IonTitle>
-          </IonText>
-          <IonGrid>
-            <IonRow>
-              <IonCol></IonCol>
-              <IonCol></IonCol>
-              <IonCol sizeLg="3">
-                <IonSearchbar mode="ios"></IonSearchbar>
-              </IonCol>
-            </IonRow>
-          </IonGrid>
-        </IonToolbar>
+        <IonGrid color="light" className="pt-4">
+          <IonRow>
+            <IonCol>
+              <IonText color="primary">
+                <IonTitle className="ion-padding-horizontal">
+                  <p className="text-bold">
+                    <IonText> 
+                    <span className="display-6 text-bold">All Patients</span>
+                    </IonText>
+                    <br />
+                    <span className="text-regular">
+                      <IonNote className="text-small">
+                        [Total Number of Patients]
+                      </IonNote>
+                    </span>
+                  </p>
+                </IonTitle>
+              </IonText>
+            </IonCol>
+            <IonCol size="12">
+              <IonSearchbar mode="md"></IonSearchbar>
+            </IonCol>
+          </IonRow>
+        </IonGrid>
         <IonGrid className="pt-0 mt-0">
           <IonRow>
             <IonCol size="12">
               <IonCard mode="ios">
-                <IonCardHeader mode="md">
+                <IonCardHeader mode="md" className="sticky-top">
                   <IonToolbar>
                     <IonCardTitle slot="start" className="pt-2 fw-bold">
                       All Patients
                     </IonCardTitle>
-                    <IonButton slot="end" className="ion-text-capitalize" routerLink="/new-patient">
+                    <IonButton
+                      slot="end"
+                      className="ion-text-capitalize"
+                      routerLink="/new-patient"
+                    >
+                      <IonIcon slot="start" icon={add}></IonIcon>
                       New Patient
                     </IonButton>
                   </IonToolbar>
                 </IonCardHeader>
                 <hr className="p-none m-0" />
-                <IonItem color="primary" lines="full" className="table-title">
+                <IonItem
+                  color="primary"
+                  lines="full"
+                  className="table-title d-lg-block d-none"
+                >
                   <IonGrid>
                     <IonRow className="align-items-center label-color">
-                      <IonCol sizeLg="1"> 
-                      </IonCol>
+                      <IonCol sizeLg="1"></IonCol>
                       <IonCol>
                         <IonText>Name</IonText>
                       </IonCol>
-                      <IonCol>
+                      <IonCol className="">
                         <IonText>Contact</IonText>
                       </IonCol>
-                      <IonCol className="text-center">
+                      <IonCol className="text-center ">
                         <IonText>Date of Birth</IonText>
                       </IonCol>
-                      <IonCol>
+                      <IonCol className="">
                         <IonText>Address</IonText>
                       </IonCol>
-                      <IonCol className="text-center">
+                      <IonCol className="text-center ">
                         <IonText>Sex</IonText>
                       </IonCol>
+                      <IonCol className="text-center ">
+                        <IonText>Ward</IonText>
+                      </IonCol>
                       <IonCol></IonCol>
+
+                      <IonButtons className="px-4">
+                        <IonButton color="primary">
+                          <IonIcon
+                            slot="icon-only"
+                            icon={chevronForward}
+                          ></IonIcon>
+                        </IonButton>
+                      </IonButtons>
                     </IonRow>
                   </IonGrid>
                 </IonItem>

@@ -3,15 +3,19 @@ import {
   IonButton,
   IonButtons,
   IonCard,
+  IonContent,
   IonHeader,
   IonIcon,
   IonImg,
   IonItem,
   IonLabel,
+  IonList,
   IonMenuButton,
   IonNote,
+  IonPopover,
   IonRippleEffect,
   IonText,
+  IonTitle,
   IonToolbar,
 } from "@ionic/react";
 import {
@@ -20,7 +24,10 @@ import {
   alert,
   arrowBack,
   barbell,
+  logOut,
+  mail,
   notifications,
+  person,
 } from "ionicons/icons";
 import React, { useEffect, useState } from "react";
 import { useHistory, useLocation, useParams } from "react-router";
@@ -28,6 +35,10 @@ import { capitalizeString } from "../Functions/functions";
 import { localImages } from "../images/images";
 import "../styles/PageHeader.css";
 const PageHeader: React.FC<{ name: string }> = (props) => {
+  const [popoverState, setShowPopover] = useState({
+    showPopover: false,
+    event: undefined,
+  });
   const [backButton, setShowBackButton] = useState(true);
   const location = useLocation();
   const history = useHistory();
@@ -35,7 +46,6 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
   function goBack() {
     if (location.pathname !== "/dashboard") {
       history.goBack();
-      setShowBackButton(false);
     }
   }
 
@@ -43,7 +53,7 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
     if (location.pathname === "/dashboard") {
       setShowBackButton(false);
     }
-  }, []);
+  }, [location]);
 
   return (
     <IonHeader>
@@ -64,7 +74,6 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
           </IonButtons>
         )}
         {/* <IonTitle slot="start">{capitalizeString(props.name)}</IonTitle> */}
-      
 
         {/*  <IonCard button color="tertiary" mode="ios" className="card-header-button">
            <IonIcon className="ion-padding" icon={addCircle}></IonIcon> 
@@ -74,10 +83,17 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
         </IonCard>
           */}
         {!backButton && (
-          <IonButton slot="start" className="ion-padding-start" color="primary">
-            <IonLabel className="ion-padding">New Patient</IonLabel>
-            <IonIcon slot="start" icon={add}></IonIcon>
-          </IonButton> 
+          <IonButton
+            slot="start"
+            className="ion-padding-start"
+            color="primary"
+            routerLink="/new-patient"
+          >
+            <IonLabel slot="end" className="ion-padding d-none d-md-block">
+              New Patient
+            </IonLabel>
+            <IonIcon slot="icon-only" icon={add}></IonIcon>
+          </IonButton>
         )}
 
         <IonCard color="light" slot="end" mode="md">
@@ -88,10 +104,19 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
           </IonButtons>
         </IonCard>
 
-        <IonCard color="light" slot="end" mode="md">
-          <IonItem lines="none" color="light">
-            <IonLabel>
-              <span>Ns. Comfort</span> <br />
+        <IonCard
+          color="light"
+          slot="end"
+          mode="md"
+          button
+          onClick={(e: any) => {
+            e.persist();
+            setShowPopover({ showPopover: true, event: e });
+          }}
+        >
+          <IonToolbar color="light">
+            <IonLabel className="d-none d-md-block px-3">
+              <span className="text-bold">Ns. Comfort</span> <br />
               <span>
                 <IonNote
                   className="ion-float-right"
@@ -104,9 +129,36 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
             <IonAvatar slot="end">
               <IonImg className="br-2" src={localImages.commy}></IonImg>
             </IonAvatar>
-          </IonItem>
+          </IonToolbar>
         </IonCard>
       </IonToolbar>
+      <IonPopover
+        mode="ios"
+        arrow
+        // showBackdrop={false}
+        event={popoverState.event}
+        isOpen={popoverState.showPopover}
+        onDidDismiss={() =>
+          setShowPopover({ showPopover: false, event: undefined })
+        }
+      > 
+      <IonContent>
+        <IonList mode="md">
+          <IonItem lines="full" button>
+            <IonIcon icon={person} slot="start" size="small"></IonIcon>
+            <IonLabel>Profile</IonLabel>
+          </IonItem>
+          <IonItem lines="full" button>
+            <IonIcon icon={mail} slot="start" size="small"></IonIcon>
+            <IonLabel>Mail</IonLabel>
+          </IonItem>
+          <IonItem lines="none" button>
+            <IonIcon icon={logOut} slot="start" size="small"></IonIcon>
+            <IonLabel>Logout</IonLabel>
+          </IonItem>
+        </IonList>
+      </IonContent>
+      </IonPopover>
     </IonHeader>
   );
 };

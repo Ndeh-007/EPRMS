@@ -77,10 +77,9 @@ const EditStaff: React.FC = () => {
           <IonText slot="start" color="primary">
             <IonTitle className="ion-padding-horizontal">
               <p className="text-bold">
-                <span>Jessica Alba</span> -{" "}
-                <span className="fs-6">
-                  <IonText color="medium">Update Profile</IonText>
-                </span>
+                <IonText>
+                <span className="display-6 text-bold">Jessica Alba</span>
+                </IonText>
                 <br />
                 <span className="text-regular">
                   <IonNote className="text-small">[Staff State]</IonNote>
@@ -88,42 +87,7 @@ const EditStaff: React.FC = () => {
               </p>
             </IonTitle>
           </IonText>
-          <IonButton
-            color="success"
-            slot="end"
-            onClick={() => {
-              setAlertDischarge(true);
-            }}
-          >
-            Delete
-          </IonButton>
-          <IonButton
-            color="danger"
-            slot="end"
-            onClick={() => {
-              setAlertAdmit(true);
-            }}
-          >
-            Make Admin
-          </IonButton>
-        </IonToolbar>
-
-        {/* BreadCrumbs */}
-        {/* <IonToolbar color="light" className="fw-bold">
-          <IonCard mode="ios" slot="end" className="p-2 my-0 mx-1">
-            <IonBreadcrumbs mode="md">
-              <IonBreadcrumb routerLink="/staff">
-                <IonIcon slot="start" icon={peopleCircle}></IonIcon>{" "}
-                <IonIcon slot="separator" icon={chevronForward}></IonIcon>
-                Staff
-              </IonBreadcrumb>
-              <IonBreadcrumb routerLink="/edit-staff">
-                <IonIcon slot="start" icon={pencil}></IonIcon>edit
-                <IonIcon slot="separator" icon={chevronForward}></IonIcon>
-              </IonBreadcrumb>
-            </IonBreadcrumbs>
-          </IonCard>
-        </IonToolbar> */} 
+        </IonToolbar> 
         <form
           action=""
           ref={formRef}

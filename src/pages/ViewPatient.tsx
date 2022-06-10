@@ -28,6 +28,7 @@ import {
   IonMenuButton,
   IonNote,
   IonPage,
+  IonPopover,
   IonRippleEffect,
   IonRow,
   IonSearchbar,
@@ -53,6 +54,7 @@ import {
   save,
 } from "ionicons/icons";
 import { localImages } from "../images/images";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 const ViewPatient: React.FC = () => {
   const { name } = useParams<{ name: string; mode?: string }>();
@@ -62,13 +64,16 @@ const ViewPatient: React.FC = () => {
   const [alertAdmit, setAlertAdmit] = useState(false);
   const [loading, setLoading] = useState(false);
   const [operationSuccessful, setOperationSuccessful] = useState(false);
+  const [viewImagePopover, setviewImagePopover] = useState(false); 
+
+  
   return (
     <IonPage>
       <PageHeader name={name}></PageHeader>
       <IonContent color="light">
         <IonToolbar color="light" className="pt-4">
           <IonText slot="start" color="primary">
-            <IonTitle className="ion-padding-horizontal">
+            {/* <IonTitle className="ion-padding-horizontal">
               <p className="text-bold">
                 <span>Patient Info</span> -{" "}
                 <span className="fs-6">
@@ -81,7 +86,7 @@ const ViewPatient: React.FC = () => {
                   </IonText>
                 </span>
               </p>
-            </IonTitle>
+            </IonTitle> */}
           </IonText>
           <IonButton
             color="success"
@@ -90,59 +95,82 @@ const ViewPatient: React.FC = () => {
               setAlertDischarge(true);
             }}
             className="m-3"
+            size="small"
           >
             Discharge Patient
           </IonButton>
-          {/* <IonButton
+          <IonButton
             color="danger"
             slot="end"
             onClick={() => {
               setAlertAdmit(true);
             }}
+            size="small"
+            className="me-3"
           >
             Admit Patient
           </IonButton>
-        </IonToolbar> */}
         </IonToolbar>
 
-        <IonCard>
-          <IonCardHeader mode="ios">
-            <IonAvatar className="ion-float-end br-2">
-              <IonImg src={localImages.commy}></IonImg>
-            </IonAvatar>
-            <IonCardTitle>
-              {faker.name.findName()}{" "}
-              <IonChip color="medium" mode="md">
-                <IonIcon icon={pencil}></IonIcon>
-                <IonLabel>edit</IonLabel>
-              </IonChip>
-            </IonCardTitle>
-            <IonCardSubtitle className="pt-1">
-              <span>Male</span> ~{" "}
-              <span>{faker.date.recent().toLocaleDateString()}</span>
-            </IonCardSubtitle>
-            <IonCardSubtitle className="text-lowercase pt-1">
-              <span>{6723339123}</span> ~ <span>{"email@awakedom.com"}</span>
-            </IonCardSubtitle> 
-            <IonCardSubtitle className="text-lowercase text-capitalize pt-1">
-              {faker.address.state()}
-            </IonCardSubtitle>
-          </IonCardHeader>
-        </IonCard>
+        <IonGrid>
+          <IonRow>
+            <IonCol size="6" sizeLg="6" sizeXs="12" sizeMd="7" sizeSm="12">
+              <IonCard>
+                <IonCardHeader mode="ios">
+                  {/* <IonAvatar className="ion-float-end br-2">
+            </IonAvatar> */}
+                  <IonCardTitle>
+                    {faker.name.findName()}{" "}
+                    <IonThumbnail className="float-end ms-3" onClick={()=>{setviewImagePopover(true)}}> 
+                      <IonImg src={localImages.commy}></IonImg>
+                    </IonThumbnail>
+                  </IonCardTitle>
+                  <IonPopover
+                  isOpen={viewImagePopover}
+                  onDidDismiss={() => setviewImagePopover(false)}
+                  >
+                  <TransformWrapper>
+                    <TransformComponent>
+                      <IonImg src={localImages.commy}></IonImg>
+                    </TransformComponent>
+                  </TransformWrapper></IonPopover>
+                  <IonCardSubtitle className="pt-1">
+                    <span>Male (26)</span> ~{" "}
+                    <span>{faker.date.recent().toLocaleDateString()}</span>
+                  </IonCardSubtitle>
+                  <IonCardSubtitle className="text-lowercase text-capitalize pt-1">
+                    [Blood Group]
+                  </IonCardSubtitle>
+                  <IonCardSubtitle className="text-lowercase pt-1">
+                    <span>{6723339123}</span> ~{" "}
+                    <span>{"email@awakedom.com"}</span>
+                  </IonCardSubtitle>
+                  <IonChip color="medium" mode="md" className="float-end mb-3">
+                    <IonIcon icon={pencil}></IonIcon>
+                    <IonLabel>edit</IonLabel>
+                  </IonChip>
+                  <IonCardSubtitle className="text-lowercase text-capitalize pt-1">
+                    {faker.address.state()}
+                  </IonCardSubtitle>
+                </IonCardHeader>
+              </IonCard>
+            </IonCol>
+          </IonRow>
+        </IonGrid>
 
         <IonToolbar color="light" className="pt-4">
           <IonText color="primary" slot="start">
             <IonTitle className="ion-padding-horizontal">
               <p className="text-bold">
-                <span>Patient Records</span>{" "}
+                <span>Records</span>{" "}
                 <span>
                   <IonText color="medium" className="fw-bold">
                     {" "}
-                    ~{" "}
+                    -{" "}
                   </IonText>
                 </span>
                 <span className="fs-6">
-                  <IonText color="success" className="fs-4">
+                  <IonText color="primary" className="fs-4">
                     {" "}
                     {Math.floor(Math.random() * 30)}
                   </IonText>
