@@ -3,6 +3,7 @@ import {
   IonButton,
   IonButtons,
   IonCard,
+  IonCardContent,
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
@@ -14,18 +15,38 @@ import {
   IonPage,
   IonSegment,
   IonSegmentButton,
+  IonSlide,
+  IonSlides,
   IonText,
   IonThumbnail,
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
 import { ellipsisVertical } from "ionicons/icons";
-import React from "react";
+import React, { useRef } from "react";
 import PageHeader from "../components/PageHeader";
+import StaffActivity from "../components/StaffActivity";
 import { localImages } from "../images/images";
 import "../styles/Page.css";
+import EditPatient from "./EditPatient";
+import EditStaff from "./EditStaff";
 
 const ViewStaff: React.FC = () => {
+  const [segmentButtonValue, setsegmentButtonValue] =
+    React.useState("biography");
+  const slidesRef = useRef<HTMLIonSlidesElement>(null);
+
+  function slideTo(value: any) {
+    if (value === "biography") {
+      slidesRef.current!.slideTo(0);
+    }
+    if (value === "activity") {
+      slidesRef.current!.slideTo(1);
+    }
+    if (value === "settings") {
+      slidesRef.current!.slideTo(2);
+    }
+  }
   return (
     <IonPage>
       <PageHeader name="header"></PageHeader>
@@ -78,9 +99,42 @@ const ViewStaff: React.FC = () => {
         </IonCard>
 
         <IonToolbar>
-            <IonSegment value={'jekk'}>
-                <IonSegmentButton value="jekk">hello</IonSegmentButton>
-            </IonSegment>
+          <IonSegment
+            value={segmentButtonValue}
+            onIonChange={(e) => {
+              slideTo(e.detail.value);
+            }}
+          >
+            <IonSegmentButton value="biography">Biography</IonSegmentButton>
+            <IonSegmentButton value="activity">Activity</IonSegmentButton>
+            <IonSegmentButton value="settings">Settings</IonSegmentButton>
+          </IonSegment>
+
+          <IonToolbar color="light">
+            <IonSlides className="slides" ref={slidesRef}>
+              <IonSlide className="slide">
+                <IonCard mode="ios">
+                  <IonCardContent>
+                    <IonText>
+                      Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                      Consectetur non eum deserunt sed autem consequatur
+                      repellat harum vero sit. Enim reiciendis impedit illum qui
+                      praesentium eveniet labore quod laboriosam deleniti! Optio
+                      maxime, porro distinctio architecto consequatur quaerat
+                      quae, a reiciendis fugit mollitia tenetur quia quasi vel
+                      impedit hic, officiis numquam?
+                    </IonText>
+                  </IonCardContent>
+                </IonCard>
+              </IonSlide>
+              <IonSlide className="slide">
+                <StaffActivity></StaffActivity>
+              </IonSlide>
+              <IonSlide className="slide">
+                <EditStaff />
+              </IonSlide>
+            </IonSlides>
+          </IonToolbar>
         </IonToolbar>
       </IonContent>
     </IonPage>

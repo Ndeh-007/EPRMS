@@ -40,9 +40,6 @@ const Routes: React.FC = () => {
         </Route>
         <Route path="/staff" exact={true}>
           <Staff/>
-        </Route>
-        <Route path={"/edit-staff"} exact={true}>
-          <EditStaff/>
         </Route> 
         <Route path={"/view-staff"} exact={true}>
           <ViewStaff/>

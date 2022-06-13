@@ -219,11 +219,11 @@ const Staff: React.FC = () => {
                   <IonText slot="start">
                     <h6>{"Dr. "+faker.name.findName()}</h6>
                   </IonText>
-                  <IonButtons slot="end">
-                    <IonButton routerLink="/edit-staff">
+                  {/* <IonButtons slot="end">
+                    <IonButton  onClick={()=>viewStaffProfile()}>
                       <IonIcon slot="icon-only" icon={pencil} size="small"></IonIcon>
                     </IonButton>
-                  </IonButtons>
+                  </IonButtons> */}
                 </IonItem> 
               </IonCard>
             </IonCol>

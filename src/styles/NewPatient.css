@@ -28,3 +28,15 @@
   background: var(--ion-color-primary);
   color: var(--ion-color-light);
 } 
+
+.history-attribute{
+  padding-bottom: 16px;
+}
+
+.history-attribute-heading{ 
+  color: var(--ion-color-primary);  
+}
+
+.history-attribute-description{
+  border-left: 2px solid var(--ion-color-primary);
+}

@@ -29,6 +29,7 @@ import {
   IonMenuButton,
   IonNote,
   IonPage,
+  IonProgressBar,
   IonRippleEffect,
   IonRow,
   IonSearchbar,
@@ -70,29 +71,14 @@ const EditStaff: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [operationSuccessful, setOperationSuccessful] = useState(false);
   return (
-    <IonPage>
-      <PageHeader name={name}></PageHeader>
-      <IonContent color="light">
-        <IonToolbar color="light" className="pt-4">
-          <IonText slot="start" color="primary">
-            <IonTitle className="ion-padding-horizontal">
-              <p className="text-bold">
-                <IonText>
-                <span className="display-6 text-bold">Jessica Alba</span>
-                </IonText>
-                <br />
-                <span className="text-regular">
-                  <IonNote className="text-small">[Staff State]</IonNote>
-                </span>
-              </p>
-            </IonTitle>
-          </IonText>
-        </IonToolbar> 
+    <>
+      <div color="light">
         <form
           action=""
           ref={formRef}
           onSubmit={(e) => {
             e.preventDefault();
+            setOperationSuccessful(true);
           }}
         >
           <IonGrid className="pt-0 mt-0">
@@ -245,8 +231,116 @@ const EditStaff: React.FC = () => {
             <IonRow className="text-center">
               <IonCol></IonCol>
               <IonCol>
-                <IonButton className="mx-auto">
-                  {/* <IonIcon icon={save} slot="start"></IonIcon> */}
+                <IonButton className="mx-auto" type="submit">
+                  <IonLabel>Save</IonLabel>
+                </IonButton>
+              </IonCol>
+              <IonCol></IonCol>
+            </IonRow>
+          </IonGrid>
+          <hr />
+        </form>
+
+        <form action=""
+          onSubmit={(e) => {
+            e.preventDefault(); 
+            setAlertAdmit(true)
+          }}>
+          <IonGrid className="pt-0 mt-0">
+            <IonRow>
+              <IonCol size="12">
+                <IonCard mode="ios">
+                  <IonCardHeader mode="md">
+                    <IonToolbar>
+                      <IonCardTitle slot="start" className="pt-2 fw-bold">
+                        Modify Access
+                      </IonCardTitle>
+                    </IonToolbar>
+                  </IonCardHeader>
+                  <hr className="p-none m-0" />
+                  <IonCardContent mode="md">
+                    <IonGrid>
+                      <IonRow>
+                        <IonCol>
+                          <IonRow>
+                            <IonCol size="12" sizeLg="6">
+                              <IonItem fill="outline" lines="full">
+                                <IonLabel position="floating">UserName</IonLabel>
+                                <IonInput type="text"></IonInput>
+                              </IonItem>
+                            </IonCol>
+                            <IonCol size="12" sizeLg="6">
+                              <IonItem fill="outline" lines="full">
+                                <IonLabel position="stacked">
+                                 Password
+                                </IonLabel>
+                                <IonInput type="text"></IonInput>
+                              </IonItem>
+                            </IonCol>
+                            <IonCol size="12" sizeLg="6">
+                              <IonItem
+                                fill="outline"
+                                color="primary"
+                                lines="full"
+                              >
+                                <IonLabel position="floating">Confirm Password</IonLabel>
+                                <IonInput type="text"></IonInput>
+                              </IonItem>
+                            </IonCol>   
+                            <IonCol size="12" sizeLg="6">
+                              <IonItem
+                                fill="outline"
+                                color="primary"
+                                lines="full"
+                              >
+                                <IonLabel position="floating">
+                                 Role
+                                </IonLabel>
+                                <IonSelect value={'staff'}>
+                                  <IonSelectOption value={"admin"}>
+                                    Admin
+                                  </IonSelectOption>
+                                  <IonSelectOption value={"staff"}>
+                                    Staff
+                                  </IonSelectOption>
+                                </IonSelect>
+                              </IonItem>
+                            </IonCol>
+                            <IonCol size="12" sizeLg="6">
+                              <IonItem
+                                fill="outline"
+                                color="primary"
+                                lines="full"
+                              >
+                                <IonLabel position="floating">
+                                  Position
+                                </IonLabel>
+                                {/* set Value to present value */}
+                                <IonSelect>
+                                  <IonSelectOption value={"doctor"}>
+                                    Doctor
+                                  </IonSelectOption>
+                                  <IonSelectOption value={"nurse"}>
+                                    Nurse
+                                  </IonSelectOption>
+                                  <IonSelectOption value={"lab-scientist"}>
+                                    Lab Scientist
+                                  </IonSelectOption>
+                                </IonSelect>
+                              </IonItem>
+                            </IonCol>
+                          </IonRow>
+                        </IonCol>
+                      </IonRow>
+                    </IonGrid>
+                  </IonCardContent>
+                </IonCard>
+              </IonCol>
+            </IonRow>
+            <IonRow className="text-center">
+              <IonCol></IonCol>
+              <IonCol>
+                <IonButton className="mx-auto" type="submit">
                   <IonLabel>Save</IonLabel>
                 </IonButton>
               </IonCol>
@@ -254,7 +348,7 @@ const EditStaff: React.FC = () => {
             </IonRow>
           </IonGrid>
         </form>
-      </IonContent>
+      </div>
 
       {/* alerts */}
       <IonAlert
@@ -330,7 +424,7 @@ const EditStaff: React.FC = () => {
           setOperationSuccessful(false);
         }}
       ></IonToast>
-    </IonPage>
+    </>
   );
 };
 

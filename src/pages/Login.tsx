@@ -106,12 +106,7 @@ const Login: React.FC = () => {
               </IonRow>
               <IonRow className="ion-justify-content-center ion-align-items-center">
                 <IonCol
-                  size="12"
-                  sizeSm="2"
-                  sizeLg="2"
-                  sizeMd="2"
-                  sizeXs="3"
-                  sizeXl="2"
+                  size="12" 
                 >
                   <IonButton fill="clear" expand="block" size="small">
                     Forgotten Password?

@@ -47,6 +47,10 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
   const [showModal, setShowModal] = useState(false);
 
   function logOutUser() {
+    setShowPopover({
+      showPopover: false,
+      event: undefined,
+    });
     history.push("/login");
   }
 
@@ -54,6 +58,14 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
     if (location.pathname !== "/dashboard") {
       history.goBack();
     }
+  }
+
+  function viewProfile(){
+    setShowPopover({
+      showPopover: false,
+      event: undefined,
+    });
+    history.push("/view-staff");
   }
 
   useEffect(() => {
@@ -151,15 +163,25 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
       >
         <IonContent>
           <IonList mode="md">
-            <IonItem lines="full" button>
+            <IonItem lines="full" button onClick={()=>viewProfile()}>
               <IonIcon icon={person} slot="start" size="small"></IonIcon>
               <IonLabel>Profile</IonLabel>
             </IonItem>
-            <IonItem lines="full" button onClick={() => setShowModal(true)}>
+            <IonItem
+              lines="full"
+              button
+              onClick={() => {
+                setShowPopover({
+                  showPopover: false,
+                  event: undefined,
+                });
+                setShowModal(true);
+              }}
+            >
               <IonIcon icon={mail} slot="start" size="small"></IonIcon>
               <IonLabel>Mail</IonLabel>
             </IonItem>
-            <IonItem lines="none" button onClick={()=>logOutUser()}>
+            <IonItem lines="none" button onClick={() => logOutUser()}>
               <IonIcon icon={logOut} slot="start" size="small"></IonIcon>
               <IonLabel>Logout</IonLabel>
             </IonItem>
@@ -177,14 +199,14 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
             </IonButtons>
             <IonTitle>Mail</IonTitle>
           </IonToolbar>
-        </IonHeader> 
+        </IonHeader>
         <IonContent>
           <IonList>
-            {Array.from(Array(10).keys()).map((i,index) => {
+            {Array.from(Array(10).keys()).map((i, index) => {
               return (
                 <IonItem lines="full" button key={index}>
-                  <IonLabel >
-                    <IonText >
+                  <IonLabel>
+                    <IonText>
                       <span className="ion-padding-top">Lorem Subject</span>
                     </IonText>
                     <br />

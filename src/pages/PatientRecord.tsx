@@ -20,6 +20,8 @@ import {
   IonImg,
   IonItem,
   IonLabel,
+  IonList,
+  IonModal,
   IonPage,
   IonRow,
   IonText,
@@ -32,9 +34,33 @@ import { useParams } from "react-router";
 import PageHeader from "../components/PageHeader";
 import "../styles/Page.css";
 import "../styles/NewPatient.css";
+import { chevronForward, pencil } from "ionicons/icons";
+import EditPatientRecord from "../components/EditPatientRecord";
 
 const PatientRecord: React.FC = () => {
   const { name } = useParams<{ name: string; mode?: string }>();
+  const [isMobileView, setIsMobileView] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editValue, setEditValue] = useState('');
+
+  function closeEditModal(){
+    setShowEditModal(false)
+  }
+
+
+
+
+
+
+  useEffect(() => {
+    window.onresize = (e) => { 
+      if (window.innerWidth < 768) {
+        setIsMobileView(true);
+      }else{
+        setIsMobileView(false);
+      }
+    }
+  },[window.innerWidth]);
   return (
     <IonPage>
       <PageHeader name={name}></PageHeader>
@@ -78,13 +104,16 @@ const PatientRecord: React.FC = () => {
               <IonCard>
                 <IonCardHeader>
                   <IonCardTitle color="primary">Medical</IonCardTitle>
-                  <IonCardSubtitle></IonCardSubtitle>
                   <IonCardSubtitle>
                     <b>On Call :</b> Dr. {faker.name.findName()}
                   </IonCardSubtitle>
                   <IonCardSubtitle>
                     <b>Admission Date :</b>{" "}
                     <IonText>{faker.date.recent().toLocaleString()}</IonText>
+                  </IonCardSubtitle>
+                  <IonCardSubtitle>
+                    <b>Status :</b>{" "}
+                    <IonText color="primary">{"discharged"}</IonText>
                   </IonCardSubtitle>
                   <IonCardSubtitle>
                     <b>Discharge Date :</b>{" "}
@@ -100,14 +129,31 @@ const PatientRecord: React.FC = () => {
             <IonCol size="12" sizeLg="4">
               <IonCard>
                 <IonCardHeader>
-                  <IonCardTitle
-                    color="primary"
-                    // className="ion-padding-start ion-padding-vertical"
-                  >
-                    Finance
-                  </IonCardTitle>
+                  <IonToolbar>
+                    <IonCardTitle
+                      color="primary"
+                      // className="ion-padding-start ion-padding-vertical"
+                    >
+                      Finance
+                    </IonCardTitle>
+                    <IonButtons slot="end">
+                      <IonButton color="primary" size="small" onClick={()=>{
+                        setEditValue("Finance")
+                        setShowEditModal(true)
+                      }} >
+                        <IonIcon
+                          slot="icon-only"
+                          icon={pencil}
+                          size="small"
+                        ></IonIcon>
+                      </IonButton>
+                    </IonButtons>{" "}
+                  </IonToolbar>
                   <IonCardSubtitle>
                     <b>Mode :</b> Bank
+                  </IonCardSubtitle>
+                  <IonCardSubtitle>
+                    <b>Amount :</b> {Date.now().toLocaleString()} XAF.
                   </IonCardSubtitle>
                   <IonCardSubtitle>
                     <b>Details :</b> [Card Number]
@@ -121,9 +167,23 @@ const PatientRecord: React.FC = () => {
             <IonCol size="12">
               <IonCard>
                 <IonCardHeader>
-                  <IonCardTitle color="primary">
-                    Patient's Complaint
-                  </IonCardTitle>
+                  <IonToolbar>
+                    <IonCardTitle color="primary">
+                      Patients Complain
+                    </IonCardTitle>
+                    <IonButtons slot="end">
+                      <IonButton color="primary" size="small" onClick={()=>{
+                        setEditValue("Patients Complain")
+                        setShowEditModal(true)
+                      }}>
+                        <IonIcon
+                          slot="icon-only"
+                          icon={pencil}
+                          size="small"
+                        ></IonIcon>
+                      </IonButton>
+                    </IonButtons>{" "}
+                  </IonToolbar>
                 </IonCardHeader>
                 <IonCardContent>
                   Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam
@@ -145,7 +205,21 @@ const PatientRecord: React.FC = () => {
             <IonCol size="12">
               <IonCard>
                 <IonCardHeader>
-                  <IonCardTitle color="primary">Patient History</IonCardTitle>
+                  <IonToolbar>
+                    <IonCardTitle color="primary">Patient History</IonCardTitle>
+                    <IonButtons slot="end">
+                      <IonButton color="primary" size="small" onClick={()=>{
+                        setEditValue("Patient History")
+                        setShowEditModal(true)
+                      }}>
+                        <IonIcon
+                          slot="icon-only"
+                          icon={pencil}
+                          size="small"
+                        ></IonIcon>
+                      </IonButton>
+                    </IonButtons>{" "}
+                  </IonToolbar>
                 </IonCardHeader>
                 <IonCardContent>
                   <IonAccordionGroup>
@@ -167,15 +241,59 @@ const PatientRecord: React.FC = () => {
                       <IonItem slot="header">
                         <IonLabel>Surgical History</IonLabel>
                       </IonItem>
-                      <p slot="content" className="p-3">
-                        <IonText>
-                          Lorem ipsum dolor sit amet consectetur adipisicing
-                          elit. Laudantium itaque dignissimos similique beatae
-                          deserunt molestias. Iure, exercitationem? Eius numquam
-                          quibusdam sequi, impedit in, illum reiciendis hic,
-                          nihil esse ea ratione!
-                        </IonText>
-                      </p>
+                      <div slot="content" className="p-3 history-attributes">
+                        <div className="history-attribute">
+                          <IonText>
+                            <div className="h6 text-bold history-attribute-heading">
+                              {" "}
+                              Lorem Section
+                            </div>
+                          </IonText>
+                          <IonText>
+                            <div className="ms-2 ps-2 history-attribute-description">
+                              Lorem ipsum dolor sit amet consectetur adipisicing
+                              elit. Laudantium itaque dignissimos similique
+                              beatae deserunt molestias. Iure, exercitationem?
+                              Eius numquam quibusdam sequi, impedit in, illum
+                              reiciendis hic, nihil esse ea ratione!
+                            </div>
+                          </IonText>
+                        </div>
+                        <div className="history-attribute">
+                          <IonText>
+                            <div className="h6 text-bold history-attribute-heading">
+                              {" "}
+                              Lorem Section
+                            </div>
+                          </IonText>
+                          <IonText>
+                            <div className="ms-2 ps-2 history-attribute-description">
+                              Lorem ipsum dolor sit amet consectetur adipisicing
+                              elit. Laudantium itaque dignissimos similique
+                              beatae deserunt molestias. Iure, exercitationem?
+                              Eius numquam quibusdam sequi, impedit in, illum
+                              reiciendis hic, nihil esse ea ratione!
+                            </div>
+                          </IonText>
+                        </div>
+                        <div className="history-attribute">
+                          <IonText>
+                            <div className="h6 text-bold history-attribute-heading">
+                              {" "}
+                              Lorem Section
+                            </div>
+                          </IonText>
+                          <IonText>
+                            <div className="ms-2 ps-2 history-attribute-description">
+                              Lorem ipsum dolor sit amet consectetur adipisicing
+                              elit. Laudantium itaque dignissimos similique
+                              beatae deserunt molestias. Iure, exercitationem?
+                              Eius numquam quibusdam sequi, impedit in, illum
+                              reiciendis hic, nihil esse ea ratione!
+                            </div>
+                          </IonText>
+                        </div>
+                      </div>
                     </IonAccordion>
                   </IonAccordionGroup>
                 </IonCardContent>
@@ -184,7 +302,21 @@ const PatientRecord: React.FC = () => {
             <IonCol size="12">
               <IonCard>
                 <IonCardHeader>
-                  <IonCardTitle color="primary">Physical Exam</IonCardTitle>
+                  <IonToolbar>
+                    <IonCardTitle color="primary">Physical Exam</IonCardTitle>
+                    <IonButtons slot="end">
+                      <IonButton color="primary" size="small" onClick={()=>{
+                        setEditValue("Physical Exam")
+                        setShowEditModal(true)
+                      }}>
+                        <IonIcon
+                          slot="icon-only"
+                          icon={pencil}
+                          size="small"
+                        ></IonIcon>
+                      </IonButton>
+                    </IonButtons>{" "}
+                  </IonToolbar>
                 </IonCardHeader>
                 <IonCardContent>
                   Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam
@@ -206,7 +338,21 @@ const PatientRecord: React.FC = () => {
             <IonCol size="12">
               <IonCard>
                 <IonCardHeader>
-                  <IonCardTitle color="primary">Diagnosis</IonCardTitle>
+                  <IonToolbar>
+                    <IonCardTitle color="primary"> Diagnostics </IonCardTitle>
+                    <IonButtons slot="end">
+                      <IonButton color="primary" size="small" onClick={()=>{
+                        setEditValue("Diagnostics")
+                        setShowEditModal(true)
+                      }}>
+                        <IonIcon
+                          slot="icon-only"
+                          icon={pencil}
+                          size="small"
+                        ></IonIcon>
+                      </IonButton>
+                    </IonButtons>{" "}
+                  </IonToolbar>
                 </IonCardHeader>
                 <IonCardContent>
                   Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam
@@ -228,32 +374,90 @@ const PatientRecord: React.FC = () => {
             <IonCol size="12">
               <IonCard>
                 <IonCardHeader>
-                  <IonCardTitle color="primary">Lab Results</IonCardTitle>
+                  <IonToolbar>
+                    <IonCardTitle color="primary">Lab Results </IonCardTitle>
+                    <IonButtons slot="end">
+                      <IonButton color="primary" size="small" onClick={()=>{
+                        setEditValue("Lab Results")
+                        setShowEditModal(true)
+                      }}>
+                        <IonIcon
+                          slot="icon-only"
+                          icon={pencil}
+                          size="small"
+                        ></IonIcon>
+                      </IonButton>
+                    </IonButtons>{" "}
+                  </IonToolbar>
                 </IonCardHeader>
                 <IonCardContent>
-                  <IonRow className="text-center row-header">
-                    <IonCol className="border">
-                      <IonText>Test</IonText>
-                    </IonCol>
-                    <IonCol className="border">
-                      <IonText>Result</IonText>
-                    </IonCol>
-                    <IonCol className="border">
-                      <IonText>Handler</IonText>
-                    </IonCol>
-                  </IonRow>
-                  <IonRow className="text-center">
-                    <IonCol className="border">Test 1</IonCol>
-                    <IonCol className="border">Test result 1</IonCol>
-                    <IonCol className="border">Handler 1</IonCol>
-                  </IonRow>
+                  {!isMobileView && (
+                    <IonRow className="text-center row-header">
+                      <IonCol className="border">
+                        <IonText>Test</IonText>
+                      </IonCol>
+                      <IonCol className="border">
+                        <IonText>Result</IonText>
+                      </IonCol>
+                      <IonCol className="border">
+                        <IonText>Handler</IonText>
+                      </IonCol>
+                    </IonRow>
+                  )}
+                  {!isMobileView && (
+                    <IonRow className="text-center">
+                      <IonCol className="border">Test 1</IonCol>
+                      <IonCol className="border">Test result 1</IonCol>
+                      <IonCol className="border">Handler 1</IonCol>
+                    </IonRow>
+                  )}
+
+                  {isMobileView && (
+                    <div>
+                      <IonItem lines="full" button>
+                        <IonLabel slot="start">
+                          Lorem ipsum, dolor sit amet consectetur adipisicing
+                          elit. Omnis, perferendis.
+                        </IonLabel>
+                        <IonIcon slot="end" icon={chevronForward}></IonIcon>
+                      </IonItem>
+                      <IonItem lines="full" button>
+                        <IonLabel slot="start">
+                          Lorem ipsum, dolor sit amet consectetur adipisicing
+                          elit. Omnis, perferendis.
+                        </IonLabel>
+                        <IonIcon slot="end" icon={chevronForward}></IonIcon>
+                      </IonItem>
+                      <IonItem lines="full" button>
+                        <IonLabel slot="start">
+                          Lorem ipsum, dolor sit amet consectetur adipisicing
+                          elit. Omnis, perferendis.
+                        </IonLabel>
+                        <IonIcon slot="end" icon={chevronForward}></IonIcon>
+                      </IonItem>
+                    </div>
+                  )}
                 </IonCardContent>
               </IonCard>
             </IonCol>
             <IonCol size="12">
               <IonCard>
                 <IonCardHeader>
-                  <IonCardTitle color="primary">Management</IonCardTitle>
+                  <IonToolbar>
+                    <IonCardTitle color="primary"> Management </IonCardTitle>
+                    <IonButtons slot="end">
+                      <IonButton color="primary" size="small" onClick={()=>{
+                        setEditValue("Management")
+                        setShowEditModal(true)
+                      }}>
+                        <IonIcon
+                          slot="icon-only"
+                          icon={pencil}
+                          size="small"
+                        ></IonIcon>
+                      </IonButton>
+                    </IonButtons>{" "}
+                  </IonToolbar>
                 </IonCardHeader>
                 <IonCardContent>
                   <IonGrid>
@@ -283,6 +487,13 @@ const PatientRecord: React.FC = () => {
           </IonRow>
         </IonGrid>
       </IonContent>
+
+      <IonModal
+        isOpen={showEditModal}
+        onDidDismiss={() => setShowEditModal(false)}
+      >
+        <EditPatientRecord category={editValue} closeModal={closeEditModal} ></EditPatientRecord>
+      </IonModal> 
     </IonPage>
   );
 };

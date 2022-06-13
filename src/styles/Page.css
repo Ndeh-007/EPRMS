@@ -20,6 +20,16 @@ ion-item.custom-height {
   --min-height: 100px;
 }
 
+ion-slides.slides{
+  background-color:transparent;
+}
+
+ion-slides.slides .slide{
+  background-color:transparent;
+  text-align: start;
+}
+
+
 @media only screen and (max-width: 600px) {
   .thumbnail {
     min-width: 40%;
