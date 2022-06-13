@@ -9,7 +9,7 @@ import {
 } from "@ionic/react";
 import { arrowBack } from "ionicons/icons";
 import React, { useState } from "react";
-import { Finance } from "./EditPatientRecordCategories";
+import { Finance, PatientsComplaint } from "./EditPatientRecordCategories";
 
 const EditPatientRecord: React.FC<{
   category: string;
@@ -32,8 +32,8 @@ const EditPatientRecord: React.FC<{
           <IonTitle>{category}</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent>
-        <Finance></Finance>
+      <IonContent> 
+          <PatientsComplaint></PatientsComplaint>
       </IonContent>
     </>
   );

@@ -1,6 +1,8 @@
 import {
   IonButton,
   IonButtons,
+  IonCard,
+  IonCardContent,
   IonContent,
   IonHeader,
   IonIcon,
@@ -10,20 +12,23 @@ import {
   IonList,
   IonSelect,
   IonSelectOption,
+  IonTextarea,
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
 import { arrowBack } from "ionicons/icons";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
 const Finance: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState("cash");
 
   return (
-    <form onSubmit={(e)=>{
-        e.preventDefault()
-        alert('submitted')
-    }}>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        alert("submitted");
+      }}
+    >
       <IonList>
         <IonItem lines="full">
           <IonLabel position="floating">Name</IonLabel>
@@ -140,10 +145,50 @@ const Finance: React.FC = () => {
         )}
       </IonList>
       <div className="text-center pt-2">
-          <IonButton type="submit">Submit</IonButton>
+        <IonButton type="submit">Submit</IonButton>
       </div>
     </form>
   );
 };
 
-export { Finance };
+const PatientsComplaint = () => {
+  const [summary, setSummary] = useState<string | null | undefined>("");
+  const summaryRef = useRef<HTMLIonTextareaElement>(null);
+  return (
+    <form
+      action=""
+      onSubmit={(e) => {
+        e.preventDefault();
+        alert("submitted");
+      }}
+    >
+      <IonCard>
+        <IonCardContent>{summary}</IonCardContent>
+      </IonCard>
+      <IonList>
+        <IonItem>
+          <IonLabel position="floating" >
+            Patient's Complaint
+          </IonLabel>
+          <IonTextarea
+          placeholder="Patient's Complaint"
+            required
+            ref={summaryRef}
+            onIonChange={(e) => {
+              setSummary(summaryRef.current?.value);
+              let text = summaryRef.current?.value;
+              var regex = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/g
+              console.log( text?.match(regex))
+            }}
+          ></IonTextarea>
+        </IonItem>
+      </IonList>
+
+      <div className="text-center pt-2">
+        <IonButton type="submit">Submit</IonButton>
+      </div>
+    </form>
+  );
+};
+
+export { Finance, PatientsComplaint };
