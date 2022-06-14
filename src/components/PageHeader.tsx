@@ -55,12 +55,12 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
   }
 
   function goBack() {
-    if (location.pathname !== "/dashboard") {
+    if (location.pathname !== "/dashboard") { 
       history.goBack();
     }
   }
 
-  function viewProfile(){
+  function viewProfile() {
     setShowPopover({
       showPopover: false,
       event: undefined,
@@ -163,7 +163,7 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
       >
         <IonContent>
           <IonList mode="md">
-            <IonItem lines="full" button onClick={()=>viewProfile()}>
+            <IonItem lines="full" button onClick={() => viewProfile()}>
               <IonIcon icon={person} slot="start" size="small"></IonIcon>
               <IonLabel>Profile</IonLabel>
             </IonItem>

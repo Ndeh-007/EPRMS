@@ -19,13 +19,13 @@
 ion-item.custom-height {
   --min-height: 100px;
 }
-
+/* 
 ion-slides.slides{
   background-color:transparent;
-}
+} */
 
 ion-slides.slides .slide{
-  background-color:transparent;
+  /* background-color:transparent; */
   text-align: start;
 }
 

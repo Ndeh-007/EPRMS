@@ -111,7 +111,7 @@ const ViewStaff: React.FC = () => {
           </IonSegment>
 
           <IonToolbar color="light">
-            <IonSlides className="slides" ref={slidesRef}>
+            <IonSlides className="slides" color="clear" ref={slidesRef}>
               <IonSlide className="slide">
                 <IonCard mode="ios">
                   <IonCardContent>

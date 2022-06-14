@@ -169,7 +169,7 @@ const PatientRecord: React.FC = () => {
                 <IonCardHeader>
                   <IonToolbar>
                     <IonCardTitle color="primary">
-                      Patients Complain
+                      Patient's Complain
                     </IonCardTitle>
                     <IonButtons slot="end">
                       <IonButton color="primary" size="small" onClick={()=>{
@@ -258,41 +258,7 @@ const PatientRecord: React.FC = () => {
                               reiciendis hic, nihil esse ea ratione!
                             </div>
                           </IonText>
-                        </div>
-                        <div className="history-attribute">
-                          <IonText>
-                            <div className="h6 text-bold history-attribute-heading">
-                              {" "}
-                              Lorem Section
-                            </div>
-                          </IonText>
-                          <IonText>
-                            <div className="ms-2 ps-2 history-attribute-description">
-                              Lorem ipsum dolor sit amet consectetur adipisicing
-                              elit. Laudantium itaque dignissimos similique
-                              beatae deserunt molestias. Iure, exercitationem?
-                              Eius numquam quibusdam sequi, impedit in, illum
-                              reiciendis hic, nihil esse ea ratione!
-                            </div>
-                          </IonText>
-                        </div>
-                        <div className="history-attribute">
-                          <IonText>
-                            <div className="h6 text-bold history-attribute-heading">
-                              {" "}
-                              Lorem Section
-                            </div>
-                          </IonText>
-                          <IonText>
-                            <div className="ms-2 ps-2 history-attribute-description">
-                              Lorem ipsum dolor sit amet consectetur adipisicing
-                              elit. Laudantium itaque dignissimos similique
-                              beatae deserunt molestias. Iure, exercitationem?
-                              Eius numquam quibusdam sequi, impedit in, illum
-                              reiciendis hic, nihil esse ea ratione!
-                            </div>
-                          </IonText>
-                        </div>
+                        </div> 
                       </div>
                     </IonAccordion>
                   </IonAccordionGroup>

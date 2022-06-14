@@ -1,22 +1,48 @@
 import {
+  IonAccordion,
+  IonAccordionGroup,
   IonButton,
   IonButtons,
   IonCard,
   IonCardContent,
+  IonCardHeader,
+  IonCardSubtitle,
+  IonCardTitle,
+  IonChip,
   IonContent,
+  IonFab,
+  IonFabButton,
   IonHeader,
   IonIcon,
   IonInput,
   IonItem,
   IonLabel,
   IonList,
+  IonProgressBar,
+  IonSegment,
+  IonSegmentButton,
   IonSelect,
   IonSelectOption,
+  IonSlide,
+  IonSlides,
+  IonText,
   IonTextarea,
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
-import { arrowBack } from "ionicons/icons";
+import {
+  add,
+  addOutline,
+  addSharp,
+  arrowBack,
+  close,
+  closeOutline,
+  closeSharp,
+  cloudUpload,
+  stop,
+  trash,
+  trashBin,
+} from "ionicons/icons";
 import React, { useRef, useState } from "react";
 
 const Finance: React.FC = () => {
@@ -151,7 +177,12 @@ const Finance: React.FC = () => {
   );
 };
 
-const PatientsComplaint = () => {
+/**
+ ** Patient's Complaint
+ *
+ */
+
+const PatientsComplaint: React.FC = () => {
   const [summary, setSummary] = useState<string | null | undefined>("");
   const summaryRef = useRef<HTMLIonTextareaElement>(null);
   return (
@@ -167,18 +198,16 @@ const PatientsComplaint = () => {
       </IonCard>
       <IonList>
         <IonItem>
-          <IonLabel position="floating" >
-            Patient's Complaint
-          </IonLabel>
+          <IonLabel position="floating">Patient's Complaint</IonLabel>
           <IonTextarea
-          placeholder="Patient's Complaint"
+            placeholder="Patient's Complaint"
             required
             ref={summaryRef}
             onIonChange={(e) => {
               setSummary(summaryRef.current?.value);
               let text = summaryRef.current?.value;
-              var regex = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/g
-              console.log( text?.match(regex))
+              var regex = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/g;
+              console.log(text?.match(regex));
             }}
           ></IonTextarea>
         </IonItem>
@@ -191,4 +220,498 @@ const PatientsComplaint = () => {
   );
 };
 
-export { Finance, PatientsComplaint };
+/**
+ * *Patient's History
+ *
+ */
+
+const PatientsHistory: React.FC = () => {
+  const [loading, setLoading] = useState(false);
+  const [newHistory, setNewHistory] = useState(false);
+  const [newHistoryAttribute, setNewHistoryAttribute] = useState(false);
+  return (
+    <>
+      <IonAccordionGroup>
+        <IonAccordion value="Medical History">
+          <IonItem slot="header">
+            <IonLabel>Medication History</IonLabel>
+          </IonItem>
+          <div slot="content" className="p-3 history-attributes">
+            <IonToolbar color="clear">
+              {newHistoryAttribute ? (
+                <IonButton
+                  slot="end"
+                  color="danger"
+                  size="small"
+                  onClick={() => {
+                    setNewHistoryAttribute(false);
+                  }}
+                >
+                  <IonIcon icon={closeOutline} slot="start"></IonIcon>
+                  <IonLabel>cancel</IonLabel>
+                </IonButton>
+              ) : (
+                <IonButton
+                  slot="end"
+                  color="medium"
+                  size="small"
+                  onClick={() => {
+                    setNewHistoryAttribute(true);
+                  }}
+                >
+                  <IonIcon icon={addOutline} slot="start"></IonIcon>
+                  <IonLabel>Add Attribute</IonLabel>
+                </IonButton>
+              )}
+            </IonToolbar>
+
+            {newHistoryAttribute && (
+              <IonCard className="mb-4">
+                {loading && (
+                  <IonProgressBar type="indeterminate"></IonProgressBar>
+                )}
+                <IonCardHeader>
+                  <IonCardTitle>New Attribute</IonCardTitle>
+                </IonCardHeader>
+                <IonCardContent>
+                  <IonItem lines="full" fill="outline">
+                    <IonLabel position="floating">title</IonLabel>
+                    <IonInput
+                      type="text"
+                      required
+                      placeholder="Title of Attribute"
+                    ></IonInput>
+                  </IonItem>
+                  <IonItem
+                    lines="full"
+                    fill="outline"
+                    className="ion-padding-top"
+                  >
+                    <IonLabel position="floating">Description</IonLabel>
+                    <IonTextarea required></IonTextarea>
+                  </IonItem>
+                </IonCardContent>
+
+                <div className="text-center pt-2 pb-2">
+                  <IonButton size="small">Add Attribute</IonButton>
+                </div>
+              </IonCard>
+            )}
+
+            <div className="history-attribute">
+              <IonText>
+                <div className="h6 text-bold history-attribute-heading">
+                  {" "}
+                  Lorem Section
+                </div>
+              </IonText>
+              <IonText>
+                <div className="ms-2 ps-2 history-attribute-description">
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                  Laudantium itaque dignissimos similique beatae deserunt
+                  molestias. Iure, exercitationem? Eius numquam quibusdam sequi,
+                  impedit in, illum reiciendis hic, nihil esse ea ratione!
+                </div>
+              </IonText>
+              <IonToolbar color="clear">
+                <IonButtons slot="end">
+                  <IonButton color="danger" size="small">
+                    <IonIcon
+                      slot="icon-only"
+                      icon={trash}
+                      size="small"
+                    ></IonIcon>
+                  </IonButton>
+                </IonButtons>
+              </IonToolbar>
+              <hr />
+            </div>
+
+            <div className="history-attribute">
+              <IonText>
+                <div className="h6 text-bold history-attribute-heading">
+                  {" "}
+                  Lorem Section
+                </div>
+              </IonText>
+              <IonText>
+                <div className="ms-2 ps-2 history-attribute-description">
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                  Laudantium itaque dignissimos similique beatae deserunt
+                  molestias. Iure, exercitationem? Eius numquam quibusdam sequi,
+                  impedit in, illum reiciendis hic, nihil esse ea ratione!
+                </div>
+              </IonText>
+              <IonToolbar color="clear">
+                <IonButtons slot="end">
+                  <IonButton color="danger" size="small">
+                    <IonIcon
+                      slot="icon-only"
+                      icon={trash}
+                      size="small"
+                    ></IonIcon>
+                  </IonButton>
+                </IonButtons>
+              </IonToolbar>
+              <hr />
+            </div> <div className="history-attribute">
+              <IonText>
+                <div className="h6 text-bold history-attribute-heading">
+                  {" "}
+                  Lorem Section
+                </div>
+              </IonText>
+              <IonText>
+                <div className="ms-2 ps-2 history-attribute-description">
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                  Laudantium itaque dignissimos similique beatae deserunt
+                  molestias. Iure, exercitationem? Eius numquam quibusdam sequi,
+                  impedit in, illum reiciendis hic, nihil esse ea ratione!
+                </div>
+              </IonText>
+              <IonToolbar color="clear">
+                <IonButtons slot="end">
+                  <IonButton color="danger" size="small">
+                    <IonIcon
+                      slot="icon-only"
+                      icon={trash}
+                      size="small"
+                    ></IonIcon>
+                  </IonButton>
+                </IonButtons>
+              </IonToolbar>
+              <hr />
+            </div>
+          </div>
+        </IonAccordion>
+      </IonAccordionGroup>
+
+      {newHistory && (
+        <IonCard>
+          {loading && <IonProgressBar type="indeterminate"></IonProgressBar>}
+          <IonCardHeader>
+            <IonCardTitle>New History</IonCardTitle>
+          </IonCardHeader>
+          <IonCardContent>
+            <IonItem fill="outline" lines="full">
+              <IonLabel position="floating">History Title</IonLabel>
+              <IonInput></IonInput>
+            </IonItem>
+            <div className="text-center pt-2">
+              <IonButton size="small">Create</IonButton>
+            </div>
+          </IonCardContent>
+        </IonCard>
+      )}
+
+      <div className="text-center pt-2">
+        {newHistory ? (
+          <IonButton
+            slot="end"
+            color="danger"
+            onClick={() => {
+              setNewHistory(false);
+            }}
+          >
+            <IonIcon icon={closeOutline} slot="start"></IonIcon>
+            cancel
+          </IonButton>
+        ) : (
+          <IonButton
+            onClick={() => {
+              setNewHistory(true);
+            }}
+          >
+            <IonIcon slot="start" icon={addOutline}></IonIcon> New History
+          </IonButton>
+        )}
+      </div>
+    </>
+  );
+};
+
+/**
+ ** Patient's Diagnosis
+ *
+ */
+
+const Diagnostics: React.FC = () => {
+  const [diagnostics, setDiagnostics] = useState<string | null | undefined>("");
+  const diagnosticsRef = useRef<HTMLIonTextareaElement>(null);
+  return (
+    <form
+      action=""
+      onSubmit={(e) => {
+        e.preventDefault();
+        alert("submitted");
+      }}
+    >
+      <IonCard>
+        <IonCardContent>{diagnostics}</IonCardContent>
+      </IonCard>
+      <IonList>
+        <IonItem>
+          <IonLabel position="floating">Diagnostics</IonLabel>
+          <IonTextarea
+            placeholder="Diagnostics"
+            required
+            ref={diagnosticsRef}
+            onIonChange={(e) => {
+              setDiagnostics(diagnosticsRef.current?.value);
+              let text = diagnosticsRef.current?.value;
+              var regex = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/g;
+              console.log(text?.match(regex));
+            }}
+          ></IonTextarea>
+        </IonItem>
+      </IonList>
+
+      <div className="text-center pt-2">
+        <IonButton type="submit">Submit</IonButton>
+      </div>
+    </form>
+  );
+};
+
+/**
+ ** Physical Examination
+ *
+ */
+
+const PhysicalExam: React.FC = () => {
+  const [physicalExam, setPhysicalExam] = useState<string | null | undefined>(
+    ""
+  );
+  const physicalExamRef = useRef<HTMLIonTextareaElement>(null);
+  return (
+    <form
+      action=""
+      onSubmit={(e) => {
+        e.preventDefault();
+        alert("submitted");
+      }}
+    >
+      <IonCard>
+        <IonCardContent>{physicalExam}</IonCardContent>
+      </IonCard>
+      <IonList>
+        <IonItem>
+          <IonLabel position="floating">Physical Exam</IonLabel>
+          <IonTextarea
+            placeholder="physicalExam"
+            required
+            ref={physicalExamRef}
+            onIonChange={(e) => {
+              setPhysicalExam(physicalExamRef.current?.value);
+              let text = physicalExamRef.current?.value;
+              var regex = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/g;
+              console.log(text?.match(regex));
+            }}
+          ></IonTextarea>
+        </IonItem>
+      </IonList>
+
+      <div className="text-center pt-2">
+        <IonButton type="submit">Submit</IonButton>
+      </div>
+    </form>
+  );
+};
+
+const LabResults: React.FC = () => {
+  const [newTest, setNewTest] = useState(false);
+  const [loading, setLoading] = useState(false);
+  return (
+    <>
+      <IonCard>
+        <IonCardHeader>
+          <IonToolbar>
+            <IonCardTitle>Malaria</IonCardTitle>
+            <IonCardSubtitle>Ns Comfort</IonCardSubtitle>
+            <IonButtons slot="end">
+              <IonButton color="danger">
+                <IonIcon icon={trash} slot="icon-only" size="small"></IonIcon>
+              </IonButton>
+            </IonButtons>
+          </IonToolbar>
+        </IonCardHeader>
+        <IonCardContent>
+          Positive Lorem ipsum dolor sit amet consectetur adipisicing elit.
+          Delectus provident sint pariatur temporibus quaerat beatae doloribus
+          libero debitis eius quas illo, id impedit illum placeat autem minus
+          expedita ducimus voluptate?
+        </IonCardContent>
+      </IonCard>
+
+      {newTest && (
+        <IonCard>
+          {loading && <IonProgressBar type="indeterminate"></IonProgressBar>}
+          <IonCardHeader>
+            <IonToolbar>
+              <IonCardTitle>New Test</IonCardTitle>
+              <IonButton
+                size="small"
+                slot="end"
+                color="danger"
+                onClick={() => {
+                  setNewTest(false);
+                }}
+              >
+                <IonIcon slot="start" icon={closeSharp}></IonIcon>
+                <IonLabel>Close</IonLabel>
+              </IonButton>
+            </IonToolbar>
+          </IonCardHeader>
+          <IonCardContent>
+            <IonItem lines="full" fill="outline">
+              <IonLabel position="floating">Title</IonLabel>
+              <IonInput type="text" required placeholder="Title"></IonInput>
+            </IonItem>
+            <IonItem lines="full" fill="outline" className="ion-padding-top">
+              <IonLabel position="floating">Handler</IonLabel>
+              <IonInput type="text" required placeholder="Handler"></IonInput>
+            </IonItem>
+            <IonItem lines="full" fill="outline" className="ion-padding-top">
+              <IonLabel position="floating">Result</IonLabel>
+              <IonTextarea required placeholder="Test Results"></IonTextarea>
+            </IonItem>
+          </IonCardContent>
+          <div className="text-center pt-2 pb-2">
+            <IonButton size="small">
+              {" "}
+              <IonIcon icon={addOutline} slot="start"></IonIcon> Create
+            </IonButton>
+          </div>
+        </IonCard>
+      )}
+
+      {!newTest && (
+        <div className="text-center pt-2 pb-2">
+          <IonButton size="small" onClick={() => setNewTest(true)}>
+            {" "}
+            <IonIcon icon={addOutline} slot="start"></IonIcon> Add Test
+          </IonButton>
+        </div>
+      )}
+    </>
+  );
+};
+
+const Management: React.FC = () => {
+  const slidesRef = useRef<HTMLIonSlidesElement>(null);
+  const [newManagmentItem, setNewManangementItem] = useState(false);
+  return (
+    <div>
+      <IonAccordionGroup>
+        <IonAccordion value="Medical History">
+          <IonItem slot="header" color="clear">
+            <IonToolbar color="clear">
+              <IonLabel slot="start">
+                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Vel
+                nulla tempora facere aliquid quisquam,
+              </IonLabel>
+            </IonToolbar>
+          </IonItem>
+          <div slot="content">
+            <IonCard>
+              <IonCardHeader>
+                <IonCardTitle>Problem</IonCardTitle>
+              </IonCardHeader>
+              <IonCardContent>
+                <IonText>
+                  <p className="p">
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                    Quae obcaecati.
+                  </p>
+                </IonText>
+              </IonCardContent>
+            </IonCard>
+            <IonCard>
+              <IonCardHeader>
+                <IonCardTitle>Solution</IonCardTitle>
+              </IonCardHeader>
+              <IonCardContent>
+                <IonText>
+                  <p className="p">
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                    Quae obcaecati dolore perspiciatis repellendus dolores
+                    maxime. Iure consequatur eaque accusantium fugit repudiandae
+                    obcaecati eos, unde blanditiis dicta doloribus laudantium
+                    laborum excepturi.
+                  </p>
+                </IonText>
+              </IonCardContent>
+            </IonCard>
+            <IonCardContent className="ion-no-padding-vertical">
+              <IonToolbar color="clear">
+                <IonChip slot="end" color="danger">
+                  <IonIcon icon={trash}></IonIcon>
+                  <IonLabel>Delete</IonLabel>
+                </IonChip>
+              </IonToolbar>
+            </IonCardContent>
+          </div>
+        </IonAccordion>
+      </IonAccordionGroup>
+
+      {newManagmentItem && (
+        <IonCard>
+          <IonCardHeader>
+            <IonToolbar>
+              <IonCardTitle slot="start">New Management Item</IonCardTitle>
+              <IonButton
+                slot="end"
+                color="danger"
+                size="small"
+                onClick={() => {
+                  setNewManangementItem(false);
+                }}
+              >
+                <IonIcon icon={close} slot="start"></IonIcon>
+                <IonLabel>Close</IonLabel>
+              </IonButton>
+            </IonToolbar>
+          </IonCardHeader>
+          <IonCardContent>
+            <IonItem lines="full" fill="outline">
+              <IonLabel position="floating">Problem</IonLabel>
+              <IonTextarea placeholder="Enter Problem"></IonTextarea>
+            </IonItem>
+            <IonItem lines="full" fill="outline" className="ion-padding-top">
+              <IonLabel position="floating">Solution</IonLabel>
+              <IonTextarea placeholder="Enter Solution"></IonTextarea>
+            </IonItem>
+            <div className="text-center pt-2 pb-2">
+              <IonButton
+                size="small"
+                onClick={() => setNewManangementItem(true)}
+              >
+                {" "}
+                <IonIcon icon={cloudUpload} slot="start"></IonIcon> submit
+              </IonButton>
+            </div>
+          </IonCardContent>
+        </IonCard>
+      )}
+
+      {!newManagmentItem && (
+        <div className="text-center pt-2 pb-2">
+          <IonButton size="small" onClick={() => setNewManangementItem(true)}>
+            {" "}
+            <IonIcon icon={addOutline} slot="start"></IonIcon> Add
+          </IonButton>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export {
+  Finance,
+  PatientsComplaint,
+  PatientsHistory,
+  Diagnostics,
+  PhysicalExam,
+  LabResults,
+  Management,
+};

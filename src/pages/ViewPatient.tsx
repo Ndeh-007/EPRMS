@@ -182,7 +182,7 @@ const ViewPatient: React.FC = () => {
             <IonRow>
               <IonCol></IonCol>
               <IonCol>
-                <IonButton color="success" className="float-end">
+                <IonButton color="success" className="float-end" routerLink='/new-record'>
                   <IonIcon slot="start" icon={add}></IonIcon> New Record
                 </IonButton>
               </IonCol>
