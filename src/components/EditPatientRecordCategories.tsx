@@ -1,3 +1,4 @@
+import faker from "@faker-js/faker";
 import {
   IonAccordion,
   IonAccordionGroup,
@@ -264,9 +265,8 @@ const PatientsHistory: React.FC = () => {
                 </IonButton>
               )}
             </IonToolbar>
-
             {newHistoryAttribute && (
-              <IonCard className="mb-4">
+              <IonCard className="mb-4" color="light">
                 {loading && (
                   <IonProgressBar type="indeterminate"></IonProgressBar>
                 )}
@@ -297,7 +297,6 @@ const PatientsHistory: React.FC = () => {
                 </div>
               </IonCard>
             )}
-
             <div className="history-attribute">
               <IonText>
                 <div className="h6 text-bold history-attribute-heading">
@@ -326,7 +325,6 @@ const PatientsHistory: React.FC = () => {
               </IonToolbar>
               <hr />
             </div>
-
             <div className="history-attribute">
               <IonText>
                 <div className="h6 text-bold history-attribute-heading">
@@ -354,7 +352,8 @@ const PatientsHistory: React.FC = () => {
                 </IonButtons>
               </IonToolbar>
               <hr />
-            </div> <div className="history-attribute">
+            </div>{" "}
+            <div className="history-attribute">
               <IonText>
                 <div className="h6 text-bold history-attribute-heading">
                   {" "}
@@ -387,15 +386,29 @@ const PatientsHistory: React.FC = () => {
       </IonAccordionGroup>
 
       {newHistory && (
-        <IonCard>
+        <IonCard color="light">
           {loading && <IonProgressBar type="indeterminate"></IonProgressBar>}
           <IonCardHeader>
+            <IonToolbar color="light">
             <IonCardTitle>New History</IonCardTitle>
+            
+          <IonButton
+            slot="end"
+            color="danger"
+            size="small"
+            onClick={() => {
+              setNewHistory(false);
+            }}
+          >
+            <IonIcon icon={closeOutline} slot="start"></IonIcon>
+            cancel
+          </IonButton>
+            </IonToolbar>
           </IonCardHeader>
           <IonCardContent>
             <IonItem fill="outline" lines="full">
               <IonLabel position="floating">History Title</IonLabel>
-              <IonInput></IonInput>
+              <IonInput placeholder="e.g Hospitalization History"></IonInput>
             </IonItem>
             <div className="text-center pt-2">
               <IonButton size="small">Create</IonButton>
@@ -405,22 +418,13 @@ const PatientsHistory: React.FC = () => {
       )}
 
       <div className="text-center pt-2">
-        {newHistory ? (
+        {!newHistory && (
           <IonButton
-            slot="end"
-            color="danger"
-            onClick={() => {
-              setNewHistory(false);
-            }}
-          >
-            <IonIcon icon={closeOutline} slot="start"></IonIcon>
-            cancel
-          </IonButton>
-        ) : (
-          <IonButton
+            size="small"
             onClick={() => {
               setNewHistory(true);
             }}
+            color="success"
           >
             <IonIcon slot="start" icon={addOutline}></IonIcon> New History
           </IonButton>
@@ -498,7 +502,7 @@ const PhysicalExam: React.FC = () => {
         <IonItem>
           <IonLabel position="floating">Physical Exam</IonLabel>
           <IonTextarea
-            placeholder="physicalExam"
+            placeholder="Physical Exam"
             required
             ref={physicalExamRef}
             onIonChange={(e) => {
@@ -696,12 +700,86 @@ const Management: React.FC = () => {
 
       {!newManagmentItem && (
         <div className="text-center pt-2 pb-2">
-          <IonButton size="small" onClick={() => setNewManangementItem(true)}>
+          <IonButton size="small" onClick={() => setNewManangementItem(true)} 
+            color="success">
             {" "}
             <IonIcon icon={addOutline} slot="start"></IonIcon> Add
           </IonButton>
         </div>
       )}
+    </div>
+  );
+};
+
+/*
+ *Immunity & Immunizations
+ */
+
+const PatientImmunity: React.FC = () => {
+  const [newImmunity, setNewImmnunity] = useState(false);
+  const [loading, setLoading] = useState(false);
+  return (
+    <div>
+      <IonItem lines="full" >
+        <IonText slot="start">Tetanus</IonText>
+        <IonText slot="end">{faker.date.recent().toLocaleDateString()}</IonText>
+      </IonItem>
+      {newImmunity && (
+        <IonCard mode="md" color="light">
+          {loading && <IonProgressBar type="indeterminate"></IonProgressBar>}
+          <IonCardHeader>
+            <IonToolbar color="light">
+
+            <IonCardTitle>New Immuninty</IonCardTitle>
+            <IonCardSubtitle>Name & Date</IonCardSubtitle> 
+          <IonButton
+            className="text-small"
+            size="small"
+            color="danger"
+            onClick={() => setNewImmnunity(false)}
+            slot="end"
+            >
+            <IonIcon slot="start" icon={close}></IonIcon>
+            <IonLabel>Cancel</IonLabel>
+          </IonButton>
+            </IonToolbar>
+          </IonCardHeader>
+          <IonCardContent>
+            <IonItem lines="full" fill="outline" className="ion-padding-top">
+              <IonLabel position="floating">Name</IonLabel>
+              <IonInput
+                type="text"
+                required
+                placeholder="e.g tetanus"
+              ></IonInput>
+            </IonItem>
+            <IonItem lines="full" fill="outline" className="ion-padding-top">
+              <IonLabel position="floating">Date Taken</IonLabel>
+              <IonInput
+                type="date"
+                required
+                placeholder="Date Taken"
+              ></IonInput>
+            </IonItem>
+            <div className="text-center py-1">
+              <IonButton size="small">Create</IonButton>
+            </div>
+          </IonCardContent>
+        </IonCard>
+      )}
+      <div className="text-center">
+        {!newImmunity && (
+          <IonButton
+            className="text-small pt-1"
+            size="small"
+            color="success"
+            onClick={() => setNewImmnunity(true)}
+          >
+            <IonIcon slot="start" icon={addOutline}></IonIcon>
+            <IonLabel>New</IonLabel>
+          </IonButton>
+        )}
+      </div>
     </div>
   );
 };
@@ -714,4 +792,5 @@ export {
   PhysicalExam,
   LabResults,
   Management,
+  PatientImmunity,
 };

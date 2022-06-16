@@ -137,6 +137,22 @@ const NewPatient: React.FC = () => {
                               </IonItem>
                             </IonCol>
                             <IonCol size="12" sizeLg="6">
+                              <IonItem fill="outline" lines="full">
+                                <IonLabel position="floating" placeholder="e.g Student">
+                                 Occupation
+                                </IonLabel>
+                                <IonInput type="text"></IonInput>
+                              </IonItem>
+                            </IonCol>
+                            <IonCol size="12" sizeLg="6">
+                              <IonItem fill="outline" lines="full">
+                                <IonLabel position="floating">
+                                  Tribe
+                                </IonLabel>
+                                <IonInput type="text" placeholder="e.g Mankon"></IonInput>
+                              </IonItem>
+                            </IonCol>
+                            <IonCol size="12" sizeLg="6">
                               <IonItem
                                 fill="outline"
                                 color="primary"

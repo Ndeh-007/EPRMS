@@ -41,26 +41,21 @@ const PatientRecord: React.FC = () => {
   const { name } = useParams<{ name: string; mode?: string }>();
   const [isMobileView, setIsMobileView] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editValue, setEditValue] = useState('');
+  const [editValue, setEditValue] = useState("");
 
-  function closeEditModal(){
-    setShowEditModal(false)
+  function closeEditModal() {
+    setShowEditModal(false);
   }
 
-
-
-
-
-
   useEffect(() => {
-    window.onresize = (e) => { 
+    window.onresize = (e) => {
       if (window.innerWidth < 768) {
         setIsMobileView(true);
-      }else{
+      } else {
         setIsMobileView(false);
       }
-    }
-  },[window.innerWidth]);
+    };
+  }, [window.innerWidth]);
   return (
     <IonPage>
       <PageHeader name={name}></PageHeader>
@@ -137,10 +132,14 @@ const PatientRecord: React.FC = () => {
                       Finance
                     </IonCardTitle>
                     <IonButtons slot="end">
-                      <IonButton color="primary" size="small" onClick={()=>{
-                        setEditValue("Finance")
-                        setShowEditModal(true)
-                      }} >
+                      <IonButton
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                          setEditValue("Finance");
+                          setShowEditModal(true);
+                        }}
+                      >
                         <IonIcon
                           slot="icon-only"
                           icon={pencil}
@@ -163,8 +162,9 @@ const PatientRecord: React.FC = () => {
                   </IonCardSubtitle>
                 </IonCardHeader>
               </IonCard>
-            </IonCol>
-            <IonCol size="12">
+            </IonCol> 
+
+            <IonCol size="12" sizeLg="8">
               <IonCard>
                 <IonCardHeader>
                   <IonToolbar>
@@ -172,10 +172,14 @@ const PatientRecord: React.FC = () => {
                       Patient's Complain
                     </IonCardTitle>
                     <IonButtons slot="end">
-                      <IonButton color="primary" size="small" onClick={()=>{
-                        setEditValue("Patients Complain")
-                        setShowEditModal(true)
-                      }}>
+                      <IonButton
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                          setEditValue("Patients Complain");
+                          setShowEditModal(true);
+                        }}
+                      >
                         <IonIcon
                           slot="icon-only"
                           icon={pencil}
@@ -202,16 +206,200 @@ const PatientRecord: React.FC = () => {
                 </IonCardContent>
               </IonCard>
             </IonCol>
-            <IonCol size="12">
+            <IonCol size="6" sizeLg="4" sizeXs="12" sizeMd="6" sizeSm="12">
+              <IonCard>
+                <IonCardHeader>
+                  <IonToolbar>
+                    <IonCardTitle color="primary">
+                      Immunity & Immunizations
+                    </IonCardTitle>
+                    <IonCardSubtitle>Name and Date</IonCardSubtitle>
+                    <IonButtons slot="end">
+                      <IonButton
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                          setEditValue("Immunity");
+                          setShowEditModal(true);
+                        }}
+                      >
+                        <IonIcon
+                          slot="icon-only"
+                          icon={pencil}
+                          size="small"
+                        ></IonIcon>
+                      </IonButton>
+                    </IonButtons>{" "}
+                  </IonToolbar>
+                </IonCardHeader>
+                <IonCardContent>
+                  <IonItem lines="full">
+                    <IonText slot="start">Flu Shot</IonText>
+                    <IonText slot="end">
+                      {faker.date.recent().toLocaleDateString()}
+                    </IonText>
+                  </IonItem>
+                  <IonItem lines="full">
+                    <IonText slot="start">Tetanus</IonText>
+                    <IonText slot="end">
+                      {faker.date.recent().toLocaleDateString()}
+                    </IonText>
+                  </IonItem>
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+            <IonCol size="6" sizeLg="4" sizeXs="12" sizeMd="6" sizeSm="12">
+              <IonCard>
+                <IonCardHeader>
+                  <IonToolbar>
+                    <IonCardTitle color="primary">Appearance</IonCardTitle>
+                    <IonButtons slot="end">
+                      <IonButton
+                        size="small"
+                        color="primary"
+                        onClick={() => {
+                          setEditValue("Appearance");
+                          setShowEditModal(true);
+                        }}
+                      >
+                        <IonIcon
+                          icon={pencil}
+                          slot="icon-only"
+                          size="small"
+                        ></IonIcon>
+                      </IonButton>
+                    </IonButtons>
+                  </IonToolbar>
+                </IonCardHeader>
+                <IonCardContent>
+                  <IonItem lines="full">
+                    <IonText slot="start">Communication</IonText>
+                    <IonText slot="end">Good</IonText>
+                  </IonItem>
+                  <IonItem lines="full">
+                    <IonText slot="start">Dental Health</IonText>
+                    <IonText slot="end">Needs Attention</IonText>
+                  </IonItem>
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+
+            <IonCol size="6" sizeLg="4" sizeXs="12" sizeMd="6" sizeSm="12">
+              <IonCard>
+                <IonCardHeader>
+                  <IonToolbar>
+                    <IonCardTitle color="primary">
+                      Instrumental Activities of Daily Living (IADL)
+                    </IonCardTitle>
+                    <IonButtons slot="end">
+                      <IonButton
+                        size="small"
+                        color="primary"
+                        onClick={() => {
+                          setEditValue("IADL");
+                          setShowEditModal(true);
+                        }}
+                      >
+                        <IonIcon
+                          icon={pencil}
+                          size="small"
+                          slot="icon-only"
+                        ></IonIcon>
+                      </IonButton>
+                    </IonButtons>
+                  </IonToolbar>
+                </IonCardHeader>
+                <IonCardContent></IonCardContent>
+              </IonCard>
+            </IonCol>
+
+            <IonCol size="6" sizeLg="4" sizeXs="12" sizeMd="6" sizeSm="12">
+              <IonCard>
+                <IonCardHeader>
+                  <IonToolbar>
+                    <IonCardTitle color="primary">
+                      Activities of Daily Living (ADL)
+                    </IonCardTitle>
+                    <IonButtons slot="end">
+                      <IonButton
+                        size="small"
+                        color="primary"
+                        onClick={() => {
+                          setEditValue("ADL");
+                          setShowEditModal(true);
+                        }}
+                      >
+                        <IonIcon
+                          icon={pencil}
+                          size="small"
+                          slot="icon-only"
+                        ></IonIcon>
+                      </IonButton>
+                    </IonButtons>
+                  </IonToolbar>
+                </IonCardHeader>
+                <IonCardContent>
+                  <IonItem lines="full">
+                    <IonText slot="start">Bathing</IonText>
+                    <IonText slot="end">Independent</IonText>
+                  </IonItem>
+                  <IonItem lines="full">
+                    <IonText slot="start">Eating</IonText>
+                    <IonText slot="end">Dependent</IonText>
+                  </IonItem>
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+
+            <IonCol size="6" sizeLg="4" sizeXs="12" sizeMd="6" sizeSm="12">
+              <IonCard>
+                <IonCardHeader>
+                  <IonToolbar>
+                    <IonCardTitle color="primary">Continence</IonCardTitle>
+                    <IonButtons slot="end">
+                      <IonButton
+                        onClick={() => {
+                          setEditValue("Continence");
+                          setShowEditModal(true);
+                        }}
+                        size="small"
+                        color="primary"
+                      >
+                        <IonIcon
+                          icon={pencil}
+                          slot="icon-only"
+                          size="small"
+                        ></IonIcon>
+                      </IonButton>
+                    </IonButtons>
+                  </IonToolbar>
+                </IonCardHeader>
+                <IonCardContent>
+                  <IonItem lines="full">
+                    <IonText slot="start">Urine</IonText>
+                    <IonText slot="end">Continent</IonText>
+                  </IonItem>
+                  <IonItem lines="full">
+                    <IonText slot="start">Stool</IonText>
+                    <IonText slot="end">Continent</IonText>
+                  </IonItem>
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+            <IonCol size="12" sizeLg="8">
               <IonCard>
                 <IonCardHeader>
                   <IonToolbar>
                     <IonCardTitle color="primary">Patient History</IonCardTitle>
                     <IonButtons slot="end">
-                      <IonButton color="primary" size="small" onClick={()=>{
-                        setEditValue("Patient History")
-                        setShowEditModal(true)
-                      }}>
+                      <IonButton
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                          setEditValue("Patient History");
+                          setShowEditModal(true);
+                        }}
+                      >
                         <IonIcon
                           slot="icon-only"
                           icon={pencil}
@@ -258,7 +446,7 @@ const PatientRecord: React.FC = () => {
                               reiciendis hic, nihil esse ea ratione!
                             </div>
                           </IonText>
-                        </div> 
+                        </div>
                       </div>
                     </IonAccordion>
                   </IonAccordionGroup>
@@ -271,10 +459,14 @@ const PatientRecord: React.FC = () => {
                   <IonToolbar>
                     <IonCardTitle color="primary">Physical Exam</IonCardTitle>
                     <IonButtons slot="end">
-                      <IonButton color="primary" size="small" onClick={()=>{
-                        setEditValue("Physical Exam")
-                        setShowEditModal(true)
-                      }}>
+                      <IonButton
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                          setEditValue("Physical Exam");
+                          setShowEditModal(true);
+                        }}
+                      >
                         <IonIcon
                           slot="icon-only"
                           icon={pencil}
@@ -307,10 +499,14 @@ const PatientRecord: React.FC = () => {
                   <IonToolbar>
                     <IonCardTitle color="primary"> Diagnostics </IonCardTitle>
                     <IonButtons slot="end">
-                      <IonButton color="primary" size="small" onClick={()=>{
-                        setEditValue("Diagnostics")
-                        setShowEditModal(true)
-                      }}>
+                      <IonButton
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                          setEditValue("Diagnostics");
+                          setShowEditModal(true);
+                        }}
+                      >
                         <IonIcon
                           slot="icon-only"
                           icon={pencil}
@@ -343,10 +539,14 @@ const PatientRecord: React.FC = () => {
                   <IonToolbar>
                     <IonCardTitle color="primary">Lab Results </IonCardTitle>
                     <IonButtons slot="end">
-                      <IonButton color="primary" size="small" onClick={()=>{
-                        setEditValue("Lab Results")
-                        setShowEditModal(true)
-                      }}>
+                      <IonButton
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                          setEditValue("Lab Results");
+                          setShowEditModal(true);
+                        }}
+                      >
                         <IonIcon
                           slot="icon-only"
                           icon={pencil}
@@ -412,10 +612,14 @@ const PatientRecord: React.FC = () => {
                   <IonToolbar>
                     <IonCardTitle color="primary"> Management </IonCardTitle>
                     <IonButtons slot="end">
-                      <IonButton color="primary" size="small" onClick={()=>{
-                        setEditValue("Management")
-                        setShowEditModal(true)
-                      }}>
+                      <IonButton
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                          setEditValue("Management");
+                          setShowEditModal(true);
+                        }}
+                      >
                         <IonIcon
                           slot="icon-only"
                           icon={pencil}
@@ -458,8 +662,11 @@ const PatientRecord: React.FC = () => {
         isOpen={showEditModal}
         onDidDismiss={() => setShowEditModal(false)}
       >
-        <EditPatientRecord category={editValue} closeModal={closeEditModal} ></EditPatientRecord>
-      </IonModal> 
+        <EditPatientRecord
+          category={editValue}
+          closeModal={closeEditModal}
+        ></EditPatientRecord>
+      </IonModal>
     </IonPage>
   );
 };

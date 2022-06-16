@@ -69,34 +69,15 @@ const EditPatient: React.FC = () => {
           <IonText slot="start" color="primary">
             <IonTitle className="ion-padding-horizontal">
               <p className="text-bold">
-                <span>Jessica Alba</span> - <span className="fs-6"><IonText color="medium">Update Profile</IonText></span>
-                <br />
+                <span>Patient Information</span> <br />
                 <span className="text-regular">
                   <IonNote className="text-small">
-                    Update Patient Information
+                    Change Values accordingly
                   </IonNote>
                 </span>
               </p>
             </IonTitle>
-          </IonText>
-          <IonButton
-            color="success"
-            slot="end"
-            onClick={() => {
-              setAlertDischarge(true);
-            }}
-          >
-            Discharge Patient
-          </IonButton>
-          <IonButton
-            color="danger"
-            slot="end"
-            onClick={() => {
-              setAlertAdmit(true);
-            }}
-          >
-            Admit Patient
-          </IonButton>
+          </IonText> 
         </IonToolbar>
 
         <form

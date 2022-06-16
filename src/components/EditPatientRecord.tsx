@@ -9,7 +9,26 @@ import {
 } from "@ionic/react";
 import { arrowBack } from "ionicons/icons";
 import React, { useEffect, useState } from "react";
-import { Diagnostics, Finance, LabResults, Management, PatientsComplaint, PatientsHistory, PhysicalExam } from "./EditPatientRecordCategories";
+import {
+  ADL,
+  ADL_States,
+  Appearance,
+  AppearanceStates,
+  Continence,
+  ContinenceStates,
+  IADL,
+} from "../interfaces/data";
+import CheckList from "./CheckList";
+import {
+  Diagnostics,
+  Finance,
+  LabResults,
+  Management,
+  PatientImmunity,
+  PatientsComplaint,
+  PatientsHistory,
+  PhysicalExam,
+} from "./EditPatientRecordCategories";
 
 const EditPatientRecord: React.FC<{
   category: string;
@@ -26,22 +45,48 @@ const EditPatientRecord: React.FC<{
       let temp = <PatientsComplaint />;
       setContent(temp);
     }
-    if(category === "Patient History"){
+    if (category === "Patient History") {
       let temp = <PatientsHistory />;
       setContent(temp);
     }
-    if(category === "Diagnostics"){
+    if (category === "Diagnostics") {
       let temp = <Diagnostics />;
       setContent(temp);
     }
-    if(category === "Physical Exam"){
+    if (category === "Physical Exam") {
       let temp = <PhysicalExam />;
       setContent(temp);
-    } if(category === "Lab Results"){
+    }
+    if (category === "Lab Results") {
       let temp = <LabResults />;
       setContent(temp);
-    }if(category === "Management"){
+    }
+    if (category === "Management") {
       let temp = <Management />;
+      setContent(temp);
+    }
+
+    if (category === "Immunity") {
+      let temp = <PatientImmunity />;
+      setContent(temp);
+    }
+
+    if (category === "Appearance") {
+      let temp = <CheckList edit data={Appearance} states={AppearanceStates} />;
+      setContent(temp);
+    }
+    if (category === "IADL") {
+      let temp = <CheckList edit data={IADL} states={ADL_States} />;
+      setContent(temp);
+    }
+    if (category === "ADL") {
+      let temp = <CheckList edit data={ADL} states={ADL_States} />;
+      setContent(temp);
+    }
+    if (category === "Continence") {
+      let temp = (
+        <CheckList edit data={Continence} states={ContinenceStates} catheter />
+      );
       setContent(temp);
     }
   }, []);
@@ -63,9 +108,7 @@ const EditPatientRecord: React.FC<{
           <IonTitle>{category}</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent>
-        {content} 
-      </IonContent>
+      <IonContent>{content}</IonContent>
     </>
   );
 };
