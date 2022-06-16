@@ -82,11 +82,11 @@ const PatientRecord: React.FC = () => {
                 <IonCardHeader>
                   <IonCardTitle color="primary"></IonCardTitle>
                   <IonCardSubtitle className="pt-1">
-                    <span>Male</span> ~{" "}
+                    <span>Male</span>,{" "}
                     <span>{faker.date.recent().toLocaleDateString()}</span>
                   </IonCardSubtitle>
                   <IonCardSubtitle className="text-lowercase pt-1">
-                    <span>{6723339123}</span> ~{" "}
+                    <span>{6723339123}</span>,{" "}
                     <span>{"email@awakedom.com"}</span>
                   </IonCardSubtitle>
                   <IonCardSubtitle className="text-lowercase text-capitalize pt-1">
@@ -117,6 +117,10 @@ const PatientRecord: React.FC = () => {
                   <IonCardSubtitle>
                     <b>Discharge Status :</b>{" "}
                     <IonText color="success">Alive</IonText>
+                  </IonCardSubtitle>
+                  <IonCardSubtitle>
+                    <b>Ward :</b>{" "}
+                    <IonText color="secondary">wm-7</IonText>
                   </IonCardSubtitle>
                 </IonCardHeader>
               </IonCard>

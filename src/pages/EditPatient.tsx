@@ -11,6 +11,7 @@ import {
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
+  IonCheckbox,
   IonCol,
   IonContent,
   IonDatetime,
@@ -52,6 +53,7 @@ import { MPI } from "../interfaces/types";
 import "../styles/Page.css";
 import "../styles/NewPatient.css";
 import { informationCircle, save } from "ionicons/icons";
+import { Wishes } from "../interfaces/data";
 
 const EditPatient: React.FC = () => {
   const { name } = useParams<{ name: string; mode?: string }>();
@@ -77,272 +79,333 @@ const EditPatient: React.FC = () => {
                 </span>
               </p>
             </IonTitle>
-          </IonText> 
+          </IonText>
         </IonToolbar>
-
-        <form
-          action=""
-          ref={formRef}
-          onSubmit={(e) => {
-            e.preventDefault();
-          }}
-        >
-          <IonGrid className="pt-0 mt-0">
-            <IonRow>
-              <IonCol size="12">
-                <IonCard mode="ios">
-                  <IonCardHeader mode="md">
-                    <IonToolbar>
-                      <IonCardTitle slot="start" className="pt-2 fw-bold">
-                        Personal Information
-                      </IonCardTitle>
-                    </IonToolbar>
-                  </IonCardHeader>
-                  <hr className="p-none m-0" />
-                  <IonCardContent mode="md">
-                    <IonGrid>
-                      <IonRow>
-                        <IonCol size="12" sizeLg="3" color="medium">
-                          <div
-                            className="drag-n-drop rounded p-5 ion-activatable ripple-parent"
+        <IonGrid className="pt-0 mt-0">
+          <IonRow>
+            <IonCol size="12">
+              <IonCard mode="ios">
+                <IonCardHeader mode="md">
+                  <IonToolbar>
+                    <IonCardTitle slot="start" className="pt-2 fw-bold">
+                      Personal Information
+                    </IonCardTitle>
+                  </IonToolbar>
+                </IonCardHeader>
+                <hr className="p-none m-0" />
+                <IonCardContent mode="md">
+                  <IonGrid>
+                    <IonRow>
+                      <IonCol size="12" sizeLg="3" color="medium">
+                        <div
+                          className="drag-n-drop rounded p-5 ion-activatable ripple-parent"
+                          onClick={() => {
+                            patientImageInputRef.current?.click();
+                          }}
+                        >
+                          <p
                             onClick={() => {
                               patientImageInputRef.current?.click();
                             }}
                           >
-                            <p
-                              onClick={() => {
-                                patientImageInputRef.current?.click();
-                              }}
+                            <h6 className="h5 fw-bold">Patient Image</h6>
+                            <p>click or Drag and drop to upload file</p>
+                          </p>
+                          <IonRippleEffect type="bounded"></IonRippleEffect>
+                        </div>
+                        <input
+                          hidden
+                          type={"file"}
+                          ref={patientImageInputRef}
+                          accept={"image/*"}
+                        ></input>
+                      </IonCol>
+                      <IonCol>
+                        <IonRow>
+                          <IonCol size="12" sizeLg="6">
+                            <IonItem fill="outline" lines="full">
+                              <IonLabel position="floating">Name</IonLabel>
+                              <IonInput type="text"></IonInput>
+                            </IonItem>
+                          </IonCol>
+                          <IonCol size="12" sizeLg="6">
+                            <IonItem fill="outline" lines="full">
+                              <IonLabel position="floating">
+                                Mother's Name
+                              </IonLabel>
+                              <IonInput type="text"></IonInput>
+                            </IonItem>
+                          </IonCol>
+                          <IonCol size="12" sizeLg="6">
+                            <IonItem fill="outline" lines="full">
+                              <IonLabel position="stacked">
+                                Date of Birth
+                              </IonLabel>
+                              <IonInput type="date"></IonInput>
+                            </IonItem>
+                          </IonCol>
+                          <IonCol size="12" sizeLg="6">
+                            <IonItem fill="outline" lines="full">
+                              <IonLabel position="floating">
+                                Place of Birth
+                              </IonLabel>
+                              <IonInput type="text"></IonInput>
+                            </IonItem>
+                          </IonCol>
+                          <IonCol size="12" sizeLg="6">
+                            <IonItem
+                              fill="outline"
+                              color="primary"
+                              lines="full"
                             >
-                              <h6 className="h5 fw-bold">Patient Image</h6>
-                              <p>click or Drag and drop to upload file</p>
-                            </p>
-                            <IonRippleEffect type="bounded"></IonRippleEffect>
-                          </div>
-                          <input
-                            hidden
-                            type={"file"}
-                            ref={patientImageInputRef}
-                            accept={"image/*"}
-                          ></input>
-                        </IonCol>
-                        <IonCol>
-                          <IonRow>
-                            <IonCol size="12" sizeLg="6">
-                              <IonItem fill="outline" lines="full">
-                                <IonLabel position="floating">Name</IonLabel>
-                                <IonInput type="text"></IonInput>
-                              </IonItem>
-                            </IonCol>
-                            <IonCol size="12" sizeLg="6">
-                              <IonItem fill="outline" lines="full">
-                                <IonLabel position="stacked">
-                                  Date of Birth
-                                </IonLabel>
-                                <IonInput type="date"></IonInput>
-                              </IonItem>
-                            </IonCol>
-                            <IonCol size="12" sizeLg="6">
-                              <IonItem
-                                fill="outline"
-                                color="primary"
-                                lines="full"
-                              >
-                                <IonLabel position="floating">Email</IonLabel>
-                                <IonInput type="email"></IonInput>
-                              </IonItem>
-                            </IonCol>
-                            <IonCol size="12" sizeLg="6">
-                              <IonItem
-                                fill="outline"
-                                color="primary"
-                                lines="full"
-                              >
-                                <IonLabel position="floating">
-                                  Phone Number
-                                </IonLabel>
-                                <IonInput type="tel"></IonInput>
-                              </IonItem>
-                            </IonCol>
-                            <IonCol size="12" sizeLg="6">
-                              <IonItem
-                                fill="outline"
-                                color="primary"
-                                lines="full"
-                              >
-                                <IonLabel position="floating">Address</IonLabel>
-                                <IonInput type="text"></IonInput>
-                              </IonItem>
-                            </IonCol>
-                            <IonCol size="12" sizeLg="6">
-                              <IonItem
-                                fill="outline"
-                                color="primary"
-                                lines="full"
-                              >
-                                <IonLabel position="floating">Sex</IonLabel>
-                                <IonInput type="text"></IonInput>
-                              </IonItem>
-                            </IonCol>
-                            <IonCol size="12" sizeLg="6">
-                              <IonItem
-                                fill="outline"
-                                color="primary"
-                                lines="full"
-                              >
-                                <IonLabel position="floating">
-                                  Marital Status
-                                </IonLabel>
-                                <IonSelect>
-                                  <IonSelectOption value={"married"}>
-                                    Married
-                                  </IonSelectOption>
-                                  <IonSelectOption value={"unmarried"}>
-                                    UnMarried
-                                  </IonSelectOption>
-                                </IonSelect>
-                              </IonItem>
-                            </IonCol>
-                            <IonCol size="12" sizeLg="6">
-                              <IonItem
-                                fill="outline"
-                                color="primary"
-                                lines="full"
-                              >
-                                <IonLabel position="floating">
-                                  Blood Group
-                                </IonLabel>
-                                <IonSelect>
-                                  <IonSelectOption value={"a+"}>
-                                    A+
-                                  </IonSelectOption>
-                                  <IonSelectOption value={"a-"}>
-                                    A-
-                                  </IonSelectOption>
-                                  <IonSelectOption value={"b+"}>
-                                    B+
-                                  </IonSelectOption>
-                                  <IonSelectOption value={"b-"}>
-                                    B-
-                                  </IonSelectOption>
-                                  <IonSelectOption value={"o-"}>
-                                    O-
-                                  </IonSelectOption>
-                                  <IonSelectOption value={"o+"}>
-                                    O+
-                                  </IonSelectOption>
-                                  <IonSelectOption value={"ab+"}>
-                                    AB+
-                                  </IonSelectOption>
-                                  <IonSelectOption value={"ab-"}>
-                                    AB-
-                                  </IonSelectOption>
-                                </IonSelect>
-                              </IonItem>
-                            </IonCol>
-                          </IonRow>
-                        </IonCol>
-                      </IonRow>
-                    </IonGrid>
-                  </IonCardContent>
-                </IonCard>
-              </IonCol>
+                              <IonLabel position="floating">Email</IonLabel>
+                              <IonInput type="email"></IonInput>
+                            </IonItem>
+                          </IonCol>
+                          <IonCol size="12" sizeLg="6">
+                            <IonItem
+                              fill="outline"
+                              color="primary"
+                              lines="full"
+                            >
+                              <IonLabel position="floating">
+                                Phone Number
+                              </IonLabel>
+                              <IonInput type="tel"></IonInput>
+                            </IonItem>
+                          </IonCol>
+                          <IonCol size="12" sizeLg="6">
+                            <IonItem
+                              fill="outline"
+                              color="primary"
+                              lines="full"
+                            >
+                              <IonLabel position="floating">Address</IonLabel>
+                              <IonInput type="text"></IonInput>
+                            </IonItem>
+                          </IonCol>
+                          <IonCol size="12" sizeLg="6">
+                            <IonItem
+                              fill="outline"
+                              color="primary"
+                              lines="full"
+                            >
+                              <IonLabel position="floating">Sex</IonLabel>
+                              <IonInput type="text"></IonInput>
+                            </IonItem>
+                          </IonCol>
+                          <IonCol size="12" sizeLg="6">
+                            <IonItem
+                              fill="outline"
+                              color="primary"
+                              lines="full"
+                            >
+                              <IonLabel position="floating">Tribe</IonLabel>
+                              <IonInput type="text"></IonInput>
+                            </IonItem>
+                          </IonCol>
+                          <IonCol size="12" sizeLg="6">
+                            <IonItem
+                              fill="outline"
+                              color="primary"
+                              lines="full"
+                            >
+                              <IonLabel position="floating">
+                                Emergency Contact
+                              </IonLabel>
+                              <IonInput type="tel"></IonInput>
+                            </IonItem>
+                          </IonCol>
+                          <IonCol size="12" sizeLg="6">
+                            <IonItem
+                              fill="outline"
+                              color="primary"
+                              lines="full"
+                            >
+                              <IonLabel position="floating">
+                                Marital Status
+                              </IonLabel>
+                              <IonSelect>
+                                <IonSelectOption value={"married"}>
+                                  Married
+                                </IonSelectOption>
+                                <IonSelectOption value={"single"}>
+                                  Single
+                                </IonSelectOption>
+                                <IonSelectOption value={"divorced"}>
+                                  Divorced
+                                </IonSelectOption>
+                              </IonSelect>
+                            </IonItem>
+                          </IonCol>
+                        </IonRow>
+                      </IonCol>
+                    </IonRow> 
+                    <IonRow className="text-center">
+                      <IonCol></IonCol>
+                      <IonCol>
+                        <IonButton className="mx-auto">
+                          {/* <IonIcon icon={save} slot="start"></IonIcon> */}
+                          <IonLabel>Save</IonLabel>
+                        </IonButton>
+                      </IonCol>
+                      <IonCol></IonCol>
+                    </IonRow>
+                  </IonGrid>
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
 
-              <IonCol>
-                <IonCard mode="ios">
-                  <IonCardHeader mode="md">
-                    <IonToolbar>
-                      <IonCardTitle slot="start" className="pt-2 fw-bold">
-                        Medical Information
-                      </IonCardTitle>
-                    </IonToolbar>
-                  </IonCardHeader>
-                  <hr className="p-none m-0" />
-                  <IonCardContent mode="md">
-                    <IonGrid>
-                      <IonRow>
-                        <IonCol size="12" sizeLg="6">
-                          <IonItem fill="outline">
-                            <IonLabel position="floating">
-                              Patient's complaint
-                            </IonLabel>
-                            <IonTextarea placeholder="Patient's Complaint"></IonTextarea>
-                          </IonItem>
-                        </IonCol>
-                        <IonCol size="12" sizeLg="6">
-                          <IonItem fill="outline">
-                            <IonLabel position="floating">
-                              Patient's History
-                            </IonLabel>
-                            <IonTextarea placeholder="Patient's History"></IonTextarea>
-                          </IonItem>
-                        </IonCol>
-                        <IonCol size="12" sizeLg="6">
-                          <IonItem fill="outline">
-                            <IonLabel position="floating">
-                              Patient's Diagnosis
-                            </IonLabel>
-                            <IonTextarea placeholder="Patient's Diagnosis"></IonTextarea>
-                          </IonItem>
-                        </IonCol>
-                        <IonCol size="12" sizeLg="6">
-                          <IonItem fill="outline">
-                            <IonLabel position="floating">
-                              Patient's Lab Results
-                            </IonLabel>
-                            <IonTextarea placeholder="Patient's Lab Results"></IonTextarea>
-                          </IonItem>
-                        </IonCol>
-                        <IonCol size="12" sizeLg="6">
-                          <IonItem fill="outline">
-                            <IonLabel position="floating">
-                              Patient's Lab Results
-                            </IonLabel>
-                            <IonTextarea placeholder="Patient's Lab Results"></IonTextarea>
-                          </IonItem>
-                        </IonCol>
-                        <IonCol size="12" sizeLg="6">
-                          <IonItem fill="outline" color="primary" lines="full">
-                            <IonLabel position="floating">
-                              Patient"s Weight
-                            </IonLabel>
-                            <IonInput type="number"></IonInput>
-                          </IonItem>
-                        </IonCol>
-                        <IonCol size="12" sizeLg="6">
-                          <IonItem fill="outline" color="primary" lines="full">
-                            <IonLabel position="floating">
-                              Patient Blood Pressure
-                            </IonLabel>
-                            <IonInput type="text"></IonInput>
-                          </IonItem>
-                        </IonCol>
-                        <IonCol size="12" sizeLg="6">
-                          <IonItem fill="outline" color="primary" lines="full">
-                            <IonLabel position="floating">
-                              Patient Temperature
-                            </IonLabel>
-                            <IonInput type="number"></IonInput>
-                          </IonItem>
-                        </IonCol>
-                      </IonRow>
-                    </IonGrid>
-                  </IonCardContent>
-                </IonCard>
-              </IonCol>
-            </IonRow>
-            <IonRow className="text-center">
-              <IonCol></IonCol>
-              <IonCol>
-                <IonButton className="mx-auto">
-                  {/* <IonIcon icon={save} slot="start"></IonIcon> */}
-                  <IonLabel>Save</IonLabel>
-                </IonButton>
-              </IonCol>
-              <IonCol></IonCol>
-            </IonRow>
-          </IonGrid>
-        </form>
+            <IonCol>
+              <IonCard mode="ios">
+                <IonCardHeader mode="md">
+                  <IonToolbar>
+                    <IonCardTitle slot="start" className="pt-2 fw-bold">
+                      Medical Information
+                    </IonCardTitle>
+                  </IonToolbar>
+                </IonCardHeader>
+                <hr className="p-none m-0" />
+                <IonCardContent mode="md">
+                  <IonGrid>
+                    <IonRow>
+                      <IonCol size="12">
+                        <IonItem fill="outline" color="primary" lines="full">
+                          <IonLabel position="floating">Blood Group</IonLabel>
+                          <IonSelect>
+                            <IonSelectOption value={"a+"}>A+</IonSelectOption>
+                            <IonSelectOption value={"a-"}>A-</IonSelectOption>
+                            <IonSelectOption value={"b+"}>B+</IonSelectOption>
+                            <IonSelectOption value={"b-"}>B-</IonSelectOption>
+                            <IonSelectOption value={"o-"}>O-</IonSelectOption>
+                            <IonSelectOption value={"o+"}>O+</IonSelectOption>
+                            <IonSelectOption value={"ab+"}>AB+</IonSelectOption>
+                            <IonSelectOption value={"ab-"}>AB-</IonSelectOption>
+                          </IonSelect>
+                        </IonItem>
+                      </IonCol>
+                      <IonCol size="12">
+                        <IonItem fill="outline">
+                          <IonLabel position="floating">Condition</IonLabel>
+                          <IonInput placeholder="e.g cripple, blind"></IonInput>
+                        </IonItem>
+                      </IonCol>
+                      <IonCol size="12">
+                        <IonItem fill="outline" color="primary" lines="full">
+                          <IonLabel position="floating">Illnesses</IonLabel>
+                          <IonInput
+                            type="text"
+                            placeholder="e.g AIDS, etc"
+                          ></IonInput>
+                        </IonItem>
+                      </IonCol>
+                    </IonRow>
+                    <IonRow className="text-center">
+                      <IonCol></IonCol>
+                      <IonCol>
+                        <IonButton className="mx-auto">
+                          {/* <IonIcon icon={save} slot="start"></IonIcon> */}
+                          <IonLabel>Save</IonLabel>
+                        </IonButton>
+                      </IonCol>
+                      <IonCol></IonCol>
+                    </IonRow>
+                  </IonGrid>
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+            <IonCol>
+              <IonCard mode="ios">
+                <IonCardHeader mode="md">
+                  <IonToolbar>
+                    <IonCardTitle slot="start" className="pt-2 fw-bold">
+                      Legal Information
+                    </IonCardTitle>
+                  </IonToolbar>
+                </IonCardHeader>
+                <hr className="p-none m-0" />
+                <IonCardContent mode="md">
+                  <IonGrid>
+                    <IonRow>
+                      <IonCol size="12">
+                        <IonItem fill="outline">
+                          <IonLabel position="floating">
+                            Power of Attorney
+                          </IonLabel>
+                          <IonInput placeholder="Contact Information"></IonInput>
+                        </IonItem>
+                      </IonCol>
+                      <IonCol size="12">
+                        <IonItem fill="outline" color="primary" lines="full">
+                          <IonLabel position="floating">
+                            Health Care Proxy
+                          </IonLabel>
+                          <IonInput
+                            type="text"
+                            placeholder="Contact Information"
+                          ></IonInput>
+                        </IonItem>
+                      </IonCol>
+                    </IonRow>
+                    <IonRow className="text-center">
+                      <IonCol></IonCol>
+                      <IonCol>
+                        <IonButton className="mx-auto">
+                          {/* <IonIcon icon={save} slot="start"></IonIcon> */}
+                          <IonLabel>Save</IonLabel>
+                        </IonButton>
+                      </IonCol>
+                      <IonCol></IonCol>
+                    </IonRow>
+                  </IonGrid>
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+
+            <IonCol>
+              <IonCard mode="ios">
+                <IonCardHeader mode="md">
+                  <IonToolbar>
+                    <IonCardTitle slot="start" className="pt-2 fw-bold">
+                      Wishes
+                    </IonCardTitle>
+                  </IonToolbar>
+                </IonCardHeader>
+                <hr className="p-none m-0" />
+                <IonCardContent mode="md">
+                  <IonGrid>
+                    <IonRow>
+                      <IonCol size="12">
+                        <IonList>
+                          {Wishes.map((wish, index) => {
+                            return (
+                              <IonItem key={index}>
+                                <IonLabel>{wish}</IonLabel>
+                                <IonCheckbox
+                                  name={"wish" + index}
+                                ></IonCheckbox>
+                              </IonItem>
+                            );
+                          })}
+                        </IonList>
+                      </IonCol>
+                    </IonRow>
+                    <IonRow className="text-center">
+                      <IonCol></IonCol>
+                      <IonCol>
+                        <IonButton className="mx-auto">
+                          {/* <IonIcon icon={save} slot="start"></IonIcon> */}
+                          <IonLabel>Save</IonLabel>
+                        </IonButton>
+                      </IonCol>
+                      <IonCol></IonCol>
+                    </IonRow>
+                  </IonGrid>
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+          </IonRow>
+        </IonGrid>
       </IonContent>
 
       {/* alerts */}
@@ -415,7 +478,9 @@ const EditPatient: React.FC = () => {
         icon={informationCircle}
         color="success"
         duration={2000}
-        onDidDismiss={()=>{setOperationSuccessful(false)}}
+        onDidDismiss={() => {
+          setOperationSuccessful(false);
+        }}
       ></IonToast>
     </IonPage>
   );

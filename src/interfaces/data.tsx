@@ -44,6 +44,10 @@ const ContinenceStates: string[] = [
   "Incontinent",
 ];
 
+const Wishes:string[] = [
+  "DNR", "No Antibiotics", "No IVs","Do Not Hospitalize","Only Comfort Care", "No Feeding Tube"
+]
+
 export {
   ADL,
   Appearance,
@@ -52,4 +56,7 @@ export {
   ADL_States,
   AppearanceStates,
   ContinenceStates,
+  Wishes,
 };
+
+

@@ -123,10 +123,10 @@ const ViewPatient: React.FC = () => {
               <IonLabel>Patient Records</IonLabel>
               <IonChip
                 slot="end"
-                color="success" 
+                color="success"
                 onClick={() => {
                   // setPatientRecordsModal(true);
-                  history.push('/new-record')
+                  history.push("/new-record");
                 }}
               >
                 <IonIcon icon={addOutline}></IonIcon>
@@ -178,13 +178,13 @@ const ViewPatient: React.FC = () => {
 
               <IonButtons slot="end">
                 <IonButton
-                  color="primary" 
+                  color="primary"
                   disabled
                   onClick={() => {
                     // setPatientRecordsModal(false);
                   }}
-                > 
-                <IonLabel>{25}</IonLabel>
+                >
+                  <IonLabel>{25}</IonLabel>
                 </IonButton>
               </IonButtons>
             </IonToolbar>
@@ -218,61 +218,70 @@ const ViewPatient: React.FC = () => {
         <IonGrid>
           <IonRow>
             <IonCol size="6" sizeLg="5" sizeXs="12" sizeMd="5" sizeSm="12">
-              <IonCard> 
-                  {/* <IonAvatar className="ion-float-end br-2">
-            </IonAvatar> */} 
-                    <IonItem lines="none">
-                      <IonText className="h2 text-bold">{faker.name.findName()} </IonText> 
-                      <IonButtons slot="end">
-                        <IonButton color="primary" size="small" routerLink="/edit-patient">
-                          <IonIcon icon={pencil} size="small" slot="icon-only"></IonIcon>
-                        </IonButton>
-                      </IonButtons>
-                      <IonThumbnail 
-                      className="rounded-4"
-                        slot="end"
-                        onClick={() => {
-                          setviewImagePopover(true);
-                        }}
-                      >
-                        <IonImg src={localImages.commy}></IonImg>
-                      </IonThumbnail>
-                    </IonItem> 
-                  <IonPopover
-                    isOpen={viewImagePopover}
-                    onDidDismiss={() => setviewImagePopover(false)}
+              <IonCard>
+                {/* <IonAvatar className="ion-float-end br-2">
+            </IonAvatar> */}
+                <IonItem lines="none">
+                  <IonText className="h2 text-bold">
+                    {faker.name.findName()}{" "}
+                  </IonText>
+                  <IonButtons slot="end">
+                    <IonButton
+                      color="primary"
+                      size="small"
+                      routerLink="/edit-patient"
+                    >
+                      <IonIcon
+                        icon={pencil}
+                        size="small"
+                        slot="icon-only"
+                      ></IonIcon>
+                    </IonButton>
+                  </IonButtons>
+                  <IonThumbnail
+                    className="rounded-4"
+                    slot="end"
+                    onClick={() => {
+                      setviewImagePopover(true);
+                    }}
                   >
-                    <TransformWrapper>
-                      <TransformComponent>
-                        <IonImg src={localImages.commy}></IonImg>
-                      </TransformComponent>
-                    </TransformWrapper>
-                  </IonPopover>
-                  <IonCardHeader> 
+                    <IonImg src={localImages.commy}></IonImg>
+                  </IonThumbnail>
+                </IonItem>
+                <IonPopover
+                  isOpen={viewImagePopover}
+                  onDidDismiss={() => setviewImagePopover(false)}
+                >
+                  <TransformWrapper>
+                    <TransformComponent>
+                      <IonImg src={localImages.commy}></IonImg>
+                    </TransformComponent>
+                  </TransformWrapper>
+                </IonPopover>
+                <IonCardHeader>
                   <IonCardSubtitle className="">
-                    <span>Male (26)</span> ~{" "}
+                    <span>Male (26)</span>, {" "} 
                     <span>{faker.date.recent().toLocaleDateString()}</span>
+                  </IonCardSubtitle>
+                  <IonCardSubtitle className="text-lowercase ">
+                    <span>{6723339123}</span>,{" "}
+                    <span>{"email@awakedom.com"}</span>
+                  </IonCardSubtitle>
+                  <IonCardSubtitle className="text-lowercase text-capitalize ">
+                  {"Catholic"}, {faker.address.state()}
+                  </IonCardSubtitle>
+                  <IonCardSubtitle className="text-lowercase text-capitalize ">
                   </IonCardSubtitle>
                   <IonCardSubtitle className="text-lowercase text-capitalize ">
                     [Blood Group]
                   </IonCardSubtitle>
-                  <IonCardSubtitle className="text-lowercase ">
-                    <span>{6723339123}</span> ~{" "}
-                    <span>{"email@awakedom.com"}</span>
-                  </IonCardSubtitle>
-                  <IonCardSubtitle className="text-lowercase text-capitalize ">
-                    {faker.address.state()}
-                  </IonCardSubtitle>
-                  <IonCardSubtitle className="text-lowercase text-capitalize ">
-                    {"Catholic"}
-                  </IonCardSubtitle> 
-                  </IonCardHeader>
+                </IonCardHeader>
               </IonCard>
             </IonCol>
             <IonCol size="6" sizeLg="7" sizeXs="12" sizeMd="7" sizeSm="12">
               <IonCard>
                 <IonCardHeader>
-                  <IonCardTitle>Patient Wishes & Protocols</IonCardTitle> 
+                  <IonCardTitle>Patient Wishes & Protocols</IonCardTitle>
                 </IonCardHeader>
                 <IonCardContent>
                   <IonText>
@@ -323,7 +332,7 @@ const ViewPatient: React.FC = () => {
           <IonText slot="start" color="primary">
             <IonTitle className="ion-padding-horizontal">
               <p className="text-bold">
-                <span>Medical History & Current Status</span> 
+                <span>Medical History & Current Status</span>
               </p>
             </IonTitle>
           </IonText>
@@ -476,7 +485,7 @@ const ViewPatient: React.FC = () => {
           <IonText slot="start" color="primary">
             <IonTitle className="ion-padding-horizontal">
               <p className="text-bold">
-                <span>Functioning</span> 
+                <span>Functioning</span>
               </p>
             </IonTitle>
           </IonText>
@@ -538,7 +547,7 @@ const ViewPatient: React.FC = () => {
               </IonCard>
             </IonCol>
           </IonRow>
-        </IonGrid> 
+        </IonGrid>
       </IonContent>
 
       {/* alerts */}
@@ -588,9 +597,19 @@ const ViewPatient: React.FC = () => {
             cssClass: "alert-admit-confirm",
             handler: () => {
               console.log("Patient Admitted");
+              let inputValue: any =
+                window.document.getElementById("ward-input");
+              console.log(inputValue.value);
               setOperationSuccessful(true);
             },
             role: "confirm",
+          },
+        ]}
+        inputs={[
+          {
+            placeholder: "Ward ID",
+            type: "text",
+            id: "ward-input",
           },
         ]}
       ></IonAlert>

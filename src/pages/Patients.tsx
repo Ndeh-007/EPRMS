@@ -138,6 +138,9 @@ const Patients: React.FC = () => {
                       <IonCol>
                         <IonText>Name</IonText>
                       </IonCol>
+                      <IonCol>
+                        <IonText>Mother's Name</IonText>
+                      </IonCol>
                       <IonCol className="">
                         <IonText>Contact</IonText>
                       </IonCol>
@@ -153,7 +156,7 @@ const Patients: React.FC = () => {
                       <IonCol className="text-center ">
                         <IonText>Ward</IonText>
                       </IonCol>
-                      <IonCol></IonCol>
+                      {/* <IonCol></IonCol> */}
 
                       <IonButtons className="px-4">
                         <IonButton color="primary">

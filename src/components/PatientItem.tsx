@@ -41,6 +41,9 @@ const PatientItem: React.FC<{ patient: MPI }> = (props) => {
             <IonText>{props.patient.name}</IonText>
           </IonCol>
           <IonCol>
+            <IonText>{props.patient.name}</IonText>
+          </IonCol>
+          <IonCol>
             <IonText>{props.patient.tel}</IonText>
           </IonCol>
           <IonCol className="text-center">
@@ -56,21 +59,7 @@ const PatientItem: React.FC<{ patient: MPI }> = (props) => {
             <IonText>
               wm-o
             </IonText>
-          </IonCol>
-          <IonCol>
-            {/* <IonButtons>
-                <IonButton mode="md" color="primary">
-                  <IonIcon slot="icon-only" icon={chevronForward}></IonIcon>
-                </IonButton>
-               <IonButton color="primary" routerLink="/edit-patient">
-                <IonIcon size="small" icon={pencil}></IonIcon>
-                </IonButton>
-                <IonButton color="primary">
-                <IonIcon size="small" icon={cloudDownload}></IonIcon>
-              </IonButton> 
-              </IonButtons> 
-               */}
-          </IonCol>
+          </IonCol> 
         </IonRow>
       </IonGrid>
       <IonAvatar slot="start" className="br-2 border-priblock d-none d-sm-block d-md-block d-lg-none" >
