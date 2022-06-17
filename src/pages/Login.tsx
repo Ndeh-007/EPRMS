@@ -8,17 +8,56 @@ import {
   IonLabel,
   IonPage,
   IonRow,
+  IonSpinner,
   IonText,
   IonTitle,
 } from "@ionic/react";
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import { useHistory, useLocation } from "react-router";
+import { StaffContext } from "../context/AppContent";
+import { firestore } from "../Firebase";
+import { GetUserData, StoreUserData } from "../Functions/functions";
 import { localImages } from "../images/images";
 import "../styles/Login.css";
 
 const Login: React.FC = () => {
-    const history =  useHistory();
-    const location = useLocation();
+  const history = useHistory();
+  const location = useLocation();
+  const [username, setUsername] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [loading, setloading] = React.useState(false);
+  const context = useContext(StaffContext);
+
+  async function AuthenticateUser(username: string, password: string) {
+    firestore
+      .collection("staff")
+      .where("username", "==", username)
+      .where("password", "==", password)
+      .onSnapshot((Snapshot) => {
+        if (Snapshot.empty) {
+          console.log("No user found");
+          alert("Invalid Username or Password");
+          setloading(false);
+          return;
+        }
+        let doc = Snapshot.docs[0];
+        let data: any = doc.data();
+        context.setStaff(data);
+        StoreUserData(data);
+        console.log(data);
+        setloading(false);
+        history.push("/dashboard");
+      });
+  }
+
+  useEffect(() => { 
+    GetUserData().then((data)=>{
+      if(data){
+        context.setStaff(data); 
+        history.push("/dashboard");
+      }
+    })
+  }, []);
 
   return (
     <IonPage>
@@ -26,8 +65,9 @@ const Login: React.FC = () => {
         <div className="main-center">
           <form
             onSubmit={(e) => {
-              e.preventDefault(); 
-              history.push("/dashboard");
+              e.preventDefault();
+              setloading(true);
+              AuthenticateUser(username, password);
             }}
           >
             <IonGrid>
@@ -75,6 +115,7 @@ const Login: React.FC = () => {
                           name="username"
                           placeholder="Enter username"
                           required
+                          onIonChange={(e) => setUsername(e.detail.value!)}
                         ></IonInput>
                       </IonItem>
                       <IonItem fill="outline" color="primary">
@@ -84,6 +125,7 @@ const Login: React.FC = () => {
                           name="password"
                           type="password"
                           placeholder="Enter password"
+                          onIonChange={(e) => setPassword(e.detail.value!)}
                         ></IonInput>
                       </IonItem>
                     </div>
@@ -99,15 +141,19 @@ const Login: React.FC = () => {
                   sizeXs="3"
                   sizeXl="2"
                 >
-                  <IonButton expand="block" type="submit">
-                    Login
-                  </IonButton>
+                  {loading ? (
+                    <IonButton expand="block">
+                      <IonSpinner name="dots"></IonSpinner>
+                    </IonButton>
+                  ) : (
+                    <IonButton expand="block" type="submit">
+                      Login
+                    </IonButton>
+                  )}
                 </IonCol>
               </IonRow>
               <IonRow className="ion-justify-content-center ion-align-items-center">
-                <IonCol
-                  size="12" 
-                >
+                <IonCol size="12">
                   <IonButton fill="clear" expand="block" size="small">
                     Forgotten Password?
                   </IonButton>

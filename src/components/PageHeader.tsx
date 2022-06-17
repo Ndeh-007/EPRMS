@@ -31,8 +31,9 @@ import {
   notifications,
   person,
 } from "ionicons/icons";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useHistory, useLocation, useParams } from "react-router";
+import { StaffContext } from "../context/AppContent";
 import { capitalizeString } from "../Functions/functions";
 import { localImages } from "../images/images";
 import "../styles/PageHeader.css";
@@ -45,6 +46,8 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
   const location = useLocation();
   const history = useHistory();
   const [showModal, setShowModal] = useState(false);
+  const context = useContext(StaffContext)
+  console.log(context.staff)
 
   function logOutUser() {
     setShowPopover({
@@ -135,18 +138,18 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
         >
           <IonToolbar color="light">
             <IonLabel className="d-none d-md-block px-3">
-              <span className="text-bold">Ns. Comfort</span> <br />
+              <span className="text-bold">{context.staff?.name}</span> <br />
               <span>
                 <IonNote
                   className="ion-float-right"
                   style={{ fontSize: "0.81rem", paddingTop: "5px" }}
                 >
-                  Admin
+                  {context.staff?.role}
                 </IonNote>
               </span>
             </IonLabel>
             <IonAvatar slot="end">
-              <IonImg className="br-2" src={localImages.commy}></IonImg>
+              <IonImg className="br-2" src={context.staff?.image}></IonImg>
             </IonAvatar>
           </IonToolbar>
         </IonCard>

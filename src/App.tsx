@@ -31,21 +31,27 @@ import Routes from "./routes/Routes";
 import "chart.js/auto";
 import { Redirect, Route } from "react-router";
 import Login from "./pages/Login";
+import { useState } from "react";
+import { StaffContext } from "./context/AppContent";
+import { Staff } from "./interfaces/types";
 
 setupIonicReact();
 
 const App: React.FC = () => {
+  const [staff, setStaff] = useState<Staff>();
   return (
     <IonApp>
-      <IonReactRouter>
-        <Routes></Routes>
+      <StaffContext.Provider value={{staff,setStaff}}>
+        <IonReactRouter>
+          <Routes></Routes>
           <Route path={"/login"} exact={true}>
             <Login></Login>
-          </Route> 
+          </Route>
           <Route path={"/"} exact={true}>
             <Login></Login>
-          </Route> 
-      </IonReactRouter>
+          </Route>
+        </IonReactRouter>
+      </StaffContext.Provider>
     </IonApp>
   );
 };

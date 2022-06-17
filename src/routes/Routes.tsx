@@ -9,6 +9,7 @@ import EditStaff from "../pages/EditStaff";
 import Login from "../pages/Login";
 import NewPatient from "../pages/NewPatient";
 import NewRecord from "../pages/NewRecord";
+import NewStaff from "../pages/NewStaff";
 import Page from "../pages/Page";
 import PatientRecord from "../pages/PatientRecord";
 import Patients from "../pages/Patients";
@@ -47,6 +48,9 @@ const Routes: React.FC = () => {
         </Route> 
         <Route path={"/new-record"} exact={true}>
           <NewRecord/>
+        </Route> 
+        <Route path={"/new-staff"} exact={true}>
+          <NewStaff/>
         </Route> 
       </IonRouterOutlet>
     </IonSplitPane>

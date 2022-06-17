@@ -28,18 +28,22 @@ import {
   IonToolbar,
 } from "@ionic/react";
 import { chevronForward } from "ionicons/icons";
+import { useContext } from "react";
 import { useParams } from "react-router";
 import BarChart from "../components/BarChart";
 import DoughnutChart from "../components/DoughnutChart";
 import ExploreContainer from "../components/ExploreContainer";
 import LineChart from "../components/LineChart";
 import PageHeader from "../components/PageHeader";
+import { StaffContext } from "../context/AppContent";
 import { capitalizeString } from "../Functions/functions";
 import { customIcons, localImages } from "../images/images";
 import "../styles/Page.css";
 
 const Dashboard: React.FC = () => {
   const { name } = useParams<{ name: string; mode?: string }>();
+  const STAFF = useContext(StaffContext);
+  console.log(STAFF.staff);
 
   function checkPatientState(value: number) {
     if (value === 0) {
@@ -53,6 +57,7 @@ const Dashboard: React.FC = () => {
     }
   }
 
+
   return (
     <IonPage>
       <PageHeader name={name}></PageHeader>
@@ -61,7 +66,7 @@ const Dashboard: React.FC = () => {
           <IonText slot="start" color="primary">
             <IonTitle className="ion-padding-top ion-padding-horizontal">
               <p className="text-bold">
-                <span>Good Morning Ns. Comfort</span>
+                <span>Good Morning {STAFF.staff?.position} {STAFF.staff?.name}</span>
                 <br />
                 <span className="text-regular">
                   <IonNote className="text-small">

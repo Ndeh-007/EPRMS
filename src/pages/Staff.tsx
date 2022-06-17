@@ -27,7 +27,7 @@ import {
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
-import { chevronForward, pencil, peopleCircle } from "ionicons/icons";
+import { addOutline, chevronForward, pencil, peopleCircle } from "ionicons/icons";
 import { useHistory, useLocation, useParams } from "react-router";
 import BarChart from "../components/BarChart";
 import DoughnutChart from "../components/DoughnutChart";
@@ -193,20 +193,14 @@ const Staff: React.FC = () => {
         </IonGrid>
         <hr />
 
-        <IonToolbar color="light">
-          <IonText slot="start" color="primary">
-            <IonTitle className="ion-padding-top ion-padding-horizontal">
-              <p className="">
-                <span>All Staff</span>
-                <br />
-                <span className="text-regular">
-                  <IonNote className="text-small">
-                    In Alphabetical Order
-                  </IonNote>
-                </span>
-              </p>
-            </IonTitle>
-          </IonText>
+        <IonToolbar color="light"> 
+            <IonTitle className="ion-padding-top ion-padding-horizontal"> 
+            All Staff
+            </IonTitle> 
+            <IonButton slot="end" routerLink="/new-staff" className="pe-3">
+              <IonIcon slot="start" icon={addOutline}></IonIcon>
+              <IonLabel>New Staff</IonLabel>
+            </IonButton>
         </IonToolbar>
         <IonGrid>
           <IonRow>
