@@ -22,6 +22,7 @@ import {
   IonMenuButton,
   IonNote,
   IonPage,
+  IonProgressBar,
   IonRow,
   IonSearchbar,
   IonText,
@@ -37,14 +38,17 @@ import ExploreContainer from "../components/ExploreContainer";
 import LineChart from "../components/LineChart";
 import PageHeader from "../components/PageHeader";
 import PatientItem from "../components/PatientItem";
+import { firestore } from "../Firebase";
 import { capitalizeString } from "../Functions/functions";
 import { customIcons, localImages } from "../images/images";
-import { MPI } from "../interfaces/types";
+import { MPI, Patient } from "../interfaces/types";
 import "../styles/Page.css";
 
 const Patients: React.FC = () => {
   const { name } = useParams<{ name: string; mode?: string }>();
   const [fakeMPI, setFakeMPI] = useState<MPI[]>([]);
+  const [allPatients, setallPatients] = useState<Patient[]>();
+  const [loading,setLoading]= useState(false);
 
   function checkPatientState(value: number) {
     if (value === 0) {
@@ -58,25 +62,17 @@ const Patients: React.FC = () => {
     }
   }
 
-  function createDummy() {
-    let res = Array.from(Array(5).keys()).map((e, i) => {
-      let patientMPI: MPI = {
-        name: faker.name.findName(),
-        tel: faker.phone.phoneNumber(),
-        address: faker.address.city(),
-        dateOfBirth: faker.date.recent().toLocaleDateString(),
-        sex: "",
-      };
-      let temp = [];
-      temp.push(patientMPI);
-      return temp[0];
-    });
-    console.log(res);
-    setFakeMPI([...res]);
+  function getPatients(){ 
+    setLoading(true);
+    firestore.collection("patients").onSnapshot((snapshot)=>{
+      let docs:any[] = snapshot.docs.map((doc)=>doc.data());
+      setLoading(false)
+      setallPatients(docs);
+    })
   }
-
-  useEffect(() => {
-    createDummy();
+ 
+  useEffect(() => { 
+    getPatients();
   }, []);
 
   return (
@@ -111,6 +107,7 @@ const Patients: React.FC = () => {
           <IonRow>
             <IonCol size="12">
               <IonCard mode="ios">
+{loading && <IonProgressBar type='indeterminate'></IonProgressBar>}
                 <IonCardHeader mode="md" className="sticky-top">
                   <IonToolbar>
                     <IonCardTitle slot="start" className="pt-2 fw-bold">
@@ -169,7 +166,7 @@ const Patients: React.FC = () => {
                     </IonRow>
                   </IonGrid>
                 </IonItem>
-                {fakeMPI.map((patient: MPI, index: number) => {
+                {allPatients?.map((patient, index: number) => {
                   return (
                     <PatientItem patient={patient} key={index}></PatientItem>
                   );

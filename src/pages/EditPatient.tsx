@@ -52,7 +52,7 @@ import { customIcons, localImages } from "../images/images";
 import { MPI } from "../interfaces/types";
 import "../styles/Page.css";
 import "../styles/NewPatient.css";
-import { informationCircle, save } from "ionicons/icons";
+import { informationCircle, save, trashSharp } from "ionicons/icons";
 import { Wishes } from "../interfaces/data";
 
 const EditPatient: React.FC = () => {
@@ -80,6 +80,15 @@ const EditPatient: React.FC = () => {
               </p>
             </IonTitle>
           </IonText>
+          <IonButtons slot="end" className="px-2">
+            <IonButton color="danger" size="small">
+              <IonIcon
+                size="small"
+                icon={trashSharp}
+                slot="icon-only"
+              ></IonIcon>
+            </IonButton>
+          </IonButtons>
         </IonToolbar>
         <IonGrid className="pt-0 mt-0">
           <IonRow>
@@ -240,7 +249,7 @@ const EditPatient: React.FC = () => {
                           </IonCol>
                         </IonRow>
                       </IonCol>
-                    </IonRow> 
+                    </IonRow>
                     <IonRow className="text-center">
                       <IonCol></IonCol>
                       <IonCol>

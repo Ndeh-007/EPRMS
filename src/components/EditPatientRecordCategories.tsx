@@ -274,7 +274,11 @@ const PatientsHistory: React.FC = () => {
                   <IonCardTitle>New Attribute</IonCardTitle>
                 </IonCardHeader>
                 <IonCardContent>
-                  <IonItem lines="full" fill="outline">
+                  <IonItem
+                    lines="full"
+                    fill="outline"
+                    className="ion-margin-bottom"
+                  >
                     <IonLabel position="floating">title</IonLabel>
                     <IonInput
                       type="text"
@@ -285,7 +289,19 @@ const PatientsHistory: React.FC = () => {
                   <IonItem
                     lines="full"
                     fill="outline"
-                    className="ion-padding-top"
+                    className="ion-margin-bottom"
+                  >
+                    <IonLabel position="floating">date</IonLabel>
+                    <IonInput
+                      type="text"
+                      required
+                      placeholder="Date of Activity"
+                    ></IonInput>
+                  </IonItem>
+                  <IonItem
+                    lines="full"
+                    fill="outline"
+                    className="ion-margin-bottom"
                   >
                     <IonLabel position="floating">Description</IonLabel>
                     <IonTextarea required></IonTextarea>
@@ -390,19 +406,19 @@ const PatientsHistory: React.FC = () => {
           {loading && <IonProgressBar type="indeterminate"></IonProgressBar>}
           <IonCardHeader>
             <IonToolbar color="light">
-            <IonCardTitle>New History</IonCardTitle>
-            
-          <IonButton
-            slot="end"
-            color="danger"
-            size="small"
-            onClick={() => {
-              setNewHistory(false);
-            }}
-          >
-            <IonIcon icon={closeOutline} slot="start"></IonIcon>
-            cancel
-          </IonButton>
+              <IonCardTitle>New History</IonCardTitle>
+
+              <IonButton
+                slot="end"
+                color="danger"
+                size="small"
+                onClick={() => {
+                  setNewHistory(false);
+                }}
+              >
+                <IonIcon icon={closeOutline} slot="start"></IonIcon>
+                cancel
+              </IonButton>
             </IonToolbar>
           </IonCardHeader>
           <IonCardContent>
@@ -700,8 +716,11 @@ const Management: React.FC = () => {
 
       {!newManagmentItem && (
         <div className="text-center pt-2 pb-2">
-          <IonButton size="small" onClick={() => setNewManangementItem(true)} 
-            color="success">
+          <IonButton
+            size="small"
+            onClick={() => setNewManangementItem(true)}
+            color="success"
+          >
             {" "}
             <IonIcon icon={addOutline} slot="start"></IonIcon> Add
           </IonButton>
@@ -720,7 +739,7 @@ const PatientImmunity: React.FC = () => {
   const [loading, setLoading] = useState(false);
   return (
     <div>
-      <IonItem lines="full" >
+      <IonItem lines="full">
         <IonText slot="start">Tetanus</IonText>
         <IonText slot="end">{faker.date.recent().toLocaleDateString()}</IonText>
       </IonItem>
@@ -729,19 +748,18 @@ const PatientImmunity: React.FC = () => {
           {loading && <IonProgressBar type="indeterminate"></IonProgressBar>}
           <IonCardHeader>
             <IonToolbar color="light">
-
-            <IonCardTitle>New Immuninty</IonCardTitle>
-            <IonCardSubtitle>Name & Date</IonCardSubtitle> 
-          <IonButton
-            className="text-small"
-            size="small"
-            color="danger"
-            onClick={() => setNewImmnunity(false)}
-            slot="end"
-            >
-            <IonIcon slot="start" icon={close}></IonIcon>
-            <IonLabel>Cancel</IonLabel>
-          </IonButton>
+              <IonCardTitle>New Immuninty</IonCardTitle>
+              <IonCardSubtitle>Name & Date</IonCardSubtitle>
+              <IonButton
+                className="text-small"
+                size="small"
+                color="danger"
+                onClick={() => setNewImmnunity(false)}
+                slot="end"
+              >
+                <IonIcon slot="start" icon={close}></IonIcon>
+                <IonLabel>Cancel</IonLabel>
+              </IonButton>
             </IonToolbar>
           </IonCardHeader>
           <IonCardContent>

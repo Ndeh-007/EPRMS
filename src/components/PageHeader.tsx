@@ -46,8 +46,7 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
   const location = useLocation();
   const history = useHistory();
   const [showModal, setShowModal] = useState(false);
-  const context = useContext(StaffContext)
-  console.log(context.staff)
+  const context = useContext(StaffContext) 
 
   function logOutUser() {
     setShowPopover({

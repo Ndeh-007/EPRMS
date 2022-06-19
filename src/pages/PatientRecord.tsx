@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useContext, useRef } from "react";
 import faker from "@faker-js/faker";
 import {
   IonAccordion,
@@ -30,22 +30,37 @@ import {
   IonToolbar,
 } from "@ionic/react";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useLocation, useParams } from "react-router";
 import PageHeader from "../components/PageHeader";
 import "../styles/Page.css";
 import "../styles/NewPatient.css";
-import { chevronForward, pencil } from "ionicons/icons";
+import { chevronForward, pencil, recording } from "ionicons/icons";
 import EditPatientRecord from "../components/EditPatientRecord";
+import { PatientRecordInterface } from "../interfaces/types";
+import { PatientContext } from "../context/AppContent";
+import { convertDate } from "../Functions/functions";
 
 const PatientRecord: React.FC = () => {
   const { name } = useParams<{ name: string; mode?: string }>();
   const [isMobileView, setIsMobileView] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editValue, setEditValue] = useState("");
+  const {patient} = useContext(PatientContext);
 
   function closeEditModal() {
     setShowEditModal(false);
   }
+
+  const location = useLocation();
+  const [_patientRecord,setPatientRecord]=useState<PatientRecordInterface>() 
+
+  useEffect(()=>{
+    if(location.state){
+      let temp:any  = location.state;
+      console.log(temp);
+      setPatientRecord(temp)
+    } 
+  },[])
 
   useEffect(() => {
     window.onresize = (e) => {
@@ -64,12 +79,12 @@ const PatientRecord: React.FC = () => {
           <IonText slot="start" color="primary">
             <IonTitle className="ion-padding-horizontal">
               <p className="text-bold">
-                <span>{faker.name.findName()}</span>{" "}
+                <span>{_patientRecord?.patient?.name}</span>{" "}
                 <span className="fw-light">
                   <IonText>~</IonText>
                 </span>{" "}
                 <span>
-                  <IonText color="medium">[Record ID]</IonText>
+                  <IonText color="medium">{_patientRecord?.id}</IonText>
                 </span>
               </p>
             </IonTitle>
@@ -82,15 +97,15 @@ const PatientRecord: React.FC = () => {
                 <IonCardHeader>
                   <IonCardTitle color="primary"></IonCardTitle>
                   <IonCardSubtitle className="pt-1">
-                    <span>Male</span>,{" "}
-                    <span>{faker.date.recent().toLocaleDateString()}</span>
+                    <span>{patient?.sex}</span>,{" "}
+                    <span>{convertDate(patient?.dateOfBirth)}</span>
                   </IonCardSubtitle>
                   <IonCardSubtitle className="text-lowercase pt-1">
-                    <span>{6723339123}</span>,{" "}
-                    <span>{"email@awakedom.com"}</span>
+                    <span>{patient?.tel}</span>,{" "}
+                    <span>{patient?.email}</span>
                   </IonCardSubtitle>
                   <IonCardSubtitle className="text-lowercase text-capitalize pt-1">
-                    {faker.address.state()}
+                   {patient?.address}
                   </IonCardSubtitle>
                 </IonCardHeader>
               </IonCard>
@@ -100,27 +115,27 @@ const PatientRecord: React.FC = () => {
                 <IonCardHeader>
                   <IonCardTitle color="primary">Medical</IonCardTitle>
                   <IonCardSubtitle>
-                    <b>On Call :</b> Dr. {faker.name.findName()}
+                    <b>On Call :</b> {patient?.handlers?.map((handler)=>handler).join(", ")}
                   </IonCardSubtitle>
                   <IonCardSubtitle>
                     <b>Admission Date :</b>{" "}
-                    <IonText>{faker.date.recent().toLocaleString()}</IonText>
+                    <IonText>{convertDate(patient?.date,true)}</IonText>
                   </IonCardSubtitle>
                   <IonCardSubtitle>
                     <b>Status :</b>{" "}
-                    <IonText color="primary">{"discharged"}</IonText>
+                    <IonText color="primary">{_patientRecord?.status}</IonText>
                   </IonCardSubtitle>
                   <IonCardSubtitle>
                     <b>Discharge Date :</b>{" "}
-                    <IonText>{faker.date.recent().toLocaleString()}</IonText>
+                    <IonText>{convertDate(_patientRecord?.dischargeDate)}</IonText>
                   </IonCardSubtitle>
                   <IonCardSubtitle>
                     <b>Discharge Status :</b>{" "}
-                    <IonText color="success">Alive</IonText>
+                    <IonText color="success">{_patientRecord?.dischargeStatus}</IonText>
                   </IonCardSubtitle>
                   <IonCardSubtitle>
                     <b>Ward :</b>{" "}
-                    <IonText color="secondary">wm-7</IonText>
+                    <IonText color="secondary">{_patientRecord?.ward}</IonText>
                   </IonCardSubtitle>
                 </IonCardHeader>
               </IonCard>
@@ -194,64 +209,11 @@ const PatientRecord: React.FC = () => {
                   </IonToolbar>
                 </IonCardHeader>
                 <IonCardContent>
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam
-                  cumque distinctio hic. Consequuntur cum aperiam nesciunt
-                  ratione fuga voluptates deserunt repudiandae, labore nihil
-                  quaerat, beatae nisi accusantium animi exercitationem neque
-                  iste soluta blanditiis in voluptatum. Velit provident quasi
-                  officiis voluptas fugiat. Possimus voluptatem reiciendis, sunt
-                  et dicta nisi est veritatis? Dolorem expedita doloribus
-                  adipisci labore. Commodi fugit omnis iure suscipit atque earum
-                  voluptates odio pariatur nostrum cupiditate! Ea dolores fugiat
-                  mollitia voluptas nihil quis quasi quae corporis voluptatem,
-                  unde laborum vitae aut error, magnam expedita doloremque,
-                  nostrum repellat exercitationem! Illum adipisci sed rerum,
-                  similique officia deleniti tempora velit natus esse.
+                
+                {_patientRecord?.patientComplaint}
                 </IonCardContent>
               </IonCard>
-            </IonCol>
-            <IonCol size="6" sizeLg="4" sizeXs="12" sizeMd="6" sizeSm="12">
-              <IonCard>
-                <IonCardHeader>
-                  <IonToolbar>
-                    <IonCardTitle color="primary">
-                      Immunity & Immunizations
-                    </IonCardTitle>
-                    <IonCardSubtitle>Name and Date</IonCardSubtitle>
-                    <IonButtons slot="end">
-                      <IonButton
-                        color="primary"
-                        size="small"
-                        onClick={() => {
-                          setEditValue("Immunity");
-                          setShowEditModal(true);
-                        }}
-                      >
-                        <IonIcon
-                          slot="icon-only"
-                          icon={pencil}
-                          size="small"
-                        ></IonIcon>
-                      </IonButton>
-                    </IonButtons>{" "}
-                  </IonToolbar>
-                </IonCardHeader>
-                <IonCardContent>
-                  <IonItem lines="full">
-                    <IonText slot="start">Flu Shot</IonText>
-                    <IonText slot="end">
-                      {faker.date.recent().toLocaleDateString()}
-                    </IonText>
-                  </IonItem>
-                  <IonItem lines="full">
-                    <IonText slot="start">Tetanus</IonText>
-                    <IonText slot="end">
-                      {faker.date.recent().toLocaleDateString()}
-                    </IonText>
-                  </IonItem>
-                </IonCardContent>
-              </IonCard>
-            </IonCol>
+            </IonCol> 
             <IonCol size="6" sizeLg="4" sizeXs="12" sizeMd="6" sizeSm="12">
               <IonCard>
                 <IonCardHeader>

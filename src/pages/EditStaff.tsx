@@ -51,7 +51,7 @@ import PageHeader from "../components/PageHeader";
 import PatientItem from "../components/PatientItem";
 import { capitalizeString } from "../Functions/functions";
 import { customIcons, localImages } from "../images/images";
-import { MPI } from "../interfaces/types";
+import { MPI, Staff } from "../interfaces/types";
 import "../styles/Page.css";
 import "../styles/NewPatient.css";
 import {
@@ -62,7 +62,9 @@ import {
   save,
 } from "ionicons/icons";
 
-const EditStaff: React.FC = () => {
+const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
+  staffDetails,
+}) => {
   const { name } = useParams<{ name: string; mode?: string }>();
   const formRef = useRef<HTMLFormElement>(null);
   const patientImageInputRef = useRef<HTMLInputElement>(null);
@@ -97,22 +99,26 @@ const EditStaff: React.FC = () => {
                     <IonGrid>
                       <IonRow>
                         <IonCol size="12" sizeLg="3" color="medium">
-                          <div
-                            className="drag-n-drop rounded p-5 ion-activatable ripple-parent"
-                            onClick={() => {
-                              patientImageInputRef.current?.click();
-                            }}
-                          >
-                            <p
+                          {staffDetails?.image?.length > 0 ? (
+                            <IonImg src={staffDetails?.image}></IonImg>
+                          ) : (
+                            <div
+                              className="drag-n-drop rounded p-5 ion-activatable ripple-parent"
                               onClick={() => {
                                 patientImageInputRef.current?.click();
                               }}
                             >
-                              <h6 className="h5 fw-bold">Staff Image</h6>
-                              <p>click or Drag and drop to upload file</p>
-                            </p>
-                            <IonRippleEffect type="bounded"></IonRippleEffect>
-                          </div>
+                              <p
+                                onClick={() => {
+                                  patientImageInputRef.current?.click();
+                                }}
+                              >
+                                <h6 className="h5 fw-bold">Staff Image</h6>
+                                <p>click or Drag and drop to upload file</p>
+                              </p>
+                              <IonRippleEffect type="bounded"></IonRippleEffect>
+                            </div>
+                          )}
                           <input
                             hidden
                             type={"file"}
@@ -125,7 +131,7 @@ const EditStaff: React.FC = () => {
                             <IonCol size="12" sizeLg="6">
                               <IonItem fill="outline" lines="full">
                                 <IonLabel position="floating">Name</IonLabel>
-                                <IonInput type="text"></IonInput>
+                                <IonInput type="text" value={staffDetails?.name}></IonInput>
                               </IonItem>
                             </IonCol>
                             <IonCol size="12" sizeLg="6">
@@ -133,7 +139,7 @@ const EditStaff: React.FC = () => {
                                 <IonLabel position="stacked">
                                   Date of Birth
                                 </IonLabel>
-                                <IonInput type="date"></IonInput>
+                                <IonInput type="date" value={staffDetails?.dateOfBirth}></IonInput>
                               </IonItem>
                             </IonCol>
                             <IonCol size="12" sizeLg="6">
@@ -143,7 +149,7 @@ const EditStaff: React.FC = () => {
                                 lines="full"
                               >
                                 <IonLabel position="floating">Email</IonLabel>
-                                <IonInput type="email"></IonInput>
+                                <IonInput type="email" value={staffDetails?.email}></IonInput>
                               </IonItem>
                             </IonCol>
                             <IonCol size="12" sizeLg="6">
@@ -155,7 +161,7 @@ const EditStaff: React.FC = () => {
                                 <IonLabel position="floating">
                                   Phone Number
                                 </IonLabel>
-                                <IonInput type="tel"></IonInput>
+                                <IonInput type="tel" value={staffDetails?.tel}></IonInput>
                               </IonItem>
                             </IonCol>
                             <IonCol size="12" sizeLg="6">
@@ -165,7 +171,7 @@ const EditStaff: React.FC = () => {
                                 lines="full"
                               >
                                 <IonLabel position="floating">Address</IonLabel>
-                                <IonInput type="text"></IonInput>
+                                <IonInput type="text" value={staffDetails?.address}></IonInput>
                               </IonItem>
                             </IonCol>
                             <IonCol size="12" sizeLg="6">
@@ -175,7 +181,7 @@ const EditStaff: React.FC = () => {
                                 lines="full"
                               >
                                 <IonLabel position="floating">Sex</IonLabel>
-                                <IonInput type="text"></IonInput>
+                                <IonInput type="text" value={staffDetails?.sex}></IonInput>
                               </IonItem>
                             </IonCol>
                             <IonCol size="12" sizeLg="6">
@@ -187,7 +193,7 @@ const EditStaff: React.FC = () => {
                                 <IonLabel position="floating">
                                   Marital Status
                                 </IonLabel>
-                                <IonSelect>
+                                <IonSelect value={staffDetails?.maritalStatus}>
                                   <IonSelectOption value={"married"}>
                                     Married
                                   </IonSelectOption>
@@ -203,11 +209,11 @@ const EditStaff: React.FC = () => {
                                 color="primary"
                                 lines="full"
                               >
-                                <IonLabel position="floating">
+                                <IonLabel position="floating" >
                                   Position
                                 </IonLabel>
                                 {/* set Value to present value */}
-                                <IonSelect>
+                                <IonSelect value={staffDetails?.position}>
                                   <IonSelectOption value={"doctor"}>
                                     Doctor
                                   </IonSelectOption>
@@ -241,11 +247,13 @@ const EditStaff: React.FC = () => {
           <hr />
         </form>
 
-        <form action=""
+        <form
+          action=""
           onSubmit={(e) => {
-            e.preventDefault(); 
-            setAlertAdmit(true)
-          }}>
+            e.preventDefault();
+            setAlertAdmit(true);
+          }}
+        >
           <IonGrid className="pt-0 mt-0">
             <IonRow>
               <IonCol size="12">
@@ -265,28 +273,18 @@ const EditStaff: React.FC = () => {
                           <IonRow>
                             <IonCol size="12" sizeLg="6">
                               <IonItem fill="outline" lines="full">
-                                <IonLabel position="floating">UserName</IonLabel>
-                                <IonInput type="text"></IonInput>
+                                <IonLabel position="floating">
+                                  UserName
+                                </IonLabel>
+                                <IonInput type="text"value={staffDetails?.username}></IonInput>
                               </IonItem>
                             </IonCol>
                             <IonCol size="12" sizeLg="6">
                               <IonItem fill="outline" lines="full">
-                                <IonLabel position="stacked">
-                                 Password
-                                </IonLabel>
-                                <IonInput type="text"></IonInput>
+                                <IonLabel position="stacked">Password</IonLabel>
+                                <IonInput type="text" value={staffDetails?.password}></IonInput>
                               </IonItem>
                             </IonCol>
-                            <IonCol size="12" sizeLg="6">
-                              <IonItem
-                                fill="outline"
-                                color="primary"
-                                lines="full"
-                              >
-                                <IonLabel position="floating">Confirm Password</IonLabel>
-                                <IonInput type="text"></IonInput>
-                              </IonItem>
-                            </IonCol>   
                             <IonCol size="12" sizeLg="6">
                               <IonItem
                                 fill="outline"
@@ -294,9 +292,19 @@ const EditStaff: React.FC = () => {
                                 lines="full"
                               >
                                 <IonLabel position="floating">
-                                 Role
+                                  Confirm Password
                                 </IonLabel>
-                                <IonSelect value={'staff'}>
+                                <IonInput type="text"></IonInput>
+                              </IonItem>
+                            </IonCol>
+                            <IonCol size="12" sizeLg="6">
+                              <IonItem
+                                fill="outline"
+                                color="primary"
+                                lines="full"
+                              >
+                                <IonLabel position="floating">Role</IonLabel>
+                                <IonSelect value={staffDetails?.role}>
                                   <IonSelectOption value={"admin"}>
                                     Admin
                                   </IonSelectOption>
@@ -316,7 +324,7 @@ const EditStaff: React.FC = () => {
                                   Position
                                 </IonLabel>
                                 {/* set Value to present value */}
-                                <IonSelect>
+                                <IonSelect value={staffDetails?.position}>
                                   <IonSelectOption value={"doctor"}>
                                     Doctor
                                   </IonSelectOption>

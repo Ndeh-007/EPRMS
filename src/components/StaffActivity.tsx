@@ -3,35 +3,28 @@ import { IonButton, IonButtons, IonCard, IonCardContent, IonCardHeader, IonCardT
 import { add, chevronForward } from "ionicons/icons";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
-import { MPI } from "../interfaces/types";
+import { firestore } from "../Firebase";
+import { MPI, Patient, Staff } from "../interfaces/types";
 import BarChart from "./BarChart";
 import DoughnutChart from "./DoughnutChart";
 import PatientItem from "./PatientItem";
 
-const StaffActivity: React.FC = () => { 
+const StaffActivity: React.FC<{details?:Staff}> = ({details}) => { 
     const { name } = useParams<{ name: string; mode?: string }>();
     const [fakeMPI, setFakeMPI] = useState<MPI[]>([]);
+    const [allPatients, setallPatients] = useState<Patient[]>();
 
-
-  function createDummy() {
-    let res = Array.from(Array(5).keys()).map((e, i) => {
-      let patientMPI: MPI = {
-        name: faker.name.findName(),
-        tel: faker.phone.phoneNumber(),
-        address: faker.address.city(),
-        dateOfBirth: faker.date.recent().toLocaleDateString(),
-        sex: "",
-      };
-      let temp = [];
-      temp.push(patientMPI);
-      return temp[0];
-    });
-    console.log(res);
-    setFakeMPI([...res]);
+  
+  function getPatients(){
+    const patientMPI: MPI[] = [];
+    firestore.collection("patients").onSnapshot((snapshot)=>{
+      let docs:any[] = snapshot.docs.map((doc)=>doc.data());
+      setallPatients(docs);
+    })
   }
  
-  useEffect(() => {
-    createDummy();
+  useEffect(() => { 
+    getPatients();
   }, []);
     return (
         <IonGrid className="pt-0 mt-0">
@@ -93,7 +86,7 @@ const StaffActivity: React.FC = () => {
                     </IonRow>
                   </IonGrid>
                 </IonItem>
-                {fakeMPI.map((patient: MPI, index: number) => {
+                {allPatients?.map((patient, index: number) => {
                   return (
                     <PatientItem patient={patient} key={index}></PatientItem>
                   );

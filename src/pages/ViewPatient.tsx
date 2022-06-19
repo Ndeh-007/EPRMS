@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useContext, useRef } from "react";
 import faker from "@faker-js/faker";
 import {
   IonAlert,
@@ -31,6 +31,7 @@ import {
   IonNote,
   IonPage,
   IonPopover,
+  IonProgressBar,
   IonRippleEffect,
   IonRow,
   IonSearchbar,
@@ -59,6 +60,16 @@ import {
 } from "ionicons/icons";
 import { localImages } from "../images/images";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import { PatientContext } from "../context/AppContent";
+import { firestore } from "../Firebase";
+import {
+  HistoryAttribute,
+  Immunity,
+  Overview,
+  PatientRecordInterface,
+} from "../interfaces/types";
+import { calculateAge, convertDate } from "../Functions/functions";
+import { PatientImmunity } from "../components/EditPatientRecordCategories";
 
 const ViewPatient: React.FC = () => {
   const { name } = useParams<{ name: string; mode?: string }>();
@@ -71,28 +82,89 @@ const ViewPatient: React.FC = () => {
   const [operationSuccessful, setOperationSuccessful] = useState(false);
   const [viewImagePopover, setviewImagePopover] = useState(false);
   const [patientRecordsModal, setPatientRecordsModal] = useState(false);
+  const { patient, setPatient } = useContext(PatientContext);
+  const [patientRecords, setPatientRecords] = useState<PatientRecordInterface[]>();
+  const [FirstRecord, setFirstRecord] = useState<PatientRecordInterface>();
+  const [SecondRecord, setSecondRecord] = useState<PatientRecordInterface>();
+  const [loadingRecords, setLoadingRecords] = useState(false);
+  const [patientImmninty, setPatientImmninty] = useState<Immunity[]>();
+  const [loadingImmninty, setLoadingImmninty] = useState(false);
+  const [patientHistory, setPatientHistory] = useState<HistoryAttribute>();
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [patientOverview, setPatientOverview] = useState<Overview[]>();
+  const [loadingOverview, setLoadingOverview] = useState(false);
+
+  function getRecords() {
+    setLoadingRecords(true);
+    firestore
+      .collection("patients")
+      .doc(patient?.id)
+      .collection("records")
+      .orderBy("date", "desc")
+      .onSnapshot((snapshot) => {
+        let docs: any = snapshot.docs.map((doc) => doc.data());
+        setFirstRecord(docs[0]);
+        if (docs[1]) setSecondRecord(docs[1]);
+        setPatientRecords(docs);
+        setLoadingRecords(false);
+      });
+  }
+
+  function viewPatientRecord(value: PatientRecordInterface | undefined) {
+    if(value)
+    history.push("/patient-record", value);
+    else history.push("/patient-record");
+  }
+
+  function getPatientImmunity() {
+    setLoadingImmninty(true);
+    firestore
+      .collection("patients")
+      .doc(patient?.id)
+      .collection("immunity")
+      .onSnapshot((snapshot) => {
+        let docs: any = snapshot.docs.map((doc) => doc.data());
+        setPatientImmninty(docs);
+        setLoadingImmninty(false);
+      });
+  }
+
+  function getPatientHistory() {
+    setLoadingHistory(true);
+    firestore
+      .collection("patients")
+      .doc(patient?.id)
+      .collection("history")
+      .onSnapshot((snapshot) => {
+        let docs: any = snapshot.docs.map((doc) => doc.data());
+        setPatientHistory(docs);
+        setLoadingHistory(false);
+      });
+  }
+
+  function getPatientOverview() {
+    setLoadingOverview(true);
+    firestore
+      .collection("patients")
+      .doc(patient?.id)
+      .collection("overview")
+      .onSnapshot((snapshot) => {
+        let docs: any = snapshot.docs.map((doc) => doc.data());
+        setPatientOverview(docs);
+        setLoadingOverview(false);
+      });
+  }
+
+  useEffect(() => {
+    getRecords();
+  }, []);
 
   return (
     <IonPage>
       <PageHeader name={name}></PageHeader>
       <IonContent color="light">
         <IonToolbar color="light" className="pt-4">
-          <IonText slot="start" color="primary">
-            {/* <IonTitle className="ion-padding-horizontal">
-              <p className="text-bold">
-                <span>Patient Info</span> -{" "}
-                <span className="fs-6">
-                  <IonText color="medium">Dr. {faker.name.findName()}</IonText>
-                </span>
-                <br />
-                <span className="text-regular">
-                  <IonText className="text-small" color="danger">
-                    Amitted
-                  </IonText>
-                </span>
-              </p>
-            </IonTitle> */}
-          </IonText>
+          <IonText slot="start" color="primary"></IonText>
           <IonButton
             color="success"
             slot="end"
@@ -119,6 +191,9 @@ const ViewPatient: React.FC = () => {
 
         <div className="px-1">
           <IonList color="clear">
+            {loadingRecords && (
+              <IonProgressBar type="indeterminate"></IonProgressBar>
+            )}
             <IonItem lines="none">
               <IonLabel>Patient Records</IonLabel>
               <IonChip
@@ -143,10 +218,20 @@ const ViewPatient: React.FC = () => {
                 <IonIcon icon={chevronForward}></IonIcon>
               </IonChip>
             </IonItem>
-            <IonItem lines="none" button routerLink="/patient-record">
+            <IonItem
+              lines="none"
+              button
+              onClick={() => {
+                viewPatientRecord(FirstRecord);
+              }}
+            >
               <IonCardHeader>
-                <IonCardTitle className="text-bold">Record ID</IonCardTitle>
-                <IonCardSubtitle>[Record Creation Date]</IonCardSubtitle>
+                <IonCardTitle className="text-bold">
+                  {FirstRecord?.id}
+                </IonCardTitle>
+                <IonCardSubtitle>
+                  {convertDate(FirstRecord?.date)}
+                </IonCardSubtitle>
               </IonCardHeader>
               <IonButtons slot="end">
                 <IonButton>
@@ -184,13 +269,13 @@ const ViewPatient: React.FC = () => {
                     // setPatientRecordsModal(false);
                   }}
                 >
-                  <IonLabel>{25}</IonLabel>
+                  <IonLabel>{patientRecords?.length}</IonLabel>
                 </IonButton>
               </IonButtons>
             </IonToolbar>
           </IonHeader>
           <IonContent>
-            {Array.from(Array(5).keys()).map((key, index) => {
+            {patientRecords?.map((record, index) => {
               return (
                 <IonItem
                   lines="full"
@@ -202,8 +287,12 @@ const ViewPatient: React.FC = () => {
                   key={index}
                 >
                   <IonCardHeader>
-                    <IonCardTitle className="text-bold">Record ID</IonCardTitle>
-                    <IonCardSubtitle>[Record Creation Date]</IonCardSubtitle>
+                    <IonCardTitle className="text-bold">
+                      {record.id}
+                    </IonCardTitle>
+                    <IonCardSubtitle>
+                      {convertDate(record?.date)}
+                    </IonCardSubtitle>
                   </IonCardHeader>
                   <IonButtons slot="end">
                     <IonButton>
@@ -222,9 +311,7 @@ const ViewPatient: React.FC = () => {
                 {/* <IonAvatar className="ion-float-end br-2">
             </IonAvatar> */}
                 <IonItem lines="none">
-                  <IonText className="h2 text-bold">
-                    {faker.name.findName()}{" "}
-                  </IonText>
+                  <IonText className="h2 text-bold">{patient?.name}</IonText>
                   <IonButtons slot="end">
                     <IonButton
                       color="primary"
@@ -245,7 +332,7 @@ const ViewPatient: React.FC = () => {
                       setviewImagePopover(true);
                     }}
                   >
-                    <IonImg src={localImages.commy}></IonImg>
+                    <IonImg src={patient?.image}></IonImg>
                   </IonThumbnail>
                 </IonItem>
                 <IonPopover
@@ -254,26 +341,30 @@ const ViewPatient: React.FC = () => {
                 >
                   <TransformWrapper>
                     <TransformComponent>
-                      <IonImg src={localImages.commy}></IonImg>
+                      <IonImg src={patient?.image}></IonImg>
                     </TransformComponent>
                   </TransformWrapper>
                 </IonPopover>
                 <IonCardHeader>
                   <IonCardSubtitle className="">
-                    <span>Male (26)</span>, {" "} 
-                    <span>{faker.date.recent().toLocaleDateString()}</span>
+                    <span>
+                      {patient?.sex} {calculateAge(patient?.dateOfBirth)}
+                    </span>
+                    ,{" "}
+                    <span>
+                      <span className="text-bold">Intake Date</span>
+                      {convertDate(patient?.dateOfBirth)}
+                    </span>
                   </IonCardSubtitle>
                   <IonCardSubtitle className="text-lowercase ">
-                    <span>{6723339123}</span>,{" "}
-                    <span>{"email@awakedom.com"}</span>
+                    <span>{patient?.name}</span>, <span>{patient?.email}</span>
                   </IonCardSubtitle>
                   <IonCardSubtitle className="text-lowercase text-capitalize ">
-                  {"Catholic"}, {faker.address.state()}
+                    {patient?.religion}, {patient?.address}
                   </IonCardSubtitle>
+                  <IonCardSubtitle className="text-lowercase text-capitalize "></IonCardSubtitle>
                   <IonCardSubtitle className="text-lowercase text-capitalize ">
-                  </IonCardSubtitle>
-                  <IonCardSubtitle className="text-lowercase text-capitalize ">
-                    [Blood Group]
+                    {patient?.bloodGroup}
                   </IonCardSubtitle>
                 </IonCardHeader>
               </IonCard>
@@ -289,36 +380,30 @@ const ViewPatient: React.FC = () => {
                       <span className="text-bold">
                         Durable Power of Attorney:{" "}
                       </span>
-                      [name and contact details]
+                      {patient?.powerOfAttorney}
                     </div>
                     <div>
                       <span className="text-bold">Health Care Proxy: </span>
-                      [name and contact details]
+                      {patient?.healthCareProxy}
                     </div>
                     <div>
                       <span className="text-bold">Emergency Contact: </span>
-                      [name and contact details]
+                      {patient?.emergencyContact}
                     </div>
                   </IonText>
                   <IonToolbar>
-                    <IonChip color="primary">
-                      <IonLabel>DNR</IonLabel>
-                    </IonChip>
-                    <IonChip color="primary">
-                      <IonLabel>No Feeding Tube</IonLabel>
-                    </IonChip>
-                    <IonChip color="primary">
-                      <IonLabel>No Antibiotics</IonLabel>
-                    </IonChip>
-                    <IonChip color="primary">
-                      <IonLabel>No IVs</IonLabel>
-                    </IonChip>
-                    <IonChip color="primary">
-                      <IonLabel>No Comfort Care</IonLabel>
-                    </IonChip>
-                    <IonChip color="primary">
-                      <IonLabel>No Hospitalize</IonLabel>
-                    </IonChip>
+                    {patient?.wishes?.map((wish, index) => {
+                      return (
+                        <IonChip color="primary" key={index}>
+                          <IonLabel>{wish}</IonLabel>
+                        </IonChip>
+                      );
+                    })}{" "}
+                    {patient?.wishes?.length === 0 && (
+                      <IonChip color="medium">
+                        <IonLabel>All Permitted</IonLabel>
+                      </IonChip>
+                    )}
                   </IonToolbar>
                 </IonCardContent>
               </IonCard>
@@ -349,15 +434,7 @@ const ViewPatient: React.FC = () => {
                   </IonCardSubtitle>
                 </IonCardHeader>
                 <IonCardContent>
-                  <IonText>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Harum dolor sit dignissimos vero numquam sequi quam,
-                    corporis dolore voluptatum expedita. Voluptas laboriosam
-                    quaerat, rem, dolor voluptatem ducimus, omnis atque
-                    repudiandae explicabo culpa perferendis est molestiae hic
-                    qui praesentium quasi a enim et mollitia nihil ipsam nostrum
-                    ab! Quae, veniam debitis.
-                  </IonText>
+                  <IonText>{FirstRecord?.diagnosis}</IonText>
                 </IonCardContent>
               </IonCard>
             </IonCol>
@@ -371,15 +448,22 @@ const ViewPatient: React.FC = () => {
                   </IonCardSubtitle>
                 </IonCardHeader>
                 <IonCardContent>
-                  <IonText>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Harum dolor sit dignissimos vero numquam sequi quam,
-                    corporis dolore voluptatum expedita. Voluptas laboriosam
-                    quaerat, rem, dolor voluptatem ducimus, omnis atque
-                    repudiandae explicabo culpa perferendis est molestiae hic
-                    qui praesentium quasi a enim et mollitia nihil ipsam nostrum
-                    ab! Quae, veniam debitis.
-                  </IonText>
+                  <IonCard>
+                    <IonCardHeader>
+                      <IonCardTitle>Past Condition</IonCardTitle>
+                    </IonCardHeader>
+                    <IonCardContent>
+                      <IonText>{SecondRecord?.diagnosis}</IonText>
+                    </IonCardContent>
+                  </IonCard>
+                  <IonCard>
+                    <IonCardHeader>
+                      <IonCardTitle>Method of Treatment</IonCardTitle>
+                    </IonCardHeader>
+                    <IonCardContent>
+                      <IonText>{SecondRecord?.treatment}</IonText>
+                    </IonCardContent>
+                  </IonCard>
                 </IonCardContent>
               </IonCard>
             </IonCol>
@@ -391,18 +475,16 @@ const ViewPatient: React.FC = () => {
                   <IonCardSubtitle>Name and Date</IonCardSubtitle>
                 </IonCardHeader>
                 <IonCardContent>
-                  <IonItem lines="full">
-                    <IonText slot="start">Flu Shot</IonText>
-                    <IonText slot="end">
-                      {faker.date.recent().toLocaleDateString()}
-                    </IonText>
-                  </IonItem>
-                  <IonItem lines="full">
-                    <IonText slot="start">Tetanus</IonText>
-                    <IonText slot="end">
-                      {faker.date.recent().toLocaleDateString()}
-                    </IonText>
-                  </IonItem>
+                  {patientImmninty?.map((immunity, index) => {
+                    return (
+                      <IonItem lines="full" key={index}>
+                        <IonText slot="start">{immunity.name}</IonText>
+                        <IonText slot="end">
+                          {convertDate(immunity.date)}
+                        </IonText>
+                      </IonItem>
+                    );
+                  })}
                 </IonCardContent>
               </IonCard>
             </IonCol>
@@ -414,53 +496,36 @@ const ViewPatient: React.FC = () => {
                   <IonCardSubtitle>Reason and Date</IonCardSubtitle>
                 </IonCardHeader>
                 <IonCardContent>
-                  <IonCard className="ion-no-border">
-                    <IonCardHeader>
-                      <IonCardTitle>Reason for Hospitalizations</IonCardTitle>
-                      <IonCardSubtitle>
-                        {faker.date.recent().toLocaleDateString()}
-                      </IonCardSubtitle>
-                    </IonCardHeader>
-                    <IonCardContent>
-                      Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                      Commodi, sunt!
-                    </IonCardContent>
-                  </IonCard>
-                  <IonCard className="ion-no-border mt-2">
-                    <IonCardHeader>
-                      <IonCardTitle>Reason for Hospitalizations</IonCardTitle>
-                      <IonCardSubtitle>
-                        {faker.date.recent().toLocaleDateString()}
-                      </IonCardSubtitle>
-                    </IonCardHeader>
-                    <IonCardContent>
-                      Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                      Commodi, sunt!
-                    </IonCardContent>
-                  </IonCard>
+                  {patientRecords
+                    ?.filter((record) => record.hasOwnProperty("admission"))
+                    .map((record, index) => {
+                      return (
+                        <IonCard className="ion-no-border mt-2" key={index}>
+                          <IonCardHeader>
+                            <IonCardTitle>
+                              {record.admission?.reason}
+                            </IonCardTitle>
+                            <IonCardSubtitle>
+                              {convertDate(record.admission?.date)}
+                            </IonCardSubtitle>
+                          </IonCardHeader>
+                          <IonCardContent>
+                            {record.admission?.description}
+                          </IonCardContent>
+                        </IonCard>
+                      );
+                    })}
                 </IonCardContent>
               </IonCard>
             </IonCol>
 
-            <IonCol size="6" sizeLg="4" sizeXs="12" sizeMd="6" sizeSm="12">
+            {/* <IonCol size="6" sizeLg="4" sizeXs="12" sizeMd="6" sizeSm="12">
               <IonCard>
                 <IonCardHeader>
                   <IonCardTitle>Previous Surgeries</IonCardTitle>
                   <IonCardSubtitle>Reason and Date</IonCardSubtitle>
                 </IonCardHeader>
                 <IonCardContent>
-                  <IonCard className="ion-no-border">
-                    <IonCardHeader>
-                      <IonCardTitle>Reason for Surgery</IonCardTitle>
-                      <IonCardSubtitle>
-                        {faker.date.recent().toLocaleDateString()}
-                      </IonCardSubtitle>
-                    </IonCardHeader>
-                    <IonCardContent>
-                      Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                      Commodi, sunt!
-                    </IonCardContent>
-                  </IonCard>
                   <IonCard className="ion-no-border mt-2">
                     <IonCardHeader>
                       <IonCardTitle>Reason for Surgery</IonCardTitle>
@@ -475,7 +540,7 @@ const ViewPatient: React.FC = () => {
                   </IonCard>
                 </IonCardContent>
               </IonCard>
-            </IonCol>
+            </IonCol> */}
           </IonRow>
         </IonGrid>
 
@@ -493,59 +558,36 @@ const ViewPatient: React.FC = () => {
 
         <IonGrid>
           <IonRow>
-            <IonCol size="6" sizeLg="4" sizeXs="12" sizeMd="6" sizeSm="12">
-              <IonCard>
-                <IonCardHeader>
-                  <IonCardTitle>Appearance</IonCardTitle>
-                </IonCardHeader>
-                <IonCardContent>
-                  <IonItem lines="full">
-                    <IonText slot="start">Communication</IonText>
-                    <IonText slot="end">Good</IonText>
-                  </IonItem>
-                  <IonItem lines="full">
-                    <IonText slot="start">Dental Health</IonText>
-                    <IonText slot="end">Needs Attention</IonText>
-                  </IonItem>
-                </IonCardContent>
-              </IonCard>
-            </IonCol>
-
-            <IonCol size="6" sizeLg="4" sizeXs="12" sizeMd="6" sizeSm="12">
-              <IonCard>
-                <IonCardHeader>
-                  <IonCardTitle>Activities of Daily Living (ADL)</IonCardTitle>
-                </IonCardHeader>
-                <IonCardContent>
-                  <IonItem lines="full">
-                    <IonText slot="start">Bathing</IonText>
-                    <IonText slot="end">Independent</IonText>
-                  </IonItem>
-                  <IonItem lines="full">
-                    <IonText slot="start">Eating</IonText>
-                    <IonText slot="end">Dependent</IonText>
-                  </IonItem>
-                </IonCardContent>
-              </IonCard>
-            </IonCol>
-
-            <IonCol size="6" sizeLg="4" sizeXs="12" sizeMd="6" sizeSm="12">
-              <IonCard>
-                <IonCardHeader>
-                  <IonCardTitle>Continence</IonCardTitle>
-                </IonCardHeader>
-                <IonCardContent>
-                  <IonItem lines="full">
-                    <IonText slot="start">Urine</IonText>
-                    <IonText slot="end">Continent</IonText>
-                  </IonItem>
-                  <IonItem lines="full">
-                    <IonText slot="start">Stool</IonText>
-                    <IonText slot="end">Continent</IonText>
-                  </IonItem>
-                </IonCardContent>
-              </IonCard>
-            </IonCol>
+            {patientOverview?.map((overview, index) => {
+              return (
+                <IonCol
+                  size="6"
+                  sizeLg="4"
+                  sizeXs="12"
+                  sizeMd="6"
+                  sizeSm="12"
+                  key={index}
+                >
+                  <IonCard>
+                    <IonCardHeader>
+                      <IonCardTitle>{overview.title}</IonCardTitle>
+                    </IonCardHeader>
+                    <IonCardContent>
+                      {overview.attribute.map((attribute, _index) => {
+                        return (
+                          <IonItem lines="full" key={_index}>
+                            <IonText slot="start">{attribute.value}</IonText>
+                            <IonText slot="end">
+                              {attribute.description}
+                            </IonText>
+                          </IonItem>
+                        );
+                      })}
+                    </IonCardContent>
+                  </IonCard>
+                </IonCol>
+              );
+            })}
           </IonRow>
         </IonGrid>
       </IonContent>

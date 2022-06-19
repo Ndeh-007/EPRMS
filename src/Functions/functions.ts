@@ -29,3 +29,30 @@ export async function GetUserData() {
   if (value) return JSON.parse(value);
   else return null;
 }
+
+export function calculateAge(dateString:string|number|undefined) {
+  if(dateString){
+    var today = new Date();
+    var birthDate = new Date(dateString);
+    var age = today.getFullYear() - birthDate.getFullYear();
+    var m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  }
+  return ''
+}
+
+export function convertDate(date:string|undefined|number,time?:boolean){
+  if(date && date != ''){
+    let _date = new Date(date).toLocaleDateString(); 
+    return " "+_date;
+  }  
+  if(date && date != '' && time){
+    let _date = new Date(date).toLocaleDateString(); 
+    let _time = new Date(date).toLocaleTimeString();
+    return " "+_date+" "+_time;
+  }
+  return ""
+}

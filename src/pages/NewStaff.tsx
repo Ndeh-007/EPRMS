@@ -143,7 +143,8 @@ const NewStaff: React.FC = () => {
       role: "staff",
       sex: staffSex,
       username: names[0],
-      position:"Ns"
+      position:"Ns",
+      date: Date.now(),
     };
 
     var storageRef = storage.ref(`staff/${data.id}/${data.id}-image.jpg`);

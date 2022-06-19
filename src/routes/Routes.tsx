@@ -13,7 +13,7 @@ import NewStaff from "../pages/NewStaff";
 import Page from "../pages/Page";
 import PatientRecord from "../pages/PatientRecord";
 import Patients from "../pages/Patients";
-import Staff from "../pages/Staff";
+import Staffs from "../pages/Staff"; 
 import ViewPatient from "../pages/ViewPatient";
 import ViewStaff from "../pages/ViewStaff";
 
@@ -41,7 +41,7 @@ const Routes: React.FC = () => {
           <PatientRecord></PatientRecord>
         </Route>
         <Route path="/staff" exact={true}>
-          <Staff/>
+          <Staffs/>
         </Route> 
         <Route path={"/view-staff"} exact={true}>
           <ViewStaff/>
