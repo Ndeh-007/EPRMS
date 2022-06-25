@@ -42,8 +42,7 @@ import "../styles/Page.css";
 
 const Dashboard: React.FC = () => {
   const { name } = useParams<{ name: string; mode?: string }>();
-  const STAFF = useContext(StaffContext);
-  console.log(STAFF.staff);
+  const STAFF = useContext(StaffContext); 
 
   function checkPatientState(value: number) {
     if (value === 0) {

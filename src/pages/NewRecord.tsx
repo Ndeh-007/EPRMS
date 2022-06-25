@@ -15,6 +15,7 @@ import {
   IonList,
   IonNote,
   IonPage,
+  IonProgressBar,
   IonRadio,
   IonRadioGroup,
   IonRow,
@@ -53,6 +54,7 @@ const NewRecord: React.FC = () => {
   const [patientRecord,setPatientRecord]=useState<PatientRecordInterface>()
   const [recordId,setRecordId]=useState<string>()
   const [startRecord,setStartRecord]=useState<boolean>(false)
+  const [loading,setloading] = useState(false)
   async function updatePatientRecord(section:string, data:AnyObject){
     
   }
@@ -84,29 +86,32 @@ const NewRecord: React.FC = () => {
             </p>
           </IonTitle>
         </IonText>
-          <IonButton slot="end"
+          {!startRecord &&(<IonButton slot="end"
           onClick={()=>{
-            firestore.collection("patients").doc(patient?.id).update({})
+            createRecord()
           }}
-          >start record</IonButton>
+          >start record</IonButton>)}
       </IonToolbar>
+          {loading && <IonProgressBar type="indeterminate"></IonProgressBar>}
       <IonContent>
+        {!startRecord && (
         <IonGrid>
           <IonRow>
             <IonCol size="12" sizeLg="6">
 
                 
               <IonCard mode="ios">
-              <form action="" onSubmit={(e:any)=>{
+              <form onSubmit={(e:any)=>{
+                setloading(true)
                 e.preventDefault();
                 let data:VitalSigns={
-                  bloodPressure:e.target.bloodPressure.value, 
+                  bloodPressure:e.target.bp.value, 
                   pulse:e.target.pulse.value,
                   temperature:e.target.temperature.value,
                   weight:e.target.weight.value,
                 }
 
-                firestore.collection("patients").doc(patient?.id).collection("records").doc()
+                firestore.collection("patients").doc(patient?.id).collection("records").doc(recordId).update({vitals:data}).then(()=>setloading(false))
               }}>
                 <IonCardHeader mode="md">
                   <IonCardTitle className="pt-2 fw-bold">
@@ -154,6 +159,15 @@ const NewRecord: React.FC = () => {
             </IonCol>
 
             <IonCol size="12" sizeLg="6">
+              <form onSubmit={(e:any)=>{
+                setloading(true)
+              e.preventDefault();
+                let data={
+                  patientComplaint: e.target.patientComplaint.value,
+                }
+                firestore.collection("patients").doc(patient?.id).collection("records").doc(recordId).update({patientComplaint:data.patientComplaint})
+              .then(()=>{setloading(false)})
+              }}> 
               <IonCard mode="ios">
                 <IonCardHeader mode="md">
                   <IonCardTitle className="pt-2 fw-bold">
@@ -172,13 +186,23 @@ const NewRecord: React.FC = () => {
                 </IonCardContent>
                 <hr className="p-none m-0" />
                 <div className="text-center py-3">
-                  <IonButton mode="md">Submit</IonButton>
-                </div>
-                
+                  <IonButton mode="md" type="submit">Submit</IonButton>
+                </div> 
               </IonCard>
+              </form>
             </IonCol>
 
             <IonCol size="12" sizeLg="6">
+              <form onSubmit={(e:any)=>{
+                setloading(true)
+              e.preventDefault();
+                let data:any={
+                  diagnosis: e.target.diagnosis.value,
+                }
+                firestore.collection("patients").doc(patient?.id).collection("records").doc(recordId).update({diagnosis:data.diagnosis})
+              .then(()=>{setloading(false)})
+              }}>
+                
               <IonCard mode="ios">
                 <IonCardHeader mode="md">
                   <IonCardTitle className="pt-2 fw-bold">
@@ -197,13 +221,23 @@ const NewRecord: React.FC = () => {
                 </IonCardContent>
                 <hr className="p-none m-0" />
                 <div className="text-center py-3">
-                  <IonButton mode="md">Submit</IonButton>
+                  <IonButton mode="md" type="submit">Submit</IonButton>
                 </div>
               </IonCard>
+              </form>
             </IonCol>
 
 
             <IonCol size="12" sizeLg="6">
+              <form onSubmit={(e:any)=>{
+                setloading(true)
+              e.preventDefault();
+                let data:any={
+                  treatment: e.target.treatment.value,
+                }
+                firestore.collection("patients").doc(patient?.id).collection("records").doc(recordId).update({treatment:data.treatment})
+              .then(()=>{setloading(false)})
+              }}> 
               <IonCard mode="ios">
                 <IonCardHeader mode="md">
                   <IonCardTitle className="pt-2 fw-bold">
@@ -222,9 +256,10 @@ const NewRecord: React.FC = () => {
                 </IonCardContent>
                 <hr className="p-none m-0" />
                 <div className="text-center py-3">
-                  <IonButton mode="md">Submit</IonButton>
+                  <IonButton mode="md" type="submit">Submit</IonButton>
                 </div>
               </IonCard>
+              </form>
             </IonCol>
 
 
@@ -242,14 +277,12 @@ const NewRecord: React.FC = () => {
                 </IonCardHeader>
                 <hr className="p-none m-0" />
                 <IonCardContent mode="md">
-                  <PatientImmunity></PatientImmunity>
+                  <PatientImmunity recordId={recordId}></PatientImmunity>
                 </IonCardContent>
-                <hr className="p-none m-0" />
-                <div className="text-center py-3">
-                  <IonButton mode="md">Submit</IonButton>
-                </div>
+                <hr className="p-none mx-0" /> 
               </IonCard>
             </IonCol>
+
             <IonCol size="12" sizeLg="6">
               <IonCard mode="ios">
                 <IonCardHeader mode="md">
@@ -259,32 +292,11 @@ const NewRecord: React.FC = () => {
                 </IonCardHeader>
                 <hr className="p-none m-0" />
                 <IonCardContent mode="md">
-                  <PatientsHistory></PatientsHistory>
+                  <PatientsHistory recordId={recordId}></PatientsHistory>
                 </IonCardContent>
-                <hr className="p-none m-0" />
-                <div className="text-center py-3">
-                  <IonButton mode="md">Submit</IonButton>
-                </div>
+                <hr className="p-none mx-0" /> 
               </IonCard>
-            </IonCol>
-
-            <IonCol size="12" sizeLg="6">
-              <IonCard mode="ios">
-                <IonCardHeader mode="md">
-                  <IonCardTitle className="pt-2 fw-bold">
-                    Immunity & Immunizations
-                  </IonCardTitle>
-                </IonCardHeader>
-                <hr className="p-none m-0" />
-                <IonCardContent mode="md">
-                  <PatientImmunity></PatientImmunity>
-                </IonCardContent>
-                <hr className="p-none m-0" />
-                <div className="text-center py-3">
-                  <IonButton mode="md">Submit</IonButton>
-                </div>
-              </IonCard>
-            </IonCol>
+            </IonCol> 
 
             <IonCol size="12" sizeLg="12">
               <hr />
@@ -302,6 +314,8 @@ const NewRecord: React.FC = () => {
                   <CheckList
                     data={Appearance}
                     states={AppearanceStates}
+                    recordId={recordId}
+                    title={"appearance"}
                   ></CheckList>
                 </IonCardContent>
                 <hr className="p-none m-0" />
@@ -320,7 +334,9 @@ const NewRecord: React.FC = () => {
                 </IonCardHeader>
                 <hr className="p-none m-0" />
                 <IonCardContent mode="md">
-                  <CheckList data={ADL} states={ADL_States}></CheckList>
+                  <CheckList data={ADL} states={ADL_States} 
+                    title={"adl"}
+                    recordId={recordId}></CheckList>
                 </IonCardContent>
                 <hr className="p-none m-0" />
                 <div className="text-center py-3">
@@ -339,8 +355,10 @@ const NewRecord: React.FC = () => {
                 <hr className="p-none m-0" />
                 <IonCardContent mode="md">
                   <CheckList
+                    title={"continence"}
                     data={Continence}
                     states={ContinenceStates}
+                    recordId={recordId}
                     catheter
                   ></CheckList>
                 </IonCardContent>
@@ -360,16 +378,16 @@ const NewRecord: React.FC = () => {
                 </IonCardHeader>
                 <hr className="p-none m-0" />
                 <IonCardContent mode="md">
-                  <CheckList data={IADL} states={ADL_States}></CheckList>
+                  <CheckList data={IADL} states={ADL_States} recordId={recordId} title="iadl"></CheckList>
                 </IonCardContent>
                 <hr className="p-none m-0" />
                 <div className="text-center py-3">
-                  <IonButton mode="md">Submit</IonButton>
+                  <IonButton mode="md" type="submit">Submit</IonButton>
                 </div>
               </IonCard>
             </IonCol>
           </IonRow>
-        </IonGrid>
+        </IonGrid>)}
       </IonContent>
     </IonPage>
   );

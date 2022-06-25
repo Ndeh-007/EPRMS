@@ -34,7 +34,7 @@ import {
 import React, { useContext, useEffect, useState } from "react";
 import { useHistory, useLocation, useParams } from "react-router";
 import { StaffContext } from "../context/AppContent";
-import { capitalizeString } from "../Functions/functions";
+import { capitalizeString, refactor } from "../Functions/functions";
 import { localImages } from "../images/images";
 import "../styles/PageHeader.css";
 const PageHeader: React.FC<{ name: string }> = (props) => {
@@ -94,6 +94,10 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
             </IonButton>
           </IonButtons>
         )}
+        <IonButton
+          onClick={()=>{refactor()}}
+          color="warning"
+        >refactor</IonButton>
         {/* <IonTitle slot="start">{capitalizeString(props.name)}</IonTitle> */}
 
         {/*  <IonCard button color="tertiary" mode="ios" className="card-header-button">

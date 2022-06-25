@@ -1,5 +1,6 @@
 import { Storage } from "@capacitor/storage";
 import { Staff } from "../interfaces/types";
+import { firestore } from "../Firebase";
 
 /**
  * It takes a string, makes it lowercase, then capitalizes the first letter and returns the result
@@ -55,4 +56,16 @@ export function convertDate(date:string|undefined|number,time?:boolean){
     return " "+_date+" "+_time;
   }
   return ""
+}
+
+export function refactor(){
+  firestore.collection("patients").get().then((docs)=>{
+    let ids= docs.docs.map((doc)=>doc.id);
+    // console.log(ids)
+    ids.forEach((id)=>{
+      firestore.collection("patients").doc(id).delete()
+    })
+  }).then(()=>{
+    alert("process complete")
+  }).catch((e)=>{console.log(e)})
 }

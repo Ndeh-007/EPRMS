@@ -631,6 +631,7 @@ const PatientRecord: React.FC = () => {
         <EditPatientRecord
           category={editValue}
           closeModal={closeEditModal}
+          recordId={_patientRecord?.id}
         ></EditPatientRecord>
       </IonModal>
     </IonPage>

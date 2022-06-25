@@ -84,7 +84,7 @@ export interface PatientRecordInterface {
 
 export interface HistoryInterface {
   title: string;
-  attribute: HistoryAttribute;
+  attributes: HistoryAttribute[];
   id:string;
 }
 
@@ -103,11 +103,18 @@ export interface Overview {
   }[];
 }
 
+export interface OverviewAttribute {
+  value: string;
+  description: string;
+}
+
 export interface HistoryAttribute {
   title: string;
   date: string | number;
   description: string;
+  id:string;
 }
+
 
 export interface Immunity {
   date: string | number;
@@ -121,10 +128,10 @@ export interface VitalSigns {
   temperature: string;
 }
 
-export interface Managment {
+export interface ManagementInterface {
   problem: string;
   solution: string;
-  date: string | number;
+  date: string;
 }
 
 export interface Labs {
