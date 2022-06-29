@@ -1,8 +1,89 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { Line } from "react-chartjs-2";
+import { Patient } from "../interfaces/types";
 
-const LineChart: React.FC = () => {
-  const labels = ["January", "February", "March", "April", "May", "June"];
+const LineChart: React.FC<{
+  patients?: Patient[];
+  dischargedPatients?: any[];
+  admittedPatients?: any[];
+}> = ({ patients, dischargedPatients, admittedPatients }) => {
+ 
+  function initGraph(){
+    let tempPatients: any = patients?.reverse();
+    let dates: any = tempPatients?.map((patient: any) =>
+      new Date(patient.date).toDateString()
+    );
+  
+    console.log(dates)
+  
+    let tempDischargedPatients: any = dischargedPatients?.reverse();
+    let dischargedDates: any = tempDischargedPatients?.map((patient: any) =>
+      new Date(patient.dischargedDate).toDateString()
+    );
+  
+    let tempAdmittedPatients: any = admittedPatients?.reverse();
+    let admittedDates: any = tempAdmittedPatients?.map((patient: any) =>
+      new Date(patient.admissionDate).toDateString()
+    );
+  
+    let allDates = [...dates, ...dischargedDates, ...admittedDates];
+    // allDates.sort();
+  
+    // Object created
+    var obj: any = {};
+    var objAdmitted: any = {};
+    var objDischarged: any = {};
+    var objOutPatient: any = {};
+  
+    let allPatients = [
+      ...tempPatients,
+      ...tempDischargedPatients,
+      ...tempAdmittedPatients,
+    ];
+  
+  
+    let admittedValues=[];
+    let dischargedValues=[];
+    let outPatientValues=[];
+   
+  /* Creating an object with the date as the key and the number of patients as the value. */
+    allPatients.forEach((patient: any) => {
+      if (patient.status == 'admitted') {
+        objAdmitted[new Date(patient.admissionDate).toDateString()] = objAdmitted[
+          new Date(patient.admissionDate).toDateString()
+        ]
+          ? objAdmitted[new Date(patient.admissionDate).toDateString()] + 1
+          : 1;
+      }
+  
+      if (patient.status == "discharged") {
+        objDischarged[new Date(patient.dischargedDate).toDateString()] = objDischarged[
+          new Date(patient.dischargedDate).toDateString()
+        ]
+          ? objDischarged[new Date(patient.dischargedDate).toDateString()] + 1
+          : 1;
+      }
+  
+      if (patient.status == "out-patient") {
+        objOutPatient[new Date(patient.date).toDateString()] = objOutPatient[
+          new Date(patient.date).toDateString()
+        ]
+          ? objOutPatient[new Date(patient.date).toDateString()] + 1
+          : 1;
+      } 
+    });
+  
+  }
+
+  console.log(patients)
+
+  useEffect(()=>{
+    if(patients !== undefined || dischargedPatients !== undefined || admittedPatients !== undefined){
+      initGraph();
+    } 
+  },[0])
+
+  const labels = Array.from(new Array(5).keys());
   const data = {
     labels: labels,
     datasets: [

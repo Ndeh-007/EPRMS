@@ -709,6 +709,7 @@ const ViewPatient: React.FC = () => {
                 },
                 ward: inputValue.value,
                 admitted: true,
+                admissionDate: Date.now(),
               };
               firestore
                 .collection("patients")

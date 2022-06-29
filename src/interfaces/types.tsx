@@ -74,7 +74,11 @@ export interface Patient {
   ward?: string;
   mothersName?:string;
   handlers?: string[];
-  complaint?:string
+  complaint?:string;
+  status?:string;
+  visitedDate?:string;
+  dischargedDate?:string;
+  admissionDate?:string;
 }
 
 export interface PatientRecordInterface {
