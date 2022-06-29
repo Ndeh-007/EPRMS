@@ -91,7 +91,7 @@ const Patients: React.FC = () => {
                     <br />
                     <span className="text-regular">
                       <IonNote className="text-small">
-                        [Total Number of Patients]
+                        {allPatients?.length} Patients
                       </IonNote>
                     </span>
                   </p>

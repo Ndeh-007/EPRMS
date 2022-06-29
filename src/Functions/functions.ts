@@ -31,6 +31,11 @@ export async function GetUserData() {
   else return null;
 }
 
+export async function DeleteUserData() {
+  await Storage.remove({ key: "staff" });
+  return true;
+}
+
 export function calculateAge(dateString:string|number|undefined) {
   if(dateString){
     var today = new Date();
@@ -69,3 +74,4 @@ export function refactor(){
     alert("process complete")
   }).catch((e)=>{console.log(e)})
 }
+

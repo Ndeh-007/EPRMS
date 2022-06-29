@@ -194,15 +194,30 @@ const Finance: React.FC = () => {
  *
  */
 
-const PatientsComplaint: React.FC = () => {
+const PatientsComplaint: React.FC <{recordId?:string}> = ({recordId}) => {
   const [summary, setSummary] = useState<string | null | undefined>("");
   const summaryRef = useRef<HTMLIonTextareaElement>(null);
+  const {patient} = useContext(PatientContext)
+
+  useEffect(()=>{ 
+    firestore
+      .collection("patients")
+      .doc(patient?.id)
+      .collection("records").doc(recordId).onSnapshot((snap)=>{
+        let doc:any = snap.data()
+        setSummary(doc.patientComplaint?doc.patientComplaint:"")
+      })
+  },[])
+  
   return (
-    <form
-      action=""
-      onSubmit={(e) => {
+    <form 
+      onSubmit={(e:any) => {
         e.preventDefault();
-        alert("submitted");
+        firestore
+          .collection("patients")
+          .doc(patient?.id)
+          .collection("records")
+          .doc(recordId).update({patientComplaint:e.target.complaint.value}).then(()=>{console.log('updated')})
       }}
     >
       <IonCard>
@@ -214,12 +229,11 @@ const PatientsComplaint: React.FC = () => {
           <IonTextarea
             placeholder="Patient's Complaint"
             required
+            name="complaint"
             ref={summaryRef}
+            // value={summary}
             onIonChange={(e) => {
-              setSummary(summaryRef.current?.value);
-              let text = summaryRef.current?.value;
-              var regex = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/g;
-              console.log(text?.match(regex));
+              setSummary(summaryRef.current?.value); 
             }}
           ></IonTextarea>
         </IonItem>
@@ -525,7 +539,7 @@ const Diagnostics: React.FC<{ recordId?: string }> = ({ recordId }) => {
       .doc(recordId)
       .onSnapshot((snapshot) => {
         let docs: any = snapshot.data();
-        setdiagnosis(docs);
+        setdiagnosis(docs.diagnosis);
       });
   }
 
@@ -566,10 +580,7 @@ const Diagnostics: React.FC<{ recordId?: string }> = ({ recordId }) => {
             name="diagnosis"
             ref={diagnosisRef}
             onIonChange={(e) => {
-              setdiagnosis(diagnosisRef.current?.value);
-              let text = diagnosisRef.current?.value;
-              var regex = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/g;
-              console.log(text?.match(regex));
+              setdiagnosis(diagnosisRef.current?.value); 
             }}
           ></IonTextarea>
         </IonItem>
@@ -676,7 +687,7 @@ const LabResults: React.FC<{ recordId?: string }> = ({ recordId }) => {
       .collection("labs")
       .onSnapshot((snap) => {
         let docs: any = snap.docs.map((doc) => {
-          doc.data();
+         return doc.data();
         });
         setLabResults(docs);
       });
@@ -688,8 +699,8 @@ const LabResults: React.FC<{ recordId?: string }> = ({ recordId }) => {
           <IonCard key={index}>
             <IonCardHeader>
               <IonToolbar>
-                <IonCardTitle>{labs.test}</IonCardTitle>
-                <IonCardSubtitle>{labs.handler}</IonCardSubtitle>
+                <IonCardTitle>{labs?.test}</IonCardTitle>
+                <IonCardSubtitle>{labs?.handler}</IonCardSubtitle>
                 <IonButtons slot="end">
                   <IonButton color="danger">
                     <IonIcon
@@ -701,7 +712,7 @@ const LabResults: React.FC<{ recordId?: string }> = ({ recordId }) => {
                 </IonButtons>
               </IonToolbar>
             </IonCardHeader>
-            <IonCardContent>{labs.result}</IonCardContent>
+            <IonCardContent>{labs?.result}</IonCardContent>
           </IonCard>
         );
       })}

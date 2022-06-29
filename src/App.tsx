@@ -31,7 +31,7 @@ import Routes from "./routes/Routes";
 import "chart.js/auto";
 import { Redirect, Route } from "react-router";
 import Login from "./pages/Login";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { PatientContext, StaffContext } from "./context/AppContent";
 import { Patient, Staff } from "./interfaces/types";
 
@@ -40,6 +40,10 @@ setupIonicReact();
 const App: React.FC = () => {
   const [staff, setStaff] = useState<Staff>();
   const [patient, setPatient] = useState<Patient>();
+
+  useEffect(()=>{
+    
+  })
   return (
     <IonApp>
       <StaffContext.Provider value={{ staff, setStaff }}>

@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useContext, useRef } from "react";
 import faker from "@faker-js/faker";
 import {
   IonAlert,
@@ -54,15 +54,18 @@ import "../styles/Page.css";
 import "../styles/NewPatient.css";
 import { informationCircle, save, trashSharp } from "ionicons/icons";
 import { Wishes } from "../interfaces/data";
+import { PatientContext } from "../context/AppContent";
 
 const EditPatient: React.FC = () => {
   const { name } = useParams<{ name: string; mode?: string }>();
   const formRef = useRef<HTMLFormElement>(null);
+  const {patient} = useContext(PatientContext);
   const patientImageInputRef = useRef<HTMLInputElement>(null);
   const [alertDischarge, setAlertDischarge] = useState(false);
   const [alertAdmit, setAlertAdmit] = useState(false);
   const [loading, setLoading] = useState(false);
   const [operationSuccessful, setOperationSuccessful] = useState(false);
+  
   return (
     <IonPage>
       <PageHeader name={name}></PageHeader>
@@ -422,7 +425,7 @@ const EditPatient: React.FC = () => {
         isOpen={alertDischarge}
         onDidDismiss={() => setAlertDischarge(false)}
         cssClass="alert-discharge"
-        message={"Discharge [Patient Name]"}
+        message={"Discharge " + patient?.name}
         header={"Discharge Patient"}
         buttons={[
           {
@@ -448,7 +451,7 @@ const EditPatient: React.FC = () => {
         isOpen={alertAdmit}
         onDidDismiss={() => setAlertAdmit(false)}
         cssClass="alert-admit"
-        message={"Admit [Patient Name]"}
+        message={"Admit " + patient?.name}
         header={"Admit Patient"}
         buttons={[
           {

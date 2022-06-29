@@ -28,7 +28,7 @@ import {
   IonToolbar,
 } from "@ionic/react";
 import { chevronForward } from "ionicons/icons";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { useParams } from "react-router";
 import BarChart from "../components/BarChart";
 import DoughnutChart from "../components/DoughnutChart";
@@ -36,13 +36,23 @@ import ExploreContainer from "../components/ExploreContainer";
 import LineChart from "../components/LineChart";
 import PageHeader from "../components/PageHeader";
 import { StaffContext } from "../context/AppContent";
+import { firestore } from "../Firebase";
 import { capitalizeString } from "../Functions/functions";
 import { customIcons, localImages } from "../images/images";
+import { Patient } from "../interfaces/types";
 import "../styles/Page.css";
 
 const Dashboard: React.FC = () => {
   const { name } = useParams<{ name: string; mode?: string }>();
   const STAFF = useContext(StaffContext); 
+  const [allPatient, setAllPatients] = useState<Patient[]>()
+
+  function fetchPatients(){
+    firestore.collection('patients').onSnapshot((snap)=>{
+      let docs:any = snap.docs.map((doc)=>doc.data())
+      setAllPatients(docs)
+    })
+  }
 
   function checkPatientState(value: number) {
     if (value === 0) {

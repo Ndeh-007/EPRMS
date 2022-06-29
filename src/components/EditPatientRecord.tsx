@@ -43,7 +43,7 @@ const EditPatientRecord: React.FC<{
       setContent(temp);
     }
     if (category === "Patients Complain") {
-      let temp = <PatientsComplaint />;
+      let temp = <PatientsComplaint recordId={recordId} />;
       setContent(temp);
     }
     if (category === "Patient History") {

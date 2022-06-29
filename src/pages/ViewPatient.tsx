@@ -83,7 +83,8 @@ const ViewPatient: React.FC = () => {
   const [viewImagePopover, setviewImagePopover] = useState(false);
   const [patientRecordsModal, setPatientRecordsModal] = useState(false);
   const { patient, setPatient } = useContext(PatientContext);
-  const [patientRecords, setPatientRecords] = useState<PatientRecordInterface[]>();
+  const [patientRecords, setPatientRecords] =
+    useState<PatientRecordInterface[]>();
   const [FirstRecord, setFirstRecord] = useState<PatientRecordInterface>();
   const [SecondRecord, setSecondRecord] = useState<PatientRecordInterface>();
   const [loadingRecords, setLoadingRecords] = useState(false);
@@ -104,15 +105,27 @@ const ViewPatient: React.FC = () => {
       .onSnapshot((snapshot) => {
         let docs: any = snapshot.docs.map((doc) => doc.data());
         setFirstRecord(docs[0]);
-        if (docs[1]) setSecondRecord(docs[1]);
+        if (docs[1]) {setSecondRecord(docs[1])};
+        console.log(docs)
         setPatientRecords(docs);
         setLoadingRecords(false);
       });
   }
 
+  function listenToRecord() {
+    firestore
+      .collection("patients")
+      .doc(patient?.id)
+      .collection("records")
+      .doc(FirstRecord?.id)
+      .onSnapshot((snap) => {
+        let doc: any = snap.data();
+        setFirstRecord(doc);
+      });
+  }
+
   function viewPatientRecord(value: PatientRecordInterface | undefined) {
-    if(value)
-    history.push("/patient-record", value);
+    if (value) history.push("/patient-record", value);
     else history.push("/patient-record");
   }
 
@@ -134,6 +147,8 @@ const ViewPatient: React.FC = () => {
     firestore
       .collection("patients")
       .doc(patient?.id)
+      .collection("records")
+      .doc(FirstRecord?.id)
       .collection("history")
       .onSnapshot((snapshot) => {
         let docs: any = snapshot.docs.map((doc) => doc.data());
@@ -147,6 +162,8 @@ const ViewPatient: React.FC = () => {
     firestore
       .collection("patients")
       .doc(patient?.id)
+      .collection("records")
+      .doc(patientRecords?.[0]?.id)
       .collection("overview")
       .onSnapshot((snapshot) => {
         let docs: any = snapshot.docs.map((doc) => doc.data());
@@ -157,6 +174,14 @@ const ViewPatient: React.FC = () => {
 
   useEffect(() => {
     getRecords();
+    getPatientImmunity();
+    getPatientOverview();
+    // listenToRecord();
+  }, []);
+
+
+  useEffect(() => { 
+    listenToRecord();
   }, []);
 
   return (
@@ -173,6 +198,7 @@ const ViewPatient: React.FC = () => {
             }}
             className="m-3"
             size="small"
+            hidden={FirstRecord?.discharged && FirstRecord?.admitted ? true : false}
           >
             Discharge Patient
           </IonButton>
@@ -182,6 +208,9 @@ const ViewPatient: React.FC = () => {
             onClick={() => {
               setAlertAdmit(true);
             }}
+            hidden={
+            FirstRecord?.admitted ? true : false
+            }
             size="small"
             className="me-3"
           >
@@ -210,7 +239,7 @@ const ViewPatient: React.FC = () => {
               <IonChip
                 slot="end"
                 color="primary"
-                onClick={() => {
+                onClick={() => { 
                   setPatientRecordsModal(true);
                 }}
               >
@@ -597,7 +626,7 @@ const ViewPatient: React.FC = () => {
         isOpen={alertDischarge}
         onDidDismiss={() => setAlertDischarge(false)}
         cssClass="alert-discharge"
-        message={"Discharge [Patient Name]"}
+        message={"Discharge " + patient?.name}
         header={"Discharge Patient"}
         buttons={[
           {
@@ -613,9 +642,40 @@ const ViewPatient: React.FC = () => {
             cssClass: "alert-discharge-confirm",
             handler: () => {
               console.log("Patient Discharged");
-              setOperationSuccessful(true);
+              setLoading(true)
+              let v: any = window.document.getElementById("dischargeStatus");
+              let data = {
+                status: "discharged",
+                discharged: true,
+                dischargedDate: Date.now(),
+                dischargedStatus: v.value ? v.value : "alive",
+              };
+              firestore
+                .collection("patients")
+                .doc(patient?.id)
+                .collection("records")
+                .doc(FirstRecord?.id)
+                .update(data)
+                .then(() => {
+                  setOperationSuccessful(true);
+                  setLoading(false)
+                })
+                .catch((e) => {
+                  console.error(e);
+                  setLoading(false)
+                  alert("discharge failed");
+                });
+
+              firestore.collection('dischargedPatients').doc(patient?.id).set(data)
             },
             role: "confirm",
+          },
+        ]}
+        inputs={[
+          {
+            placeholder: "Status e.g Alive",
+            type: "text",
+            id: "dischargeStatus",
           },
         ]}
       ></IonAlert>
@@ -623,7 +683,7 @@ const ViewPatient: React.FC = () => {
         isOpen={alertAdmit}
         onDidDismiss={() => setAlertAdmit(false)}
         cssClass="alert-admit"
-        message={"Admit [Patient Name]"}
+        message={"Admit " + patient?.name}
         header={"Admit Patient"}
         buttons={[
           {
@@ -638,11 +698,36 @@ const ViewPatient: React.FC = () => {
             text: "Admit",
             cssClass: "alert-admit-confirm",
             handler: () => {
-              console.log("Patient Admitted");
+              setLoading(true)
               let inputValue: any =
                 window.document.getElementById("ward-input");
-              console.log(inputValue.value);
-              setOperationSuccessful(true);
+              let reason: any = window.document.getElementById("ad-input");
+              let data = {
+                admission: {
+                  date: Date.now(),
+                  reason: reason.value ? reason.value : "",
+                },
+                ward: inputValue.value,
+                admitted: true,
+              };
+              firestore
+                .collection("patients")
+                .doc(patient?.id)
+                .collection("records")
+                .doc(FirstRecord?.id)
+                .update(data)
+                .then(() => {
+                  console.log("Patient Admitted");
+                  setLoading(false)
+                  setOperationSuccessful(true);
+                })
+                .catch((e) => {
+                  console.error(e);
+                  alert("admission failed");
+                  setLoading(false)
+                });
+
+              firestore.collection('admittedPatients').doc(patient?.id).set(data)
             },
             role: "confirm",
           },
@@ -652,6 +737,11 @@ const ViewPatient: React.FC = () => {
             placeholder: "Ward ID",
             type: "text",
             id: "ward-input",
+          },
+          {
+            placeholder: "Reason for admission",
+            type: "text",
+            id: "ad-input",
           },
         ]}
       ></IonAlert>

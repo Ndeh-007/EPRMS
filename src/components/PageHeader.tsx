@@ -34,7 +34,12 @@ import {
 import React, { useContext, useEffect, useState } from "react";
 import { useHistory, useLocation, useParams } from "react-router";
 import { StaffContext } from "../context/AppContent";
-import { capitalizeString, refactor } from "../Functions/functions";
+import {
+  capitalizeString,
+  DeleteUserData,
+  GetUserData,
+  refactor,
+} from "../Functions/functions";
 import { localImages } from "../images/images";
 import "../styles/PageHeader.css";
 const PageHeader: React.FC<{ name: string }> = (props) => {
@@ -46,19 +51,57 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
   const location = useLocation();
   const history = useHistory();
   const [showModal, setShowModal] = useState(false);
-  const context = useContext(StaffContext) 
+  const context = useContext(StaffContext);
+  const [modal, setModal] = useState(false);
+
+  const { setStaff, staff } = useContext(StaffContext);
 
   function logOutUser() {
     setShowPopover({
       showPopover: false,
       event: undefined,
     });
-    history.push("/login");
+    DeleteUserData()
+      .then(() => {
+        setStaff(null);
+        history.push("/login");
+      })
+      .catch((e) => {
+        console.log("error", e);
+      });
+  }
+
+  function handleNavigation(_location: string) {
+    console.log("location", _location);
+    if (_location == "/patient-record") {
+      history.push('/view-patient')
+    }
+    if (_location == "/view-patient") {
+      history.push('/patients')
+    }
+    if (_location == "/new-record") {
+      history.push('/view-patient')
+    }
+    if (_location == "/new-patient") {
+      history.push('/patients')
+    }
+    if (_location == "/edit-patient") {
+      history.push('/view-patient')
+    }
+    if (_location == "/staff") {
+      history.push('/dashboard')
+    }
+    if (_location == "/patients") {
+      history.push('/dashboard')
+    }
+    if (_location == "/new-staff") {
+      history.push('/staff')
+    }
   }
 
   function goBack() {
-    if (location.pathname !== "/dashboard") { 
-      history.goBack();
+    if (location.pathname !== "/dashboard") {
+      handleNavigation(location.pathname);
     }
   }
 
@@ -70,7 +113,19 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
     history.push("/view-staff");
   }
 
+  function initStaff() {
+    GetUserData().then((data) => {
+      if (data) {
+        context.setStaff(data);
+      }
+      if(data == null){
+        history.push('/login')
+      }
+    });
+  }
+
   useEffect(() => {
+    initStaff();
     if (location.pathname === "/dashboard") {
       setShowBackButton(false);
     }
@@ -94,19 +149,6 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
             </IonButton>
           </IonButtons>
         )}
-        <IonButton
-          onClick={()=>{refactor()}}
-          color="warning"
-        >refactor</IonButton>
-        {/* <IonTitle slot="start">{capitalizeString(props.name)}</IonTitle> */}
-
-        {/*  <IonCard button color="tertiary" mode="ios" className="card-header-button">
-           <IonIcon className="ion-padding" icon={addCircle}></IonIcon> 
-          <IonText  className="ion-padding text-bold">
-            Announcements
-          </IonText>
-        </IonCard>
-          */}
         {!backButton && (
           <IonButton
             slot="start"

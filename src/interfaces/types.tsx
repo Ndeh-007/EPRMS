@@ -29,6 +29,15 @@ export interface Staff {
   username: string | null | undefined;
   position?: any;
   date: number | string;
+  displayName?: string | null;
+  // email: string | null;
+  phoneNumber?: string | null;
+  photoURL?: string | null;
+  providerId?: string;
+  /**
+   * The user's unique ID.
+   */
+  uid?: string;
 }
 
 export interface StaffAccess {
@@ -65,6 +74,7 @@ export interface Patient {
   ward?: string;
   mothersName?:string;
   handlers?: string[];
+  complaint?:string
 }
 
 export interface PatientRecordInterface {
@@ -79,7 +89,10 @@ export interface PatientRecordInterface {
   status?: string;
   dischargeDate?: string;
   dischargeStatus?: string;
+  admitted?:boolean;
+  discharged?:boolean;
   ward?: string; 
+  physicalExam?:string;
 }
 
 export interface HistoryInterface {

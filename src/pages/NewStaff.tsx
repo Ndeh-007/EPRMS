@@ -42,7 +42,7 @@ import {
   IonToolbar,
 } from "@ionic/react";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useLocation, useParams } from "react-router";
 import PageHeader from "../components/PageHeader";
 import PatientItem from "../components/PatientItem";
 import { capitalizeString, generatePassword } from "../Functions/functions";
@@ -68,6 +68,7 @@ const NewStaff: React.FC = () => {
   const maritalStatusRef = useRef<HTMLIonSelectElement>(null);
   const positionRef = useRef<HTMLIonSelectElement>(null);
   const biographyRef = useRef<HTMLIonTextareaElement>(null);
+  const location = useLocation();
 
   const [staffBiography, setStaffBiography] = useState<
     string | null | undefined
@@ -112,7 +113,7 @@ const NewStaff: React.FC = () => {
     color: "",
   });
 
-  const context = useContext(StaffContext)
+  const context = useContext(StaffContext);
 
   function InitializeImage(file: File | null | undefined) {
     let i: any = file;
@@ -143,7 +144,7 @@ const NewStaff: React.FC = () => {
       role: "staff",
       sex: staffSex,
       username: names[0],
-      position:"Ns",
+      position: "Ns",
       date: Date.now(),
     };
 
@@ -188,27 +189,36 @@ const NewStaff: React.FC = () => {
     }
 
     // check if username is taken
-    firestore.collection("staff").where("username", "==", staffUsername).onSnapshot((snapshot)=>{
-      if(snapshot.docs.length > 0){
-        alert("Username already taken");
-        setLoading(false);
-        return;
-      }
-    })
-    
-    let data:StaffAccess = {
+    firestore
+      .collection("staff")
+      .where("username", "==", staffUsername)
+      .onSnapshot((snapshot) => {
+        if (snapshot.docs.length > 0) {
+          alert("Username already taken");
+          setLoading(false);
+          return;
+        }
+      });
+
+    let data: StaffAccess = {
       username: staffUsername,
       password: staffPassword,
       role: staffRole,
       position: staffPosition,
-    }
+    };
 
-    firestore.collection("staff").doc(context.staff?.id).update(data).then(()=>{
-      setLoading(false);
-      setOperationSuccessful({
-        state:true, message:"Access Modified Successfully", color:"success"
-      })
-    })
+    firestore
+      .collection("staff")
+      .doc(context.staff?.id)
+      .update(data)
+      .then(() => {
+        setLoading(false);
+        setOperationSuccessful({
+          state: true,
+          message: "Access Modified Successfully",
+          color: "success",
+        });
+      });
 
     setOperationSuccessful({
       state: true,
@@ -496,13 +506,13 @@ const NewStaff: React.FC = () => {
           </form>
 
           <form
-            action=""
             onSubmit={(e) => {
               e.preventDefault();
               ModfifyAccess();
             }}
           >
-            <IonGrid className="pt-0 mt-0">
+            <IonGrid className="pt-0 mt-0" 
+            hidden={location.pathname == "/new-staff" ? true : false}>
               <IonRow>
                 <IonCol size="12">
                   <IonCard mode="ios">
@@ -575,7 +585,12 @@ const NewStaff: React.FC = () => {
                                   lines="full"
                                 >
                                   <IonLabel position="floating">Role</IonLabel>
-                                  <IonSelect value={staffRole} onIonChange={e=>setStaffRole(e.detail.value)}>
+                                  <IonSelect
+                                    value={staffRole}
+                                    onIonChange={(e) =>
+                                      setStaffRole(e.detail.value)
+                                    }
+                                  >
                                     <IonSelectOption value={"admin"}>
                                       Admin
                                     </IonSelectOption>
@@ -595,7 +610,12 @@ const NewStaff: React.FC = () => {
                                     Position
                                   </IonLabel>
                                   {/* set Value to present value */}
-                                  <IonSelect value={staffPosition} onIonChange={e=>setStaffPosition(e.detail.value)}>
+                                  <IonSelect
+                                    value={staffPosition}
+                                    onIonChange={(e) =>
+                                      setStaffPosition(e.detail.value)
+                                    }
+                                  >
                                     <IonSelectOption value={"doctor"}>
                                       Doctor
                                     </IonSelectOption>
