@@ -338,7 +338,7 @@ const Dashboard: React.FC = () => {
               <IonCard mode="ios">
                 <IonCardHeader mode="md">
                   <IonCardTitle className="pt-2 fw-bold">
-                    Patient Chart
+                    Monthly Statistics
                   </IonCardTitle>
                 </IonCardHeader>
                 <hr className="p-none m-0" />

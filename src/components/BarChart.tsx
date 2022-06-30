@@ -12,6 +12,9 @@ const BarChart: React.FC<{
   const [cumulativeAdmitted, setCumulativeAdmitted] = useState<number>(0);
   const [cumulativeDischarged, setCumulativeDischarged] = useState<number>(0);
   const [cumulativeOutPatients, setCumulativeOutPatients] = useState<number>(0);
+  const [cumulativeArrayAdmitted, setCumulativeArrayAdmitted] = useState<number[]>();
+  const [cumulativeArrayDischarged, setCumulativeArrayDischarged] = useState<number[]>();
+  const [cumulativeArrayOutPatients, setCumulativeArrayOutPatients] = useState<number[]>();
 
   let allDates: any[] = [];
   let admittedValues: any[] = [];
@@ -43,8 +46,7 @@ const BarChart: React.FC<{
     let uniqueDates = allDates.filter((element, index) => {
       return allDates.indexOf(element) === index;
     });
-
-    console.log(uniqueDates)
+ 
     setCombinedDates(uniqueDates);
     // Object created
     var obj: any = {};
@@ -76,34 +78,35 @@ const BarChart: React.FC<{
     uniquePatients.forEach((patient: any) => {
       // console.log(patient.status, patient.name, patient.admissionDate)
       if (patient.status == "admitted") {
-        objAdmitted[new Date(Number(patient.admissionDate)).toDateString()] =
-          objAdmitted[new Date(Number(patient.admissionDate)).toDateString()]
+        objAdmitted[ new Intl.DateTimeFormat('en-US',options).format(Number(patient.admissionDate)).toString()] =
+          objAdmitted[ new Intl.DateTimeFormat('en-US',options).format(Number(patient.admissionDate)).toString()]
             ? objAdmitted[
-                new Date(Number(patient.admissionDate)).toDateString()
+                 new Intl.DateTimeFormat('en-US',options).format(Number(patient.admissionDate)).toString()
               ] + 1
             : 1; // If the key exists, increment the value. If not, set the value to 1.
       }
 
       if (patient.status == "discharged") {
-        objDischarged[new Date(Number(patient.dischargedDate)).toDateString()] =
-          objDischarged[new Date(Number(patient.dischargedDate)).toDateString()]
+        objDischarged[ new Intl.DateTimeFormat('en-US',options).format(Number(patient.dischargedDate)).toString()] =
+          objDischarged[ new Intl.DateTimeFormat('en-US',options).format(Number(patient.dischargedDate)).toString()]
             ? objDischarged[
-                new Date(Number(patient.dischargedDate)).toDateString()
+                 new Intl.DateTimeFormat('en-US',options).format(Number(patient.dischargedDate)).toString()
               ] + 1
             : 1; // If the key exists, increment the value. If not, set the value to 1.
       }
 
       if (patient.status == "out-patient") {
-        objOutPatient[new Date(Number(patient.date)).toDateString()] =
-          objOutPatient[new Date(Number(patient.date)).toDateString()]
-            ? objOutPatient[new Date(Number(patient.date)).toDateString()] + 1
+        objOutPatient[new Intl.DateTimeFormat('en-US',options).format(Number(patient.date)).toString()] =
+          objOutPatient[new Intl.DateTimeFormat('en-US',options).format(Number(patient.date)).toString()]
+            ? objOutPatient[new Intl.DateTimeFormat('en-US',options).format(Number(patient.date)).toString()] + 1
             : 1; // If the key exists, increment the value. If not, set the value to 1.
       }
     });
+ 
 
-    for (let i = 0; i < uniqueDates.length; i++) {
+    for (let i = 0; i < uniqueDates.length; i++) { 
       if (objAdmitted.hasOwnProperty(uniqueDates[i])) { 
-        admittedValues.push(objAdmitted[uniqueDates[i]]);  
+        admittedValues.push(objAdmitted[uniqueDates[i]]); 
       }
       if (objDischarged.hasOwnProperty(uniqueDates[i])) { 
         dischargedValues.push(objDischarged[uniqueDates[i]]); 
@@ -113,22 +116,21 @@ const BarChart: React.FC<{
       }
     }
 
-    var sumAdmitted = admittedValues.reduce((accumulator, value) => {
+    setCumulativeArrayAdmitted(admittedValues);
+    setCumulativeArrayDischarged(dischargedValues);
+    setCumulativeArrayOutPatients(outPatientValues);
+
+    var sumAdmitted = admittedValues.reduce((accumulator, value) => { 
       return accumulator + value;
     }, 0);
-    var sumDischarged = dischargedValues.reduce((accumulator, value) => {
+    var sumDischarged = dischargedValues.reduce((accumulator, value) => { 
       return accumulator + value;
     }, 0);
 
-    var sumOutPatient = outPatientValues.reduce((accumulator, value) => {
+    var sumOutPatient = outPatientValues.reduce((accumulator, value) => { 
       return accumulator + value;
     }, 0);
-
-    console.log(
-      sumAdmitted,
-      sumDischarged,
-      sumOutPatient,
-    )
+ 
    
     setCumulativeAdmitted(sumAdmitted);
     setCumulativeDischarged(sumDischarged);
@@ -176,29 +178,26 @@ const BarChart: React.FC<{
       },
     },
   };
-
-
-  // let tempPatients: any = patients?.reverse();
-  // let dates: any = tempPatients?.map((patient: any) =>
-  //   new Date(patient.date).toDateString()
-  // );
  
+  const labels = [
+   ...combinedDates 
+  ]; 
   const data = {
-    combinedDates,
+    labels,
     datasets: [
       {
         label: "Admitted",
-        data: cumulativeAdmitted,
+        data: cumulativeArrayAdmitted,
         backgroundColor: "#eb445a",
       },
       {
         label: "discharged",
-        data: cumulativeDischarged,
+        data: cumulativeArrayDischarged,
         backgroundColor: "#28ba62",
       },
       {
         label: "out-patient",
-        data: cumulativeOutPatients,
+        data: cumulativeArrayOutPatients,
         backgroundColor: "#3880ff",
       },
     ],
