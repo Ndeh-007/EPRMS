@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Line } from "react-chartjs-2";
 import { Patient } from "../interfaces/types";
 
@@ -7,91 +7,130 @@ const LineChart: React.FC<{
   dischargedPatients?: any[];
   admittedPatients?: any[];
 }> = ({ patients, dischargedPatients, admittedPatients }) => {
- 
-  function initGraph(){
+  const [combinedDates, setCombinedDates] = useState<string[]>([]);
+  const [cumulativeAdmitted, setCumulativeAdmitted] = useState<number[]>();
+  const [cumulativeDischarged, setCumulativeDischarged] = useState<number[]>();
+  const [cumulativeOutPatients, setCumulativeOutPatients] = useState<number[]>();
+
+  let allDates: any[] = [];
+  let admittedValues: any[] = [];
+  let dischargedValues: any[] = [];
+  let outPatientValues: any[] = [];
+
+  function initGraph() {
     let tempPatients: any = patients?.reverse();
     let dates: any = tempPatients?.map((patient: any) =>
       new Date(patient.date).toDateString()
     );
-  
-    console.log(dates)
-  
+
     let tempDischargedPatients: any = dischargedPatients?.reverse();
     let dischargedDates: any = tempDischargedPatients?.map((patient: any) =>
       new Date(patient.dischargedDate).toDateString()
     );
-  
-    let tempAdmittedPatients: any = admittedPatients?.reverse();
+
+    admittedPatients?.reverse();
+
+    let tempAdmittedPatients: any = admittedPatients;
     let admittedDates: any = tempAdmittedPatients?.map((patient: any) =>
       new Date(patient.admissionDate).toDateString()
     );
-  
-    let allDates = [...dates, ...dischargedDates, ...admittedDates];
-    // allDates.sort();
-  
+
+    allDates = [...dates, ...dischargedDates, ...admittedDates];
+    allDates.sort().reverse();
+    let uniqueDates = allDates.filter((element, index) => {
+      return allDates.indexOf(element) === index;
+    });
+    setCombinedDates(uniqueDates);
     // Object created
     var obj: any = {};
     var objAdmitted: any = {};
     var objDischarged: any = {};
     var objOutPatient: any = {};
-  
-    let allPatients = [
+
+    let allPatients: any[] = [
       ...tempPatients,
       ...tempDischargedPatients,
       ...tempAdmittedPatients,
     ];
-  
-  
-    let admittedValues=[];
-    let dischargedValues=[];
-    let outPatientValues=[];
-   
-  /* Creating an object with the date as the key and the number of patients as the value. */
-    allPatients.forEach((patient: any) => {
-      if (patient.status == 'admitted') {
-        objAdmitted[new Date(patient.admissionDate).toDateString()] = objAdmitted[
-          new Date(patient.admissionDate).toDateString()
-        ]
-          ? objAdmitted[new Date(patient.admissionDate).toDateString()] + 1
-          : 1;
+
+    let uniquePatientsId: any = [];
+    let uniquePatients: any = [];
+
+    let unique = allPatients.filter((element) => {
+      const isDuplicate = uniquePatientsId.includes(element.id);
+      if (!isDuplicate) {
+        uniquePatientsId.push(element.id);
+        uniquePatients.push(element);
+        return true;
       }
-  
+
+      return false;
+    }); 
+    /* Creating an object with the date as the key and the number of patients as the value. */
+    uniquePatients.forEach((patient: any) => {
+      // console.log(patient.status, patient.name, patient.admissionDate)
+      if (patient.status == "admitted") {
+        objAdmitted[new Date(Number(patient.admissionDate)).toDateString()] =
+          objAdmitted[new Date(Number(patient.admissionDate)).toDateString()]
+            ? objAdmitted[
+                new Date(Number(patient.admissionDate)).toDateString()
+              ] + 1
+            : 1; // If the key exists, increment the value. If not, set the value to 1.
+      }
+
       if (patient.status == "discharged") {
-        objDischarged[new Date(patient.dischargedDate).toDateString()] = objDischarged[
-          new Date(patient.dischargedDate).toDateString()
-        ]
-          ? objDischarged[new Date(patient.dischargedDate).toDateString()] + 1
-          : 1;
+        objDischarged[new Date(Number(patient.dischargedDate)).toDateString()] =
+          objDischarged[new Date(Number(patient.dischargedDate)).toDateString()]
+            ? objDischarged[
+                new Date(Number(patient.dischargedDate)).toDateString()
+              ] + 1
+            : 1; // If the key exists, increment the value. If not, set the value to 1.
       }
-  
+
       if (patient.status == "out-patient") {
-        objOutPatient[new Date(patient.date).toDateString()] = objOutPatient[
-          new Date(patient.date).toDateString()
-        ]
-          ? objOutPatient[new Date(patient.date).toDateString()] + 1
-          : 1;
-      } 
+        objOutPatient[new Date(Number(patient.date)).toDateString()] =
+          objOutPatient[new Date(Number(patient.date)).toDateString()]
+            ? objOutPatient[new Date(Number(patient.date)).toDateString()] + 1
+            : 1; // If the key exists, increment the value. If not, set the value to 1.
+      }
     });
-  
+
+    for (let i = 0; i < uniqueDates.length; i++) {
+      if (objAdmitted.hasOwnProperty(uniqueDates[i])) { 
+        admittedValues.push(objAdmitted[uniqueDates[i]]);  
+      }
+      if (objDischarged.hasOwnProperty(uniqueDates[i])) { 
+        dischargedValues.push(objDischarged[uniqueDates[i]]); 
+      }
+      if (objOutPatient.hasOwnProperty(uniqueDates[i])) {
+        outPatientValues.push(objOutPatient[uniqueDates[i]]);
+      }
+    }
+   
+    setCumulativeAdmitted(admittedValues);
+    setCumulativeDischarged(dischargedValues);
+    setCumulativeOutPatients(outPatientValues);
   }
 
-  console.log(patients)
-
-  useEffect(()=>{
-    if(patients !== undefined || dischargedPatients !== undefined || admittedPatients !== undefined){
+  useEffect(() => {
+    if (
+      patients != undefined &&
+      dischargedPatients != undefined &&
+      admittedPatients != undefined
+    ) {
       initGraph();
-    } 
-  },[0])
+    }
+  }, [patients, dischargedPatients, admittedPatients]);
 
-  const labels = Array.from(new Array(5).keys());
+  const labels = combinedDates;
   const data = {
     labels: labels,
     datasets: [
       {
-        label: "Patients",
+        label: "Out Patients",
         backgroundColor: "#3880ff",
         borderColor: "#3880ff",
-        data: [40, 10, 12, 20, 26, 37],
+        data: cumulativeOutPatients,
         tension: 0.3,
         point: {
           backgroundColor: "#ffffff",
@@ -106,7 +145,7 @@ const LineChart: React.FC<{
         label: "Admitted",
         backgroundColor: "#eb445a",
         borderColor: "#eb445a",
-        data: [0, 32, 5, 2, 55, 30],
+        data: cumulativeAdmitted,
         tension: 0.3,
         point: {
           backgroundColor: "#ffffff",
@@ -121,7 +160,7 @@ const LineChart: React.FC<{
         label: "Discharged",
         backgroundColor: "#28ba62",
         borderColor: "#28ba62",
-        data: [30, 20, 15, 22, 25, 17],
+        data: cumulativeDischarged,
         tension: 0.3,
         point: {
           backgroundColor: "#ffffff",
@@ -171,7 +210,7 @@ const LineChart: React.FC<{
   };
 
   return (
-    <div className="p-3">
+    <div className="p-lg-3 p-none">
       <Line data={data} options={options}></Line>
     </div>
   );

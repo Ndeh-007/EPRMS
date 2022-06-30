@@ -23,9 +23,11 @@ import {
   IonNote,
   IonPage,
   IonRow,
+  IonSpinner,
   IonText,
   IonTitle,
   IonToolbar,
+  IonProgressBar,
 } from "@ionic/react";
 import { chevronForward } from "ionicons/icons";
 import { useContext, useEffect, useState } from "react";
@@ -52,55 +54,60 @@ const Dashboard: React.FC = () => {
   const [outPatients, setOutPatients] = useState<Patient[]>();
   const [recentPatients, setRecentPatients] = useState<Patient[]>();
   const [greetings, setGreetings] = useState<string>();
+  const [loading, setLoading] = useState(false);
   const history = useHistory();
 
   function fetchPatients() {
-    firestore.collection("patients").orderBy('date','desc').onSnapshot((snap) => {
-      let arr: any[] = [];
-      let docs: any[] = snap.docs.map((doc) => {
-        return doc.data();
+    console.log("fetching patients");
+    firestore
+      .collection("patients")
+      .orderBy("date", "desc")
+      .onSnapshot((snap) => {
+        let arr: any[] = [];
+        let docs: any[] = snap.docs.map((doc) => {
+          return doc.data();
+        });
+        snap.docs.forEach((sp) => {
+          arr.push(sp.data());
+        });
+        setAllPatients(arr);
+        getOutPatients(docs);
+        setRecentPatients(docs.splice(0, 8));
       });
-      snap.docs.forEach((sp) => {
-        arr.push(sp.data());
-      }); 
-      setAllPatients(arr);
-      getOutPatients(docs);
-      setRecentPatients(docs.splice(0, 8));
-    });
 
+      console.log("fetching patients 1");
     firestore.collection("dischargedPatients").onSnapshot((snap) => {
       let docs: any = snap.docs.map((doc) => doc.data());
       setDischargedPatients(docs);
     });
 
+    console.log("fetching patients 2");
     firestore.collection("admittedPatients").onSnapshot((snap) => {
       let docs: any = snap.docs.map((doc) => doc.data());
       setAdmittedPatients(docs);
     });
+    console.log('finished fetching patients')
   }
 
   function getOutPatients(pts: any[]) {
-    let docs: any[] = pts.filter(
-      (patient) => patient.status == "out-patient"
-    );
+    let docs: any[] = pts.filter((patient) => patient.status == "out-patient");
     setOutPatients(docs);
   }
-
 
   function getGreetings() {
     let greeting = GREETINGS(new Date());
     setGreetings(greeting);
+    setLoading(false);
   }
 
-
   function navigateToPatient(data: Patient) {
-    history.push("/view-patient", data);
+    history.push("/view-patient", {patient:data});
   }
 
   function checkPatientState(value: string | undefined) {
     if (value === "discharged") {
       return { color: "success", state: "Discharged" };
-    } else if (value === "in-patient") {
+    } else if (value === "admitted") {
       return { color: "danger", state: "Admitted" };
     } else if (value === "out-patient") {
       return { color: "warning", state: "Out Patient" };
@@ -110,6 +117,7 @@ const Dashboard: React.FC = () => {
   }
 
   useEffect(() => {
+    setLoading(true);
     fetchPatients();
     getGreetings();
   }, []);
@@ -242,7 +250,14 @@ const Dashboard: React.FC = () => {
                 </IonCardHeader>
                 <hr className="p-none m-0" />
                 <IonCardContent mode="md">
-                  <LineChart patients={allPatient} admittedPatients={admittedPatients} dischargedPatients={dischargedPatients}></LineChart>
+                  {loading && <IonProgressBar type="indeterminate"></IonProgressBar>}
+                  {!loading && (
+                    <LineChart
+                      patients={allPatient}
+                      admittedPatients={admittedPatients}
+                      dischargedPatients={dischargedPatients}
+                    ></LineChart>
+                  )}
                 </IonCardContent>
               </IonCard>
             </IonCol>
@@ -311,7 +326,10 @@ const Dashboard: React.FC = () => {
                 </IonCardHeader>
                 <hr className="p-none m-0" />
                 <IonCardContent mode="md">
-                  <DoughnutChart patients={allPatient}></DoughnutChart>
+                  {loading && <IonProgressBar  type="indeterminate"></IonProgressBar>}
+                  {!loading && (
+                    <DoughnutChart patients={allPatient}></DoughnutChart>
+                  )}
                 </IonCardContent>
               </IonCard>
             </IonCol>
@@ -325,7 +343,11 @@ const Dashboard: React.FC = () => {
                 </IonCardHeader>
                 <hr className="p-none m-0" />
                 <IonCardContent mode="md">
-                  <BarChart></BarChart>
+                  {loading && <IonProgressBar type="indeterminate"></IonProgressBar>}
+                  {!loading && <BarChart 
+                      patients={allPatient}
+                      admittedPatients={admittedPatients}
+                      dischargedPatients={dischargedPatients}></BarChart>}
                 </IonCardContent>
               </IonCard>
             </IonCol>

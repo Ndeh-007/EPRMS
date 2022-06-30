@@ -45,7 +45,7 @@ import {
   IonToolbar,
 } from "@ionic/react";
 import { useEffect, useState } from "react";
-import { useHistory, useParams } from "react-router";
+import { useHistory, useLocation, useParams } from "react-router";
 import PageHeader from "../components/PageHeader";
 import "../styles/Page.css";
 import "../styles/NewPatient.css";
@@ -74,6 +74,7 @@ import { PatientImmunity } from "../components/EditPatientRecordCategories";
 const ViewPatient: React.FC = () => {
   const { name } = useParams<{ name: string; mode?: string }>();
   const history = useHistory();
+  const location = useLocation();
   const formRef = useRef<HTMLFormElement>(null);
   const patientImageInputRef = useRef<HTMLInputElement>(null);
   const [alertDischarge, setAlertDischarge] = useState(false);
@@ -105,19 +106,20 @@ const ViewPatient: React.FC = () => {
       .onSnapshot((snapshot) => {
         let docs: any = snapshot.docs.map((doc) => doc.data());
         setFirstRecord(docs[0]);
-        if (docs[1]) {setSecondRecord(docs[1])};
-        console.log(docs)
+        if (docs[1]) {setSecondRecord(docs[1])}; 
         setPatientRecords(docs);
         setLoadingRecords(false);
+
       });
   }
 
   function listenToRecord() {
+    let _firstRecord = FirstRecord;
     firestore
       .collection("patients")
       .doc(patient?.id)
       .collection("records")
-      .doc(FirstRecord?.id)
+      .doc(_firstRecord?.id)
       .onSnapshot((snap) => {
         let doc: any = snap.data();
         setFirstRecord(doc);
@@ -171,18 +173,21 @@ const ViewPatient: React.FC = () => {
         setLoadingOverview(false);
       });
   }
-
-  useEffect(() => {
-    getRecords();
-    getPatientImmunity();
-    getPatientOverview();
-    // listenToRecord();
-  }, []);
-
-
-  useEffect(() => { 
-    listenToRecord();
-  }, []);
+  
+  useEffect(() => {  
+    if(location.state){
+      let temp:any = location.state
+      console.log(temp)
+      setPatient(temp.patient);
+      getRecords();
+      getPatientImmunity();
+      getPatientOverview(); 
+    }else{ 
+      getRecords();
+      getPatientImmunity();
+      getPatientOverview();
+    }
+  }, [location]);
 
   return (
     <IonPage>
@@ -198,24 +203,26 @@ const ViewPatient: React.FC = () => {
             }}
             className="m-3"
             size="small"
-            hidden={FirstRecord?.discharged && FirstRecord?.admitted ? true : false}
+            hidden={FirstRecord?.discharged && FirstRecord?.discharged ? true : false}
           >
             Discharge Patient
           </IonButton>
-          <IonButton
-            color="danger"
-            slot="end"
-            onClick={() => {
-              setAlertAdmit(true);
-            }}
-            hidden={
-            FirstRecord?.admitted ? true : false
-            }
-            size="small"
-            className="me-3"
-          >
-            Admit Patient
-          </IonButton>
+         {
+          FirstRecord?.discharged?"": <IonButton
+          color="danger"
+          slot="end"
+          onClick={() => {
+            setAlertAdmit(true);
+          }}
+          hidden={
+          FirstRecord?.admitted ? true : false
+          }
+          size="small"
+          className="me-3"
+        >
+          Admit Patient
+        </IonButton>
+         }
         </IonToolbar>
 
         <div className="px-1">
@@ -666,7 +673,8 @@ const ViewPatient: React.FC = () => {
                   alert("discharge failed");
                 });
 
-              firestore.collection('dischargedPatients').doc(patient?.id).set(data)
+              firestore.collection('dischargedPatients').doc(patient?.id).set({...data,...patient})
+              firestore.collection('patients').doc(patient?.id).update(data)
             },
             role: "confirm",
           },
@@ -710,7 +718,9 @@ const ViewPatient: React.FC = () => {
                 ward: inputValue.value,
                 admitted: true,
                 admissionDate: Date.now(),
+                status:"admitted"
               };
+              console.log(FirstRecord?.id)
               firestore
                 .collection("patients")
                 .doc(patient?.id)
@@ -728,7 +738,8 @@ const ViewPatient: React.FC = () => {
                   setLoading(false)
                 });
 
-              firestore.collection('admittedPatients').doc(patient?.id).set(data)
+              firestore.collection('admittedPatients').doc(patient?.id).set({...data,...patient})
+              firestore.collection('patients').doc(patient?.id).update(data)
             },
             role: "confirm",
           },

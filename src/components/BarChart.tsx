@@ -1,13 +1,155 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import faker from "@faker-js/faker";
+import { Patient } from "../interfaces/types";
 
-const BarChart: React.FC = () => {
+const BarChart: React.FC<{
+  patients?: Patient[];
+  dischargedPatients?: any[];
+  admittedPatients?: any[];
+}> = ({ patients, dischargedPatients, admittedPatients }) => {
+  const [combinedDates, setCombinedDates] = useState<string[]>([]);
+  const [cumulativeAdmitted, setCumulativeAdmitted] = useState<number>(0);
+  const [cumulativeDischarged, setCumulativeDischarged] = useState<number>(0);
+  const [cumulativeOutPatients, setCumulativeOutPatients] = useState<number>(0);
+
+  let allDates: any[] = [];
+  let admittedValues: any[] = [];
+  let dischargedValues: any[] = [];
+  let outPatientValues: any[] = [];
+
+  function initGraph() {
+
+  const options:any = { month: 'long' };
+    let tempPatients: any = patients?.reverse();
+    let dates: any = tempPatients?.map((patient: any) =>
+      new Intl.DateTimeFormat('en-US',options).format(Number(patient.date)).toString()
+    );
+
+    let tempDischargedPatients: any = dischargedPatients?.reverse();
+    let dischargedDates: any = tempDischargedPatients?.map((patient: any) =>
+      new Intl.DateTimeFormat('en-US',options).format(Number(patient.dischargedDate)).toString()
+    );
+
+    // admittedPatients?.reverse();
+
+    let tempAdmittedPatients: any = admittedPatients;
+    let admittedDates: any = tempAdmittedPatients?.map((patient: any) =>
+      new Intl.DateTimeFormat('en-US',options).format(Number(patient.admissionDate)).toString()
+    );
+
+    allDates = [...dates, ...dischargedDates, ...admittedDates];
+    allDates.sort().reverse();
+    let uniqueDates = allDates.filter((element, index) => {
+      return allDates.indexOf(element) === index;
+    });
+
+    console.log(uniqueDates)
+    setCombinedDates(uniqueDates);
+    // Object created
+    var obj: any = {};
+    var objAdmitted: any = {};
+    var objDischarged: any = {};
+    var objOutPatient: any = {};
+
+    let allPatients: any[] = [
+      ...tempPatients,
+      ...tempDischargedPatients,
+      ...tempAdmittedPatients,
+    ];
+
+    let uniquePatientsId: any = [];
+    let uniquePatients: any = [];
+
+    let unique = allPatients.filter((element) => {
+      const isDuplicate = uniquePatientsId.includes(element.id);
+      if (!isDuplicate) {
+        uniquePatientsId.push(element.id);
+        uniquePatients.push(element);
+        return true;
+      }
+
+      return false;
+    });
+ 
+    /* Creating an object with the date as the key and the number of patients as the value. */
+    uniquePatients.forEach((patient: any) => {
+      // console.log(patient.status, patient.name, patient.admissionDate)
+      if (patient.status == "admitted") {
+        objAdmitted[new Date(Number(patient.admissionDate)).toDateString()] =
+          objAdmitted[new Date(Number(patient.admissionDate)).toDateString()]
+            ? objAdmitted[
+                new Date(Number(patient.admissionDate)).toDateString()
+              ] + 1
+            : 1; // If the key exists, increment the value. If not, set the value to 1.
+      }
+
+      if (patient.status == "discharged") {
+        objDischarged[new Date(Number(patient.dischargedDate)).toDateString()] =
+          objDischarged[new Date(Number(patient.dischargedDate)).toDateString()]
+            ? objDischarged[
+                new Date(Number(patient.dischargedDate)).toDateString()
+              ] + 1
+            : 1; // If the key exists, increment the value. If not, set the value to 1.
+      }
+
+      if (patient.status == "out-patient") {
+        objOutPatient[new Date(Number(patient.date)).toDateString()] =
+          objOutPatient[new Date(Number(patient.date)).toDateString()]
+            ? objOutPatient[new Date(Number(patient.date)).toDateString()] + 1
+            : 1; // If the key exists, increment the value. If not, set the value to 1.
+      }
+    });
+
+    for (let i = 0; i < uniqueDates.length; i++) {
+      if (objAdmitted.hasOwnProperty(uniqueDates[i])) { 
+        admittedValues.push(objAdmitted[uniqueDates[i]]);  
+      }
+      if (objDischarged.hasOwnProperty(uniqueDates[i])) { 
+        dischargedValues.push(objDischarged[uniqueDates[i]]); 
+      }
+      if (objOutPatient.hasOwnProperty(uniqueDates[i])) {
+        outPatientValues.push(objOutPatient[uniqueDates[i]]);
+      }
+    }
+
+    var sumAdmitted = admittedValues.reduce((accumulator, value) => {
+      return accumulator + value;
+    }, 0);
+    var sumDischarged = dischargedValues.reduce((accumulator, value) => {
+      return accumulator + value;
+    }, 0);
+
+    var sumOutPatient = outPatientValues.reduce((accumulator, value) => {
+      return accumulator + value;
+    }, 0);
+
+    console.log(
+      sumAdmitted,
+      sumDischarged,
+      sumOutPatient,
+    )
+   
+    setCumulativeAdmitted(sumAdmitted);
+    setCumulativeDischarged(sumDischarged);
+    setCumulativeOutPatients(sumOutPatient);
+  }
+
+  useEffect(() => {
+    if (
+      patients != undefined &&
+      dischargedPatients != undefined &&
+      admittedPatients != undefined
+    ) {
+      initGraph();
+    }
+  }, [patients, dischargedPatients, admittedPatients]);
+ 
+
   const options = {
     responsive: true,
     plugins: {
-      legend: {
-        // position: "bottom" as const,
+      legend: { 
         display: false,
       },
     },
@@ -35,34 +177,35 @@ const BarChart: React.FC = () => {
     },
   };
 
-  const labels = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-  ];
 
+  // let tempPatients: any = patients?.reverse();
+  // let dates: any = tempPatients?.map((patient: any) =>
+  //   new Date(patient.date).toDateString()
+  // );
+ 
   const data = {
-    labels,
+    combinedDates,
     datasets: [
       {
         label: "Admitted",
-        data: labels.map(() => faker.datatype.number({ min: 0, max: 1500 })),
+        data: cumulativeAdmitted,
         backgroundColor: "#eb445a",
       },
       {
-        label: "Treated",
-        data: labels.map(() => faker.datatype.number({ min: 0, max: 1500 })),
-        backgroundColor: "#2dd36f",
+        label: "discharged",
+        data: cumulativeDischarged,
+        backgroundColor: "#28ba62",
+      },
+      {
+        label: "out-patient",
+        data: cumulativeOutPatients,
+        backgroundColor: "#3880ff",
       },
     ],
   };
 
   return (
-    <div className="p-3">
+    <div className="p-lg-3 p-none">
       <Bar options={options} data={data} />
     </div>
   );

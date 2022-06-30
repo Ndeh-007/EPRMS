@@ -36,8 +36,8 @@ export async function DeleteUserData() {
   return true;
 }
 
-export function calculateAge(dateString:string|number|undefined) {
-  if(dateString){
+export function calculateAge(dateString: string | number | undefined) {
+  if (dateString) {
     var today = new Date();
     var birthDate = new Date(dateString);
     var age = today.getFullYear() - birthDate.getFullYear();
@@ -47,31 +47,36 @@ export function calculateAge(dateString:string|number|undefined) {
     }
     return age;
   }
-  return ''
+  return "";
 }
 
-export function convertDate(date:string|undefined|number,time?:boolean){
-  if(date && date != ''){
-    let _date = new Date(date).toLocaleDateString(); 
-    return " "+_date;
-  }  
-  if(date && date != '' && time){
-    let _date = new Date(date).toLocaleDateString(); 
-    let _time = new Date(date).toLocaleTimeString();
-    return " "+_date+" "+_time;
+export function convertDate(date: string | undefined | number, time?: boolean) {
+  if (date && date != "") {
+    let _date = new Date(date).toLocaleDateString();
+    return " " + _date;
   }
-  return ""
+  if (date && date != "" && time) {
+    let _date = new Date(date).toLocaleDateString();
+    let _time = new Date(date).toLocaleTimeString();
+    return " " + _date + " " + _time;
+  }
+  return "";
 }
 
-export function refactor(){
-  firestore.collection("patients").get().then((docs)=>{
-    let ids= docs.docs.map((doc)=>doc.id);
-    // console.log(ids)
-    ids.forEach((id)=>{
-      firestore.collection("patients").doc(id).delete()
+export function refactor() {
+  firestore
+    .collection("patients")
+    .get()
+    .then((docs) => {
+      let ids = docs.docs.map((doc) => doc.id);
+      ids.forEach((id) => {
+        firestore.collection("patients").doc(id).delete();
+      });
     })
-  }).then(()=>{
-    alert("process complete")
-  }).catch((e)=>{console.log(e)})
+    .then(() => {
+      alert("process complete");
+    })
+    .catch((e) => {
+      console.log(e);
+    });
 }
-

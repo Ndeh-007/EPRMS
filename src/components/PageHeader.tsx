@@ -162,7 +162,7 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
             <IonIcon slot="icon-only" icon={add}></IonIcon>
           </IonButton>
         )}
-
+      {/* <IonButton onClick={()=>refactor()}> refactor</IonButton> */}
         <IonCard color="light" slot="end" mode="md">
           <IonButtons>
             <IonButton color="warning">

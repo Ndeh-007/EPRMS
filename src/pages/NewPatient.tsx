@@ -202,6 +202,8 @@ const NewPatient: React.FC = () => {
                 date: Date.now(),
                 religion:e.target.religion.value,
                 emergencyContact:e.target.emergencyContact.value, 
+                status:"out-patient",
+                mothersName: e.target.mothersName.value,
               };
               CreatePatient(data);
             }}
@@ -362,6 +364,16 @@ const NewPatient: React.FC = () => {
                               >
                                 <IonLabel position="floating">Emergency Contact</IonLabel>
                                 <IonInput type="text" name="emergencyContact"></IonInput>
+                              </IonItem>
+                            </IonCol>
+                            <IonCol size="12" sizeLg="6">
+                              <IonItem
+                                fill="outline"
+                                color="primary"
+                                lines="full"
+                              >
+                                <IonLabel position="floating">Mother's Name</IonLabel>
+                                <IonInput type="text" name="mothersName" placeholder="Mother's Name"></IonInput>
                               </IonItem>
                             </IonCol>
                             <IonCol size="12" sizeLg="6">

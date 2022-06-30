@@ -14,9 +14,7 @@ import { Patient } from "../interfaces/types";
 const DoughnutChart: React.FC<{ patients?: Patient[] }> = ({ patients }) => {
   const [femaleCount, setFemaleCount] = useState(0);
   const [maleCount, setMaleCount] = useState(0);
-
-  console.log(patients);
-
+ 
   // count males and females
   function countPeople() {
     let female = 0,
