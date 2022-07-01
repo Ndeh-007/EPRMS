@@ -28,37 +28,7 @@ const Login: React.FC = () => {
   const [loading, setloading] = React.useState(false);
   const context = useContext(StaffContext);
 
-  async function AuthenticateUser(username: string, password: string) {
-    // let email = username + "@awakedom.com"; 
-    // console.log(email,password)
-    // auth
-    //   .signInWithEmailAndPassword(email, password)
-    //   .then((userCredential) => {
-    //     // Signed in
-    //     var user = userCredential.user; // The user.
-    //     if (user != null) {
-    //       firestore.collection("staff").doc(username).update(user);
-    //       firestore
-    //         .collection("staff")
-    //         .doc(username)
-    //         .onSnapshot((snap) => {
-    //           let data: any = snap.data();
-
-    //           context.setStaff(data);
-    //           StoreUserData(data);
-    //           setloading(false);
-    //           history.push("/dashboard");
-    //         });
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     var errorCode = error.code;
-    //     var errorMessage = error.message;
-    //     console.log(errorCode, errorMessage)
-    //     console.log("No user found");
-    //     alert("Invalid Username or Password");
-    //     setloading(false)
-    //   });
+  async function AuthenticateUser(username: string, password: string) { 
 
     firestore
       .collection("staff")
@@ -73,7 +43,9 @@ const Login: React.FC = () => {
         }
         let doc = Snapshot.docs[0];
         let data: any = doc.data();
-        context.setStaff(data);
+        let _lastSeen = Date.now().toString()
+        context.setStaff({...data, lastSeen:_lastSeen});
+        firestore.collection("staff").doc(data.id).update({lastSeen:_lastSeen}).catch((e)=>{console.log("failed to update last seen",e)})
         StoreUserData(data);
         console.log(data);
         setloading(false);

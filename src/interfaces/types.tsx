@@ -16,7 +16,7 @@ export interface AppPage {
 export interface Staff {
   image: any;
   id: any;
-  name: string | null | undefined;
+  name: any
   role: string | null | undefined;
   email: string | null | undefined;
   tel: string | null | undefined;
@@ -38,6 +38,7 @@ export interface Staff {
    * The user's unique ID.
    */
   uid?: string;
+  lastSeen?: string;
 }
 
 export interface StaffAccess {
@@ -79,6 +80,22 @@ export interface Patient {
   visitedDate?:string;
   dischargedDate?:string;
   admissionDate?:string;
+  dischargeStatus?:string;
+  payment?:Payment
+}
+
+export interface Payment{
+
+  mode:string;
+  amount:number | string;
+  date:string;
+  details:string;
+  status:string;
+  momoNumber?:string;
+  cardNumber?:string;
+  cvc?:string;
+  expirationDate?:string,
+  insuranceID?:string,
 }
 
 export interface PatientRecordInterface {
@@ -97,6 +114,7 @@ export interface PatientRecordInterface {
   discharged?:boolean;
   ward?: string; 
   physicalExam?:string;
+  payment?:Payment
 }
 
 export interface HistoryInterface {

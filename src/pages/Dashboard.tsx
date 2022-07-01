@@ -37,7 +37,7 @@ import DoughnutChart from "../components/DoughnutChart";
 import ExploreContainer from "../components/ExploreContainer";
 import LineChart from "../components/LineChart";
 import PageHeader from "../components/PageHeader";
-import { StaffContext } from "../context/AppContent";
+import { PatientContext, StaffContext } from "../context/AppContent";
 import { firestore } from "../Firebase";
 import { capitalizeString } from "../Functions/functions";
 import { customIcons, localImages } from "../images/images";
@@ -48,6 +48,7 @@ import GREETINGS from "../interfaces/greeting";
 const Dashboard: React.FC = () => {
   const { name } = useParams<{ name: string; mode?: string }>();
   const STAFF = useContext(StaffContext);
+  const PATIENT =  useContext(PatientContext);
   const [allPatient, setAllPatients] = useState<Patient[]>();
   const [admittedPatients, setAdmittedPatients] = useState<Patient[]>();
   const [dischargedPatients, setDischargedPatients] = useState<Patient[]>();
@@ -101,6 +102,7 @@ const Dashboard: React.FC = () => {
   }
 
   function navigateToPatient(data: Patient) {
+    PATIENT.setPatient(data)
     history.push("/view-patient", {patient:data});
   }
 

@@ -60,7 +60,7 @@ import {
 } from "ionicons/icons";
 import { localImages } from "../images/images";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-import { PatientContext } from "../context/AppContent";
+import { PatientContext, PatientRecordContext } from "../context/AppContent";
 import { firestore } from "../Firebase";
 import {
   HistoryAttribute,
@@ -95,6 +95,7 @@ const ViewPatient: React.FC = () => {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [patientOverview, setPatientOverview] = useState<Overview[]>();
   const [loadingOverview, setLoadingOverview] = useState(false);
+  const RECORD = useContext(PatientRecordContext)
 
   function getRecords() {
     setLoadingRecords(true);
@@ -106,10 +107,12 @@ const ViewPatient: React.FC = () => {
       .onSnapshot((snapshot) => {
         let docs: any = snapshot.docs.map((doc) => doc.data());
         setFirstRecord(docs[0]);
-        if (docs[1]) {setSecondRecord(docs[1])}; 
+        if (docs[1]) {
+          setSecondRecord(docs[1]);
+        }
         setPatientRecords(docs);
+        RECORD.setPatientRecord(docs[0]);
         setLoadingRecords(false);
-
       });
   }
 
@@ -173,20 +176,12 @@ const ViewPatient: React.FC = () => {
         setLoadingOverview(false);
       });
   }
-  
-  useEffect(() => {  
-    if(location.state){
-      let temp:any = location.state
-      console.log(temp)
-      setPatient(temp.patient);
-      getRecords();
-      getPatientImmunity();
-      getPatientOverview(); 
-    }else{ 
-      getRecords();
-      getPatientImmunity();
-      getPatientOverview();
-    }
+
+  useEffect(() => { 
+    getRecords();
+    getPatientImmunity();
+    getPatientOverview();
+    getPatientHistory();
   }, [location]);
 
   return (
@@ -194,7 +189,9 @@ const ViewPatient: React.FC = () => {
       <PageHeader name={name}></PageHeader>
       <IonContent color="light">
         <IonToolbar color="light" className="pt-4">
-          <IonText slot="start" color="primary"></IonText>
+          <IonText slot="start" color="primary">
+            <p className="fw-6 h6 ps-2">{patient?.status}</p>
+          </IonText>
           <IonButton
             color="success"
             slot="end"
@@ -203,26 +200,28 @@ const ViewPatient: React.FC = () => {
             }}
             className="m-3"
             size="small"
-            hidden={FirstRecord?.discharged && FirstRecord?.discharged ? true : false}
+            hidden={
+              FirstRecord?.discharged && FirstRecord?.discharged ? true : false
+            }
           >
             Discharge Patient
           </IonButton>
-         {
-          FirstRecord?.discharged?"": <IonButton
-          color="danger"
-          slot="end"
-          onClick={() => {
-            setAlertAdmit(true);
-          }}
-          hidden={
-          FirstRecord?.admitted ? true : false
-          }
-          size="small"
-          className="me-3"
-        >
-          Admit Patient
-        </IonButton>
-         }
+          {FirstRecord?.discharged ? (
+            ""
+          ) : (
+            <IonButton
+              color="danger"
+              slot="end"
+              onClick={() => {
+                setAlertAdmit(true);
+              }}
+              hidden={FirstRecord?.admitted ? true : false}
+              size="small"
+              className="me-3"
+            >
+              Admit Patient
+            </IonButton>
+          )}
         </IonToolbar>
 
         <div className="px-1">
@@ -246,7 +245,7 @@ const ViewPatient: React.FC = () => {
               <IonChip
                 slot="end"
                 color="primary"
-                onClick={() => { 
+                onClick={() => {
                   setPatientRecordsModal(true);
                 }}
               >
@@ -318,6 +317,7 @@ const ViewPatient: React.FC = () => {
                   button
                   onClick={() => {
                     setPatientRecordsModal(false);
+                    RECORD.setPatientRecord(record);
                     history.push("/patient-record");
                   }}
                   key={index}
@@ -434,9 +434,9 @@ const ViewPatient: React.FC = () => {
                           <IonLabel>{wish}</IonLabel>
                         </IonChip>
                       );
-                    })}{" "}
+                    })} 
                     {patient?.wishes?.length === 0 && (
-                      <IonChip color="medium">
+                      <IonChip color="success">
                         <IonLabel>All Permitted</IonLabel>
                       </IonChip>
                     )}
@@ -649,13 +649,14 @@ const ViewPatient: React.FC = () => {
             cssClass: "alert-discharge-confirm",
             handler: () => {
               console.log("Patient Discharged");
-              setLoading(true)
+              setLoading(true);
               let v: any = window.document.getElementById("dischargeStatus");
               let data = {
                 status: "discharged",
                 discharged: true,
                 dischargedDate: Date.now(),
                 dischargedStatus: v.value ? v.value : "alive",
+                ward: "discharged",
               };
               firestore
                 .collection("patients")
@@ -665,16 +666,19 @@ const ViewPatient: React.FC = () => {
                 .update(data)
                 .then(() => {
                   setOperationSuccessful(true);
-                  setLoading(false)
+                  setLoading(false);
                 })
                 .catch((e) => {
                   console.error(e);
-                  setLoading(false)
+                  setLoading(false);
                   alert("discharge failed");
                 });
 
-              firestore.collection('dischargedPatients').doc(patient?.id).set({...data,...patient})
-              firestore.collection('patients').doc(patient?.id).update(data)
+              firestore
+                .collection("dischargedPatients")
+                .doc(patient?.id)
+                .set({ ...data, ...patient });
+              firestore.collection("patients").doc(patient?.id).update(data);
             },
             role: "confirm",
           },
@@ -706,7 +710,7 @@ const ViewPatient: React.FC = () => {
             text: "Admit",
             cssClass: "alert-admit-confirm",
             handler: () => {
-              setLoading(true)
+              setLoading(true);
               let inputValue: any =
                 window.document.getElementById("ward-input");
               let reason: any = window.document.getElementById("ad-input");
@@ -718,9 +722,9 @@ const ViewPatient: React.FC = () => {
                 ward: inputValue.value,
                 admitted: true,
                 admissionDate: Date.now(),
-                status:"admitted"
+                status: "admitted",
               };
-              console.log(FirstRecord?.id)
+              console.log(FirstRecord?.id);
               firestore
                 .collection("patients")
                 .doc(patient?.id)
@@ -729,17 +733,20 @@ const ViewPatient: React.FC = () => {
                 .update(data)
                 .then(() => {
                   console.log("Patient Admitted");
-                  setLoading(false)
+                  setLoading(false);
                   setOperationSuccessful(true);
                 })
                 .catch((e) => {
                   console.error(e);
                   alert("admission failed");
-                  setLoading(false)
+                  setLoading(false);
                 });
 
-              firestore.collection('admittedPatients').doc(patient?.id).set({...data,...patient})
-              firestore.collection('patients').doc(patient?.id).update(data)
+              firestore
+                .collection("admittedPatients")
+                .doc(patient?.id)
+                .set({ ...data, ...patient });
+              firestore.collection("patients").doc(patient?.id).update(data);
             },
             role: "confirm",
           },

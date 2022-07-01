@@ -30,7 +30,7 @@ import {
   IonToolbar,
 } from "@ionic/react";
 import { add, chevronForward } from "ionicons/icons";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import BarChart from "../components/BarChart";
 import DoughnutChart from "../components/DoughnutChart";
@@ -48,7 +48,9 @@ const Patients: React.FC = () => {
   const { name } = useParams<{ name: string; mode?: string }>();
   const [fakeMPI, setFakeMPI] = useState<MPI[]>([]);
   const [allPatients, setallPatients] = useState<Patient[]>();
-  const [loading,setLoading]= useState(false);
+  const [loading, setLoading] = useState(false);
+  const searchBarRef = useRef<HTMLIonSearchbarElement>(null);
+  const [tempAllPatients, setTempAllPatients] = useState<Patient[]>();
 
   function checkPatientState(value: number) {
     if (value === 0) {
@@ -62,16 +64,46 @@ const Patients: React.FC = () => {
     }
   }
 
-  function getPatients(){ 
-    setLoading(true);
-    firestore.collection("patients").onSnapshot((snapshot)=>{
-      let docs:any[] = snapshot.docs.map((doc)=>doc.data());
-      setLoading(false)
-      setallPatients(docs);
-    })
+  /**
+   * It takes a string value as an argument and filters the patients based on the search value
+   * @param {string | undefined | null} value - string | undefined
+   */
+  function searchPatient(value: string | undefined | null) {
+    let temp = tempAllPatients;
+    if (value) {
+      const filteredPatients = temp?.filter((patient) =>
+        patient.name.toLowerCase().includes(value.toLowerCase())
+      ); // filter the patients based on the search value
+      setallPatients(filteredPatients);
+    } else {
+      setallPatients(temp);
+    }
   }
- 
-  useEffect(() => { 
+
+  /**
+   * We're using the firestore.collection() method to get all the patients from the database.
+   *
+   * The onSnapshot() method is a listener that listens for changes in the database.
+   *
+   * The snapshot.docs.map() method is used to map the data from the database to the docs array.
+   *
+   * The setallPatients() method is used to set the state of the allPatients array.
+   *
+   * The setTempAllPatients() method is used to set the state of the tempAllPatients array.
+   *
+   * The setLoading() method is used to set the state of the loading variable.
+   */
+  function getPatients() {
+    setLoading(true);
+    firestore.collection("patients").onSnapshot((snapshot) => {
+      let docs: any[] = snapshot.docs.map((doc) => doc.data());
+      setLoading(false);
+      setallPatients(docs);
+      setTempAllPatients(docs);
+    });
+  }
+
+  useEffect(() => {
     getPatients();
   }, []);
 
@@ -85,8 +117,8 @@ const Patients: React.FC = () => {
               <IonText color="primary">
                 <IonTitle className="ion-padding-horizontal">
                   <p className="text-bold">
-                    <IonText> 
-                    <span className="display-6 text-bold">All Patients</span>
+                    <IonText>
+                      <span className="display-6 text-bold">All Patients</span>
                     </IonText>
                     <br />
                     <span className="text-regular">
@@ -99,7 +131,18 @@ const Patients: React.FC = () => {
               </IonText>
             </IonCol>
             <IonCol size="12">
-              <IonSearchbar mode="md"></IonSearchbar>
+              <IonSearchbar
+                mode="md"
+                onIonChange={(e) => {
+                  searchPatient(e.detail.value);
+                }}
+                ref={searchBarRef}
+                onKeyUp={(e) => {
+                  if (e.key === "Enter") {
+                    searchPatient(searchBarRef.current?.value);
+                  }
+                }}
+              ></IonSearchbar>
             </IonCol>
           </IonRow>
         </IonGrid>
@@ -107,7 +150,9 @@ const Patients: React.FC = () => {
           <IonRow>
             <IonCol size="12">
               <IonCard mode="ios">
-{loading && <IonProgressBar type='indeterminate'></IonProgressBar>}
+                {loading && (
+                  <IonProgressBar type="indeterminate"></IonProgressBar>
+                )}
                 <IonCardHeader mode="md" className="sticky-top">
                   <IonToolbar>
                     <IonCardTitle slot="start" className="pt-2 fw-bold">
@@ -167,8 +212,19 @@ const Patients: React.FC = () => {
                   </IonGrid>
                 </IonItem>
                 {allPatients?.map((patient, index: number) => {
+                  let color: string = "danger";
+                  if (patient.ward === "discharged") {
+                    color = "success";
+                  }
+                  if (patient.ward === "out-patient") {
+                    color = "primary";
+                  }
                   return (
-                    <PatientItem patient={patient} key={index}></PatientItem>
+                    <PatientItem
+                      patient={patient}
+                      key={index}
+                      color={color}
+                    ></PatientItem>
                   );
                 })}
               </IonCard>

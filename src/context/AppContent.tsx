@@ -1,6 +1,6 @@
 import React from "react";
 import { useContext } from "react";
-import { Patient, Staff } from "../interfaces/types";
+import { Patient, PatientRecordInterface, Staff } from "../interfaces/types";
 
 export const StaffDefault: { staff: Staff; setStaff: () => void } = {
   staff: {
@@ -46,11 +46,41 @@ export const PatientDefault: { patient: Patient; setPatient: () => void } = {
     tel: "",
     tribe: "",
     wishes: [],
-    religion:"",
-    emergencyContact:"", 
+    religion: "",
+    emergencyContact: "",
   },
   setPatient: () => {},
 };
+
+export const RecordDefault: {
+  patientRecord: PatientRecordInterface;
+  setPatientRecord: () => void;
+} = {
+  patientRecord: {
+    id: "",
+    date: "",
+    vitals: {
+      bloodPressure: "",
+      pulse: "",
+      temperature: "",
+      weight: "",
+    },
+    patientComplaint: "",
+    diagnosis: "",
+    treatment: "",
+    
+
+  },
+  setPatientRecord: () => {},
+};
+
+const PatientRecordContext = React.createContext<{
+  patientRecord: PatientRecordInterface | undefined;
+  setPatientRecord: Function;
+}>({
+  patientRecord: RecordDefault.patientRecord,
+  setPatientRecord: RecordDefault.setPatientRecord,
+});
 
 const PatientContext = React.createContext<{
   patient: Patient | undefined;
@@ -59,8 +89,7 @@ const PatientContext = React.createContext<{
   patient: PatientDefault.patient,
   setPatient: PatientDefault.setPatient,
 });
-
-// const PatientDefaul:{patient:Patient; setPatien}
+ 
 
 const StaffContext = React.createContext<{
   staff: Staff | undefined;
@@ -70,4 +99,4 @@ const StaffContext = React.createContext<{
   setStaff: StaffDefault.setStaff,
 });
 
-export {PatientContext, StaffContext };
+export { PatientContext, StaffContext, PatientRecordContext };

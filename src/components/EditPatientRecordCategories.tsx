@@ -45,25 +45,66 @@ import {
   trashBin,
 } from "ionicons/icons";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { PatientContext, StaffContext } from "../context/AppContent";
+import {
+  PatientContext,
+  PatientRecordContext,
+  StaffContext,
+} from "../context/AppContent";
 import { firestore } from "../Firebase";
 import {
   HistoryAttribute,
   HistoryInterface,
   Immunity,
-  Labs, 
+  Labs,
   ManagementInterface,
   PatientRecordInterface,
+  Payment,
 } from "../interfaces/types";
 import uniqid from "uniqid";
 
 const Finance: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState("cash");
+  const { patient, setPatient } = useContext(PatientContext);
+  const { patientRecord, setPatientRecord } = useContext(PatientRecordContext);
+  function updatePaymentInfo(payment: Payment) {
+    let q1 = firestore.collection("patients").doc(patient?.id).update({
+      payment: payment,
+    });
+    let q2 = firestore
+      .collection("patients")
+      .doc(patient?.id)
+      .collection("records")
+      .doc(patientRecord?.id)
+      .update({ payment: payment });
 
+    return Promise.all([q1, q2]).then(()=>{
+      let tr:any = patientRecord;
+      tr.payment = payment;
+      let tp:any = patient;
+      tp.payment = payment;
+      setPatientRecord(tr);
+      setPatient(tp);
+    }).catch((error)=>{
+      console.log('updating payment error: ',error);
+    });
+  }
   return (
     <form
-      onSubmit={(e) => {
+      onSubmit={(e: any) => {
         e.preventDefault();
+        let data: Payment = {
+          date: Date.now().toString(),
+          mode: e.target.mode.value,
+          amount: e.target.amount.title,
+          details: e.target.details.value,
+          status: "pending",
+          momoNumber: e.target.momoNumber.value || " ",
+          cardNumber: e.target.cardNumber.value || " ",
+          cvc: e.target.cvc.value || " ",
+          expirationDate: e.target.expirationDate.value || " ",
+          insuranceID: e.target.insuranceID.value || " ",
+        };
+        updatePaymentInfo(data);
         alert("submitted");
       }}
     >
@@ -72,6 +113,7 @@ const Finance: React.FC = () => {
           <IonLabel position="floating">Name</IonLabel>
           <IonInput
             required
+            value={patient?.name}
             name="name"
             type="text"
             placeholder="Name of Payer (Bank Card Name, Mobile Money)"
@@ -81,25 +123,17 @@ const Finance: React.FC = () => {
           <IonLabel position="floating">Amount</IonLabel>
           <IonInput
             required
+            value={patientRecord?.payment?.amount}
             name="amount"
             type="number"
             placeholder="Amount to be paid"
           ></IonInput>
         </IonItem>
         <IonItem lines="full">
-          <IonLabel position="floating">Date</IonLabel>
-          <IonInput
-            required
-            name="date"
-            type="date"
-            placeholder="Payment Date"
-          ></IonInput>
-        </IonItem>
-        <IonItem lines="full">
           <IonLabel position="floating">Status</IonLabel>
-          <IonSelect value={"unpaid"}>
-            <IonSelectOption value={"unpaid"}>Unpaid</IonSelectOption>
-            <IonSelectOption value={"paid"}>Paid</IonSelectOption>
+          <IonSelect value={patientRecord?.payment?.status} name='status'>
+            <IonSelectOption value={"pending"}>Pending</IonSelectOption>
+            <IonSelectOption value={"completed"}>Completed</IonSelectOption>
           </IonSelect>
         </IonItem>
 
@@ -107,6 +141,7 @@ const Finance: React.FC = () => {
           <IonLabel position="floating">Mode</IonLabel>
           <IonSelect
             value={paymentMethod}
+            name='mode'
             onIonChange={(e) => {
               setPaymentMethod(e.detail.value);
             }}
@@ -128,6 +163,7 @@ const Finance: React.FC = () => {
               <IonLabel position="floating">Acc Number</IonLabel>
               <IonInput
                 required
+                value={patientRecord?.payment?.cardNumber}
                 name="accountNumber"
                 type="number"
                 placeholder="Account Number"
@@ -137,7 +173,8 @@ const Finance: React.FC = () => {
               <IonLabel position="floating">CVC</IonLabel>
               <IonInput
                 required
-                name="cvcNumber"
+                value={patientRecord?.payment?.cvc}
+                name="cvc"
                 type="number"
                 placeholder="CVC Number"
               ></IonInput>
@@ -151,20 +188,12 @@ const Finance: React.FC = () => {
               <IonLabel position="floating">Ins Number</IonLabel>
               <IonInput
                 required
-                name="insuranceNumber"
+                name="insuranceID"
+                value={patientRecord?.payment?.insuranceID}
                 type="number"
                 placeholder="Insurance Number"
               ></IonInput>
-            </IonItem>
-            <IonItem lines="full">
-              <IonLabel position="floating">Ins Company</IonLabel>
-              <IonInput
-                required
-                name="insuranceCompany"
-                type="text"
-                placeholder="Insurance Company"
-              ></IonInput>
-            </IonItem>
+            </IonItem> 
           </>
         )}
 
@@ -174,8 +203,9 @@ const Finance: React.FC = () => {
               <IonLabel position="floating">Account Number</IonLabel>
               <IonInput
                 required
-                name="mobileMoneyAccountNumber"
+                name="momoNumber"
                 type="tel"
+                value={patientRecord?.payment?.momoNumber}
                 placeholder="Account Number"
               ></IonInput>
             </IonItem>
@@ -194,30 +224,40 @@ const Finance: React.FC = () => {
  *
  */
 
-const PatientsComplaint: React.FC <{recordId?:string}> = ({recordId}) => {
+const PatientsComplaint: React.FC<{ recordId?: string }> = ({ recordId }) => {
   const [summary, setSummary] = useState<string | null | undefined>("");
   const summaryRef = useRef<HTMLIonTextareaElement>(null);
-  const {patient} = useContext(PatientContext)
+  const { patient,setPatient } = useContext(PatientContext); 
+  const { patientRecord, setPatientRecord } = useContext(PatientRecordContext);
 
-  useEffect(()=>{ 
+  useEffect(() => {
     firestore
       .collection("patients")
       .doc(patient?.id)
-      .collection("records").doc(recordId).onSnapshot((snap)=>{
-        let doc:any = snap.data()
-        setSummary(doc.patientComplaint?doc.patientComplaint:"")
-      })
-  },[])
-  
+      .collection("records")
+      .doc(recordId)
+      .onSnapshot((snap) => {
+        let doc: any = snap.data();
+        setSummary(doc.patientComplaint ? doc.patientComplaint : "");
+      });
+  }, []);
+
   return (
-    <form 
-      onSubmit={(e:any) => {
+    <form
+      onSubmit={(e: any) => {
         e.preventDefault();
         firestore
           .collection("patients")
           .doc(patient?.id)
           .collection("records")
-          .doc(recordId).update({patientComplaint:e.target.complaint.value}).then(()=>{console.log('updated')})
+          .doc(recordId)
+          .update({ patientComplaint: e.target.complaint.value })
+          .then(() => {
+            console.log("updated");
+            let tr: any = patientRecord;
+            tr.patientComplaint = e.target.complaint.value;
+            setPatientRecord(tr);
+          });
       }}
     >
       <IonCard>
@@ -233,7 +273,7 @@ const PatientsComplaint: React.FC <{recordId?:string}> = ({recordId}) => {
             ref={summaryRef}
             // value={summary}
             onIonChange={(e) => {
-              setSummary(summaryRef.current?.value); 
+              setSummary(summaryRef.current?.value);
             }}
           ></IonTextarea>
         </IonItem>
@@ -252,7 +292,8 @@ const PatientsComplaint: React.FC <{recordId?:string}> = ({recordId}) => {
  */
 
 const PatientsHistory: React.FC<{ recordId?: string }> = ({ recordId }) => {
-  const { patient } = useContext(PatientContext);
+  const { patient,setPatient } = useContext(PatientContext); 
+  const { patientRecord, setPatientRecord } = useContext(PatientRecordContext);
   const [loading, setLoading] = useState(false);
   const [newHistory, setNewHistory] = useState(false);
   const [newHistoryAttribute, setNewHistoryAttribute] = useState(false);
@@ -263,7 +304,7 @@ const PatientsHistory: React.FC<{ recordId?: string }> = ({ recordId }) => {
       .collection("patients")
       .doc(patient?.id)
       .collection("records")
-      .doc(recordId)
+      .doc(patientRecord?.id)
       .collection("history")
       .onSnapshot((snap) => {
         let docs: any = snap.docs.map((doc) => doc.data());
@@ -322,12 +363,12 @@ const PatientsHistory: React.FC<{ recordId?: string }> = ({ recordId }) => {
                           description: e.target.description.value,
                           title: e.target.title.value,
                           id: uniqid(),
-                        };
+                        }; 
                         firestore
                           .collection("patients")
                           .doc(patient?.id)
                           .collection("records")
-                          .doc(recordId)
+                          .doc(patientRecord?.id)
                           .collection("history")
                           .doc(_history.id)
                           .update({
@@ -366,7 +407,7 @@ const PatientsHistory: React.FC<{ recordId?: string }> = ({ recordId }) => {
                         >
                           <IonLabel position="floating">date</IonLabel>
                           <IonInput
-                            type="text"
+                            type="date"
                             name="date"
                             required
                             placeholder="Date of Activity"
@@ -397,7 +438,7 @@ const PatientsHistory: React.FC<{ recordId?: string }> = ({ recordId }) => {
                   <div className="history-attribute" key={key}>
                     <IonText>
                       <div className="h6 text-bold history-attribute-heading">
-                        {attribute.title}
+                        {attribute.title} <span className="text-muted fw-light fw-h6"> - {attribute.date}</span>
                       </div>
                     </IonText>
                     <IonText>
@@ -419,7 +460,7 @@ const PatientsHistory: React.FC<{ recordId?: string }> = ({ recordId }) => {
                               .collection("patients")
                               .doc(patient?.id)
                               .collection("records")
-                              .doc(recordId)
+                              .doc(patientRecord?.id)
                               .collection("history")
                               .doc(_history.id)
                               .update({ attributes: temp });
@@ -458,7 +499,7 @@ const PatientsHistory: React.FC<{ recordId?: string }> = ({ recordId }) => {
                 .collection("patients")
                 .doc(patient?.id)
                 .collection("records")
-                .doc(recordId)
+                .doc(patientRecord?.id)
                 .collection("history")
                 .doc(data.id)
                 .set(data)
@@ -528,7 +569,8 @@ const PatientsHistory: React.FC<{ recordId?: string }> = ({ recordId }) => {
 const Diagnostics: React.FC<{ recordId?: string }> = ({ recordId }) => {
   const [diagnosis, setdiagnosis] = useState<any>("");
   const [loading, setLoading] = useState(false);
-  const { patient } = useContext(PatientContext);
+  const { patient,setPatient } = useContext(PatientContext); 
+  const { patientRecord, setPatientRecord } = useContext(PatientRecordContext);
   const diagnosisRef = useRef<HTMLIonTextareaElement>(null);
 
   function fetchDiagnosis() {
@@ -560,6 +602,9 @@ const Diagnostics: React.FC<{ recordId?: string }> = ({ recordId }) => {
           .update({ diagnosis: diagnosis })
           .then(() => {
             setLoading(false);
+            let tr:any = patientRecord;
+            tr.diagnosis = diagnosis;
+            setPatientRecord(tr);
           })
           .catch((e) => {
             console.error(e);
@@ -580,7 +625,7 @@ const Diagnostics: React.FC<{ recordId?: string }> = ({ recordId }) => {
             name="diagnosis"
             ref={diagnosisRef}
             onIonChange={(e) => {
-              setdiagnosis(diagnosisRef.current?.value); 
+              setdiagnosis(diagnosisRef.current?.value);
             }}
           ></IonTextarea>
         </IonItem>
@@ -604,7 +649,8 @@ const PhysicalExam: React.FC<{ recordId?: string }> = ({ recordId }) => {
   );
   const physicalExamRef = useRef<HTMLIonTextareaElement>(null);
   const [loading, setLoading] = useState(false);
-  const { patient } = useContext(PatientContext);
+  const { patient,setPatient } = useContext(PatientContext); 
+  const { patientRecord, setPatientRecord } = useContext(PatientRecordContext);
   useEffect(() => {
     firestore
       .collection("patients")
@@ -634,6 +680,9 @@ const PhysicalExam: React.FC<{ recordId?: string }> = ({ recordId }) => {
           .update({ physicalExam: data })
           .then(() => {
             setLoading(false);
+            let tr:any = patientRecord;
+            tr.physicalExam = data;
+            setPatientRecord(tr);
             console.log("completed");
           })
           .catch((e) => {
@@ -655,10 +704,7 @@ const PhysicalExam: React.FC<{ recordId?: string }> = ({ recordId }) => {
             ref={physicalExamRef}
             name={"physicalExam"}
             onIonChange={(e) => {
-              setPhysicalExam(physicalExamRef.current?.value);
-              let text = physicalExamRef.current?.value;
-              var regex = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/g;
-              console.log(text?.match(regex));
+              setPhysicalExam(physicalExamRef.current?.value); 
             }}
           ></IonTextarea>
         </IonItem>
@@ -687,7 +733,7 @@ const LabResults: React.FC<{ recordId?: string }> = ({ recordId }) => {
       .collection("labs")
       .onSnapshot((snap) => {
         let docs: any = snap.docs.map((doc) => {
-         return doc.data();
+          return doc.data();
         });
         setLabResults(docs);
       });
@@ -815,7 +861,7 @@ const LabResults: React.FC<{ recordId?: string }> = ({ recordId }) => {
   );
 };
 
-const Management: React.FC<{recordId?:string}> = ({ recordId }) => {
+const Management: React.FC<{ recordId?: string }> = ({ recordId }) => {
   const [loading, setloading] = useState(false);
   const { patient } = useContext(PatientContext);
   const [management, setManagement] = useState<ManagementInterface[]>();
@@ -858,7 +904,7 @@ const Management: React.FC<{recordId?:string}> = ({ recordId }) => {
       {management?.map((mgtItem, index) => {
         return (
           <IonAccordionGroup key={index}>
-            <IonAccordion value="Medical History">
+            <IonAccordion value={mgtItem.problem}>
               <IonItem slot="header" color="clear">
                 <IonToolbar color="clear">
                   <IonLabel slot="start">{mgtItem.problem}</IonLabel>

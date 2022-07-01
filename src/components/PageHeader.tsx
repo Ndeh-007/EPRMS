@@ -34,6 +34,7 @@ import {
 import React, { useContext, useEffect, useState } from "react";
 import { useHistory, useLocation, useParams } from "react-router";
 import { StaffContext } from "../context/AppContent";
+import { firestore } from "../Firebase";
 import {
   capitalizeString,
   DeleteUserData,
@@ -41,6 +42,7 @@ import {
   refactor,
 } from "../Functions/functions";
 import { localImages } from "../images/images";
+import { Staff } from "../interfaces/types";
 import "../styles/PageHeader.css";
 const PageHeader: React.FC<{ name: string }> = (props) => {
   const [popoverState, setShowPopover] = useState({
@@ -71,6 +73,10 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
       });
   }
 
+  function distrubteNumbers(){
+
+  }
+
   function handleNavigation(_location: string) {
     console.log("location", _location);
     if (_location == "/patient-record") {
@@ -97,6 +103,9 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
     if (_location == "/new-staff") {
       history.push('/staff')
     }
+    if (_location == "/view-staff") {
+      history.push('/staff')
+    }
   }
 
   function goBack() {
@@ -116,7 +125,9 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
   function initStaff() {
     GetUserData().then((data) => {
       if (data) {
-        context.setStaff(data);
+        let _lastSeen = Date.now().toString()
+        context.setStaff({...data, lastSeen:_lastSeen});
+        firestore.collection("staff").doc(data.id).update({lastSeen:_lastSeen}).catch((e)=>{console.log("failed to update last seen",e)})
       }
       if(data == null){
         history.push('/login')

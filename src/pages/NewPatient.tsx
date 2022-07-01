@@ -120,7 +120,7 @@ const NewPatient: React.FC = () => {
           color: "success",
         });
         console.log(patient);
-        history.push("/view-patient", holder);
+        history.push("/view-patient", {patient:holder});
       })
       .catch((e) => {
         console.error(e);
@@ -204,6 +204,7 @@ const NewPatient: React.FC = () => {
                 emergencyContact:e.target.emergencyContact.value, 
                 status:"out-patient",
                 mothersName: e.target.mothersName.value,
+                ward:"out-patient"
               };
               CreatePatient(data);
             }}

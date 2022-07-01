@@ -41,7 +41,7 @@ import {
   OverviewAttribute,
   PatientRecordInterface,
 } from "../interfaces/types";
-import { PatientContext } from "../context/AppContent";
+import { PatientContext, PatientRecordContext } from "../context/AppContent";
 import { convertDate } from "../Functions/functions";
 import { firestore } from "../Firebase";
 
@@ -57,7 +57,8 @@ const PatientRecord: React.FC = () => {
   const [continence, setcontinence] = useState<OverviewAttribute[]>();
   const [histories, sethistories] = useState<HistoryInterface[]>();
   const [managements, setmanagements] = useState<ManagementInterface[]>();
-  const [_patientRecord, setPatientRecord] = useState<PatientRecordInterface>();
+  const {patientRecord,setPatientRecord} =  useContext(PatientRecordContext);
+  // const [patientRecord, _setPatientRecord] = useState<PatientRecordInterface>();
   const [labs, setlabs] = useState<Labs[]>();
   const location = useLocation();
 
@@ -70,7 +71,7 @@ const PatientRecord: React.FC = () => {
       .collection("patients")
       .doc(patient?.id)
       .collection("records")
-      .doc(_patientRecord?.id)
+      .doc(patientRecord?.id)
       .collection("appearance")
       .onSnapshot((docs) => {
         let temp: any = docs.docs.map((doc) => doc.data());
@@ -81,7 +82,7 @@ const PatientRecord: React.FC = () => {
       .collection("patients")
       .doc(patient?.id)
       .collection("records")
-      .doc(_patientRecord?.id)
+      .doc(patientRecord?.id)
       .collection("adl")
       .onSnapshot((docs) => {
         let temp: any = docs.docs.map((doc) => doc.data());
@@ -92,7 +93,7 @@ const PatientRecord: React.FC = () => {
       .collection("patients")
       .doc(patient?.id)
       .collection("records")
-      .doc(_patientRecord?.id)
+      .doc(patientRecord?.id)
       .collection("iadl")
       .onSnapshot((docs) => {
         let temp: any = docs.docs.map((doc) => doc.data());
@@ -103,7 +104,7 @@ const PatientRecord: React.FC = () => {
       .collection("patients")
       .doc(patient?.id)
       .collection("records")
-      .doc(_patientRecord?.id)
+      .doc(patientRecord?.id)
       .collection("continence")
       .onSnapshot((docs) => {
         let temp: any = docs.docs.map((doc) => doc.data());
@@ -114,8 +115,8 @@ const PatientRecord: React.FC = () => {
       .collection("patients")
       .doc(patient?.id)
       .collection("records")
-      .doc(_patientRecord?.id)
-      .collection("continence")
+      .doc(patientRecord?.id)
+      .collection("history")
       .onSnapshot((docs) => {
         let temp: any = docs.docs.map((doc) => doc.data());
         sethistories(temp);
@@ -125,7 +126,7 @@ const PatientRecord: React.FC = () => {
       .collection("patients")
       .doc(patient?.id)
       .collection("records")
-      .doc(_patientRecord?.id)
+      .doc(patientRecord?.id)
       .collection("management")
       .onSnapshot((docs) => {
         let temp: any = docs.docs.map((doc) => doc.data());
@@ -136,10 +137,10 @@ const PatientRecord: React.FC = () => {
       .collection("patients")
       .doc(patient?.id)
       .collection("records")
-      .doc(_patientRecord?.id)
+      .doc(patientRecord?.id)
       .collection("labs")
       .onSnapshot((docs) => {
-        let temp: any = docs.docs.map((doc) => doc.data());
+        let temp: any = docs.docs.map((doc) => doc.data()); 
         setlabs(temp);
       });
 
@@ -150,14 +151,9 @@ const PatientRecord: React.FC = () => {
     });
   }
 
-  useEffect(() => {
-    if (location.state) {
-      let temp: any = location.state;
-      console.log(temp);
-      setPatientRecord(temp);
-      getAttributes();
-    }
-  }, []);
+  useEffect(() => { 
+    getAttributes();
+  }, [location]);
 
   useEffect(() => {
     window.onresize = (e) => {
@@ -181,7 +177,7 @@ const PatientRecord: React.FC = () => {
                   <IonText>~</IonText>
                 </span>{" "}
                 <span>
-                  <IonText color="medium">{_patientRecord?.id}</IonText>
+                  <IonText color="medium">{patientRecord?.id}</IonText>
                 </span>
               </p>
             </IonTitle>
@@ -220,23 +216,23 @@ const PatientRecord: React.FC = () => {
                   </IonCardSubtitle>
                   <IonCardSubtitle>
                     <b>Status :</b>{" "}
-                    <IonText color="primary">{_patientRecord?.status}</IonText>
+                    <IonText color="primary">{patient?.status}</IonText>
                   </IonCardSubtitle>
                   <IonCardSubtitle>
                     <b>Discharge Date :</b>{" "}
                     <IonText>
-                      {convertDate(_patientRecord?.dischargeDate)}
+                      {convertDate(Number(patient?.dischargedDate))}
                     </IonText>
                   </IonCardSubtitle>
                   <IonCardSubtitle>
                     <b>Discharge Status :</b>{" "}
                     <IonText color="success">
-                      {_patientRecord?.dischargeStatus}
+                      {patient?.dischargeStatus}
                     </IonText>
                   </IonCardSubtitle>
                   <IonCardSubtitle>
                     <b>Ward :</b>{" "}
-                    <IonText color="secondary">{_patientRecord?.ward}</IonText>
+                    <IonText color="secondary">{patient?.ward}</IonText>
                   </IonCardSubtitle>
                 </IonCardHeader>
               </IonCard>
@@ -269,14 +265,17 @@ const PatientRecord: React.FC = () => {
                     </IonButtons>{" "}
                   </IonToolbar>
                   <IonCardSubtitle>
-                    <b>Mode :</b> Bank
+                    <b>Mode :</b> {patient?.cardNumber}
                   </IonCardSubtitle>
                   <IonCardSubtitle>
                     <b>Amount :</b> {Date.now().toLocaleString()} XAF.
                   </IonCardSubtitle>
                   <IonCardSubtitle>
-                    <b>Details :</b> [Card Number]
+                    <b>Details :</b> {patient?.cardNumber}
                   </IonCardSubtitle>
+                  {/* <IonCardSubtitle>
+                    <b>Details :</b> {patient?.cardNumber}
+                  </IonCardSubtitle> */}
                   <IonCardSubtitle>
                     <b>status :</b> <IonText color="warning">pending</IonText>
                   </IonCardSubtitle>
@@ -310,7 +309,7 @@ const PatientRecord: React.FC = () => {
                   </IonToolbar>
                 </IonCardHeader>
                 <IonCardContent>
-                  {_patientRecord?.patientComplaint}
+                  {patientRecord?.patientComplaint}
                 </IonCardContent>
               </IonCard>
             </IonCol>
@@ -487,6 +486,7 @@ const PatientRecord: React.FC = () => {
                 <IonCardContent>
                   <IonAccordionGroup>
                     {histories?.map((history, index) => {
+                      console.log(history);
                       return (
                         <IonAccordion value={history.title} key={index}>
                           <IonItem slot="header">
@@ -543,7 +543,7 @@ const PatientRecord: React.FC = () => {
                     </IonButtons>{" "}
                   </IonToolbar>
                 </IonCardHeader>
-                <IonCardContent>{_patientRecord?.physicalExam}</IonCardContent>
+                <IonCardContent>{patientRecord?.physicalExam}</IonCardContent>
               </IonCard>
             </IonCol>
             <IonCol size="12">
@@ -569,7 +569,7 @@ const PatientRecord: React.FC = () => {
                     </IonButtons>{" "}
                   </IonToolbar>
                 </IonCardHeader>
-                <IonCardContent>{_patientRecord?.diagnosis}</IonCardContent>
+                <IonCardContent>{patientRecord?.diagnosis}</IonCardContent>
               </IonCard>
             </IonCol>
             <IonCol size="12">
@@ -612,11 +612,11 @@ const PatientRecord: React.FC = () => {
                   {!isMobileView ? (
                     <>
                       {labs?.map((lab, index) => {
-                        <IonRow className="text-center" key={index}>
+                      return  <IonRow className="text-center" key={index}>
                           <IonCol className="border">{lab.test}</IonCol>
                           <IonCol className="border">{lab.result}</IonCol>
                           <IonCol className="border">{lab.handler}</IonCol>
-                        </IonRow>;
+                        </IonRow>
                       })}
                     </>
                   ) : (
@@ -625,7 +625,7 @@ const PatientRecord: React.FC = () => {
 
                   {isMobileView && (
                     <IonAccordionGroup>
-                      {labs?.map((lab, index) => {
+                      {labs?.map((lab, index) => { 
                         return (
                           <IonAccordion key={index}>
                             <IonItem lines="full" button slot="header">
@@ -716,7 +716,7 @@ const PatientRecord: React.FC = () => {
         <EditPatientRecord
           category={editValue}
           closeModal={closeEditModal}
-          recordId={_patientRecord?.id}
+          recordId={patientRecord?.id}
         ></EditPatientRecord>
       </IonModal>
     </IonPage>

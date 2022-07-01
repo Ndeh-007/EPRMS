@@ -51,7 +51,7 @@ import PageHeader from "../components/PageHeader";
 import PatientItem from "../components/PatientItem";
 import { capitalizeString } from "../Functions/functions";
 import { customIcons, localImages } from "../images/images";
-import { MPI, Staff } from "../interfaces/types";
+import { MPI, Staff, StaffAccess } from "../interfaces/types";
 import "../styles/Page.css";
 import "../styles/NewPatient.css";
 import {
@@ -61,26 +61,142 @@ import {
   peopleCircle,
   save,
 } from "ionicons/icons";
+import { firestore, storage } from "../Firebase";
 
 const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
   staffDetails,
 }) => {
-  const { name } = useParams<{ name: string; mode?: string }>();
+  // const { name } = useParams<{ name: string; mode?: string }>();
   const formRef = useRef<HTMLFormElement>(null);
-  const patientImageInputRef = useRef<HTMLInputElement>(null);
-  const [alertDischarge, setAlertDischarge] = useState(false);
-  const [alertAdmit, setAlertAdmit] = useState(false);
+  const patientImageInputRef = useRef<HTMLInputElement>(null); 
   const [loading, setLoading] = useState(false);
-  const [operationSuccessful, setOperationSuccessful] = useState(false);
+  const [operationSuccessful, setOperationSuccessful] = useState({
+    state: false,
+    message: "",
+    color: "",
+  });
+  const [staffImage, setStaffImage] = useState<any>(undefined);
+
+  function InitializeImage(file: File | null | undefined) {
+    let i: any = file;
+    const reader = new FileReader();
+
+    reader.onloadend = () => { 
+      setStaffImage(reader.result);
+    };
+    if (file) reader.readAsDataURL(file);
+  }
+
+  async function updateStaffDetails(data: any) { 
+
+    setLoading(true);
+
+
+    var storageRef =  storage.refFromURL(staffDetails?.image)
+    let response = await fetch(staffImage);
+    let blob = await response.blob();
+    let query1 = storageRef.put(blob).then((snapshot) => {
+      snapshot.ref.getDownloadURL().then((url) => {
+        data.image = url;
+        firestore
+          .collection("staff")
+          .doc(staffDetails?.id)
+          .update(data)
+          .catch((error) => {
+            console.log("Updating Staff Details Error", error);
+          });
+      });
+    });
+
+    await Promise.all([query1])
+      .then(() => {
+        setLoading(false);
+        setOperationSuccessful({
+          state: true,
+          message: "Staff Created Successfully",
+          color: "success",
+        });
+      })
+      .catch((e) => {
+        console.error(e);
+        setLoading(false);
+        setOperationSuccessful({
+          state: true,
+          message: "Staff Creation Failed",
+          color: "danger",
+        });
+      });
+
+    setLoading(false);
+  }
+
+  function checkUserName(username: string) {
+    // check if username is taken
+    firestore
+      .collection("staff")
+      .where("username", "==", username)
+      .onSnapshot((snapshot) => {
+        if (snapshot.docs.length > 0) {
+          alert("Username already taken");
+          setLoading(false);
+          return;
+        }
+      });
+  }
+
+  function ModifyStaffAccess(data: any) {
+    setLoading(true);
+    //  check user name
+    checkUserName(data.username);
+
+    // update staff details
+    firestore
+      .collection("staff")
+      .doc(staffDetails?.id)
+      .update(data)
+      .then(() => {
+        setLoading(false);
+        setOperationSuccessful({
+          state: true,
+          message: "Staff Access Modified Successfully",
+          color: "success",
+        });
+      })
+      .catch((error) => {
+        console.log("Updating Staff Details Error", error);
+        setLoading(false);
+        setOperationSuccessful({
+          state: true,
+          message: "Staff Access Modification Failed",
+          color: "danger",
+        });
+      });
+  }
+
   return (
     <>
       <div color="light">
         <form
           action=""
           ref={formRef}
-          onSubmit={(e) => {
+          onSubmit={(e: any) => {
             e.preventDefault();
-            setOperationSuccessful(true);
+            let _img =staffDetails?.image;
+            if(staffImage){ 
+               _img = staffImage.length > 0 ? staffImage : staffDetails?.image;
+            }
+            let data = {
+              name: e.target.name.value,
+              email: e.target.email.value,
+              tel: e.target.tel.value,
+              address: e.target.address.value,
+              dateOfBirth: e.target.dob.value,
+              image: _img,
+              biography: e.target.biography.value,
+              maritalStatus: e.target.maritalStatus.value,
+              sex: e.target.sex.value,
+            };
+            updateStaffDetails(data);
           }}
         >
           <IonGrid className="pt-0 mt-0">
@@ -100,7 +216,12 @@ const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
                       <IonRow>
                         <IonCol size="12" sizeLg="3" color="medium">
                           {staffDetails?.image?.length > 0 ? (
-                            <IonImg src={staffDetails?.image}></IonImg>
+                            <IonImg
+                              src={staffImage || staffDetails?.image}
+                              onClick={() => {
+                                patientImageInputRef.current?.click();
+                              }}
+                            ></IonImg>
                           ) : (
                             <div
                               className="drag-n-drop rounded p-5 ion-activatable ripple-parent"
@@ -124,6 +245,9 @@ const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
                             type={"file"}
                             ref={patientImageInputRef}
                             accept={"image/*"}
+                            onChange={(e) => {
+                              InitializeImage(e.target.files?.item(0));
+                            }}
                           ></input>
                         </IonCol>
                         <IonCol>
@@ -131,7 +255,11 @@ const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
                             <IonCol size="12" sizeLg="6">
                               <IonItem fill="outline" lines="full">
                                 <IonLabel position="floating">Name</IonLabel>
-                                <IonInput type="text" value={staffDetails?.name}></IonInput>
+                                <IonInput
+                                  type="text"
+                                  name="name"
+                                  value={staffDetails?.name}
+                                ></IonInput>
                               </IonItem>
                             </IonCol>
                             <IonCol size="12" sizeLg="6">
@@ -139,7 +267,11 @@ const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
                                 <IonLabel position="stacked">
                                   Date of Birth
                                 </IonLabel>
-                                <IonInput type="date" value={staffDetails?.dateOfBirth}></IonInput>
+                                <IonInput
+                                  type="date"
+                                  name="dob"
+                                  value={staffDetails?.dateOfBirth}
+                                ></IonInput>
                               </IonItem>
                             </IonCol>
                             <IonCol size="12" sizeLg="6">
@@ -149,7 +281,11 @@ const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
                                 lines="full"
                               >
                                 <IonLabel position="floating">Email</IonLabel>
-                                <IonInput type="email" value={staffDetails?.email}></IonInput>
+                                <IonInput
+                                  type="email"
+                                  name="email"
+                                  value={staffDetails?.email}
+                                ></IonInput>
                               </IonItem>
                             </IonCol>
                             <IonCol size="12" sizeLg="6">
@@ -161,7 +297,11 @@ const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
                                 <IonLabel position="floating">
                                   Phone Number
                                 </IonLabel>
-                                <IonInput type="tel" value={staffDetails?.tel}></IonInput>
+                                <IonInput
+                                  type="tel"
+                                  name="tel"
+                                  value={staffDetails?.tel}
+                                ></IonInput>
                               </IonItem>
                             </IonCol>
                             <IonCol size="12" sizeLg="6">
@@ -171,7 +311,11 @@ const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
                                 lines="full"
                               >
                                 <IonLabel position="floating">Address</IonLabel>
-                                <IonInput type="text" value={staffDetails?.address}></IonInput>
+                                <IonInput
+                                  type="text"
+                                  name="address"
+                                  value={staffDetails?.address}
+                                ></IonInput>
                               </IonItem>
                             </IonCol>
                             <IonCol size="12" sizeLg="6">
@@ -181,7 +325,26 @@ const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
                                 lines="full"
                               >
                                 <IonLabel position="floating">Sex</IonLabel>
-                                <IonInput type="text" value={staffDetails?.sex}></IonInput>
+                                <IonInput
+                                  type="text"
+                                  name="sex"
+                                  value={staffDetails?.sex}
+                                ></IonInput>
+                              </IonItem>
+                            </IonCol>
+                            <IonCol size="12" sizeLg="6">
+                              <IonItem
+                                fill="outline"
+                                color="primary"
+                                lines="full"
+                              >
+                                <IonLabel position="floating">
+                                  Biography
+                                </IonLabel>
+                                <IonTextarea
+                                  name="biography"
+                                  value={staffDetails?.biography}
+                                ></IonTextarea>
                               </IonItem>
                             </IonCol>
                             <IonCol size="12" sizeLg="6">
@@ -193,7 +356,10 @@ const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
                                 <IonLabel position="floating">
                                   Marital Status
                                 </IonLabel>
-                                <IonSelect value={staffDetails?.maritalStatus}>
+                                <IonSelect
+                                  value={staffDetails?.maritalStatus}
+                                  name="maritalStatus"
+                                >
                                   <IonSelectOption value={"married"}>
                                     Married
                                   </IonSelectOption>
@@ -209,18 +375,21 @@ const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
                                 color="primary"
                                 lines="full"
                               >
-                                <IonLabel position="floating" >
+                                <IonLabel position="floating">
                                   Position
                                 </IonLabel>
                                 {/* set Value to present value */}
-                                <IonSelect value={staffDetails?.position}>
-                                  <IonSelectOption value={"doctor"}>
+                                <IonSelect
+                                  value={staffDetails?.position}
+                                  name="staffPosition"
+                                >
+                                  <IonSelectOption value={"Dr"}>
                                     Doctor
                                   </IonSelectOption>
-                                  <IonSelectOption value={"nurse"}>
+                                  <IonSelectOption value={"Ns"}>
                                     Nurse
                                   </IonSelectOption>
-                                  <IonSelectOption value={"lab-scientist"}>
+                                  <IonSelectOption value={"LSc"}>
                                     Lab Scientist
                                   </IonSelectOption>
                                 </IonSelect>
@@ -249,9 +418,23 @@ const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
 
         <form
           action=""
-          onSubmit={(e) => {
+          onSubmit={(e: any) => {
             e.preventDefault();
-            setAlertAdmit(true);
+            // check Passwords
+            if (e.target.password.value !== e.target.confirmPassword.value) {
+              alert("Make Sure passwords match");
+              setLoading(false);
+              return;
+            }
+            //  collect access data
+            let data: StaffAccess = {
+              password: e.target.password.value,
+              position: e.target.position.value,
+              role: e.target.role.value,
+              username: e.target.username.value,
+            }; 
+
+            ModifyStaffAccess(data)
           }}
         >
           <IonGrid className="pt-0 mt-0">
@@ -276,13 +459,21 @@ const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
                                 <IonLabel position="floating">
                                   UserName
                                 </IonLabel>
-                                <IonInput type="text"value={staffDetails?.username}></IonInput>
+                                <IonInput
+                                  type="text"
+                                  value={staffDetails?.username}
+                                  name="username"
+                                ></IonInput>
                               </IonItem>
                             </IonCol>
                             <IonCol size="12" sizeLg="6">
                               <IonItem fill="outline" lines="full">
                                 <IonLabel position="stacked">Password</IonLabel>
-                                <IonInput type="text" value={staffDetails?.password}></IonInput>
+                                <IonInput
+                                  type="text"
+                                  value={staffDetails?.password}
+                                  name="password"
+                                ></IonInput>
                               </IonItem>
                             </IonCol>
                             <IonCol size="12" sizeLg="6">
@@ -294,7 +485,10 @@ const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
                                 <IonLabel position="floating">
                                   Confirm Password
                                 </IonLabel>
-                                <IonInput type="text"></IonInput>
+                                <IonInput
+                                  type="text"
+                                  name="confirmPassword"
+                                ></IonInput>
                               </IonItem>
                             </IonCol>
                             <IonCol size="12" sizeLg="6">
@@ -304,7 +498,10 @@ const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
                                 lines="full"
                               >
                                 <IonLabel position="floating">Role</IonLabel>
-                                <IonSelect value={staffDetails?.role}>
+                                <IonSelect
+                                  value={staffDetails?.role}
+                                  name="role"
+                                >
                                   <IonSelectOption value={"admin"}>
                                     Admin
                                   </IonSelectOption>
@@ -324,14 +521,17 @@ const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
                                   Position
                                 </IonLabel>
                                 {/* set Value to present value */}
-                                <IonSelect value={staffDetails?.position}>
-                                  <IonSelectOption value={"doctor"}>
+                                <IonSelect
+                                  value={staffDetails?.position}
+                                  name="position"
+                                >
+                                  <IonSelectOption value={"Dr"}>
                                     Doctor
                                   </IonSelectOption>
-                                  <IonSelectOption value={"nurse"}>
+                                  <IonSelectOption value={"Ns"}>
                                     Nurse
                                   </IonSelectOption>
-                                  <IonSelectOption value={"lab-scientist"}>
+                                  <IonSelectOption value={"LSc"}>
                                     Lab Scientist
                                   </IonSelectOption>
                                 </IonSelect>
@@ -358,78 +558,25 @@ const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
         </form>
       </div>
 
-      {/* alerts */}
-      <IonAlert
-        isOpen={alertDischarge}
-        onDidDismiss={() => setAlertDischarge(false)}
-        cssClass="alert-discharge"
-        message={"Discharge [Patient Name]"}
-        header={"Discharge Patient"}
-        buttons={[
-          {
-            text: "cancel",
-            cssClass: "alert-discharge-cancel",
-            handler: () => {
-              console.log("Confirm failed");
-            },
-            role: "cancel",
-          },
-          {
-            text: "Discharge",
-            cssClass: "alert-discharge-confirm",
-            handler: () => {
-              console.log("Patient Discharged");
-              setOperationSuccessful(true);
-            },
-            role: "confirm",
-          },
-        ]}
-      ></IonAlert>
-      <IonAlert
-        isOpen={alertAdmit}
-        onDidDismiss={() => setAlertAdmit(false)}
-        cssClass="alert-admit"
-        message={"Admit [Patient Name]"}
-        header={"Admit Patient"}
-        buttons={[
-          {
-            text: "cancel",
-            cssClass: "alert-admit-cancel",
-            handler: () => {
-              console.log("Confirm failed");
-            },
-            role: "cancel",
-          },
-          {
-            text: "Admit",
-            cssClass: "alert-admit-confirm",
-            handler: () => {
-              console.log("Patient Admitted");
-              setOperationSuccessful(true);
-            },
-            role: "confirm",
-          },
-        ]}
-      ></IonAlert>
-
+      
+ 
       {/* loading */}
       <IonLoading
         isOpen={loading}
         onDidDismiss={() => {
-          setLoading(false);
-          setOperationSuccessful(true);
+          setLoading(false); 
         }}
       ></IonLoading>
 
       {/* toast */}
       <IonToast
-        isOpen={operationSuccessful}
-        message={"Operation Successful"}
+        isOpen={operationSuccessful.state}
+        message={operationSuccessful.message}
         icon={informationCircle}
-        color="success"
+        color={operationSuccessful.color}
         duration={2000}
         onDidDismiss={() => {
-          setOperationSuccessful(false);
+          setOperationSuccessful({ state: false, message: "", color: "" })
         }}
       ></IonToast>
     </>

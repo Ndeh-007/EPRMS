@@ -43,6 +43,7 @@ const ViewStaff: React.FC = () => {
   const [segmentButtonValue, setsegmentButtonValue] =
     React.useState("biography");
   const slidesRef = useRef<HTMLIonSlidesElement>(null);
+  const [_lastSeen, _setLastSeen] = useState<string>("");
 
   function slideTo(value: any) {
     if (value === "biography") {
@@ -59,8 +60,7 @@ const ViewStaff: React.FC = () => {
   function DeleteStaff(){
     setloading(true)
     firestore.collection("staff").doc(StaffDetails?.id).delete().then(()=>{
-      setloading(false)
-      // storage.refFromURL(StaffDetails?.image).delete()
+      setloading(false) 
       history.push("/staff")
     }).catch((e)=>{console.log(e)})
   }
@@ -70,6 +70,9 @@ const ViewStaff: React.FC = () => {
       let temp:any = location.state
       console.log(temp)
       setStaffDetails(temp)
+      console.log(temp.lastSeen)
+      let date = new Date(Number(temp.lastSeen))
+      _setLastSeen(date.toLocaleString())
     }
   },[])
   return (
@@ -117,11 +120,11 @@ const ViewStaff: React.FC = () => {
                 <IonCardTitle mode="ios" color="dark">
                   {StaffDetails?.name}
                 </IonCardTitle>
-                <IonCardSubtitle mode="ios" className="pt-sm-4">
+                <IonCardSubtitle mode="ios" className="pt-sm-4 text-lowercase text-capitalize">
                   {StaffDetails?.position}
                 </IonCardSubtitle>
                 <IonCardSubtitle mode="md" className="pt-sm-2 fst-italic">
-                  <span className="text-bold">Last Seen:</span> {Date()}
+                  <span className="text-bold">Last Seen:</span> {_lastSeen}
                 </IonCardSubtitle>
               </div>
             </IonItem>
@@ -138,10 +141,9 @@ const ViewStaff: React.FC = () => {
             <IonSegmentButton value="biography">Biography</IonSegmentButton>
             <IonSegmentButton value="activity">Activity</IonSegmentButton>
             <IonSegmentButton value="settings">Settings</IonSegmentButton>
-          </IonSegment>
-
+          </IonSegment> 
           <IonToolbar color="light">
-            <IonSlides className="slides" color="clear" ref={slidesRef}>
+            <IonSlides className="slides" color="clear" ref={slidesRef} onIonSlideTransitionEnd={(e)=>{}}>
               <IonSlide className="slide">
                 <IonCard mode="ios">
                   <IonCardContent>

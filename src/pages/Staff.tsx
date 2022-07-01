@@ -24,6 +24,7 @@ import {
   IonPage,
   IonProgressBar,
   IonRow,
+  IonSearchbar,
   IonText,
   IonTitle,
   IonToolbar,
@@ -34,7 +35,7 @@ import {
   pencil,
   peopleCircle,
 } from "ionicons/icons";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useHistory, useLocation, useParams } from "react-router";
 import BarChart from "../components/BarChart";
 import DoughnutChart from "../components/DoughnutChart";
@@ -54,31 +55,77 @@ const Staffs: React.FC = () => {
   const location = useLocation();
   const history = useHistory();
   const STAFF = useContext(StaffContext);
-  const [loading,setloading] = useState(false)
+  const [loading, setloading] = useState(false);
+  const [doctors, setDoctors] = useState<Staff[]>();
+  const [nurses, setNurses] = useState<Staff[]>();
+  const [labSci, setLabSci] = useState<Staff[]>();
+  const [totalStaff, setTotalStaff] = useState<Staff[]>();
+  const searchBarRef = useRef<HTMLIonSearchbarElement>(null);
+  const [tempAllStaff, setTempAllStaff] = useState<Staff[]>();
 
-  function checkPatientState(value: number) {
-    if (value === 0) {
-      return { color: "success", state: "Discharged" };
-    } else if (value === 1) {
-      return { color: "danger", state: "Admitted" };
-    } else if (value === 2) {
-      return { color: "warning", state: "Waiting" };
+  function distributeStaff(staff: Staff[]) {
+    let tempDoctors: any = [];
+    let tempNurses: any = [];
+    let tempLabSci: any = [];
+
+    staff?.forEach((staff) => {
+      if (staff.position === "Dr") {
+        tempDoctors.push(staff);
+      } else if (staff.position === "Ns") {
+        tempNurses.push(staff);
+      } else if (staff.position === "LSc") {
+        tempLabSci.push(staff);
+      }
+    });
+
+    setDoctors(tempDoctors);
+    setNurses(tempNurses);
+    setLabSci(tempLabSci);
+  }
+/**
+ * It filters the staff based on the search value
+ * @param {string | undefined | null} value - string | undefined | null
+ */
+
+  function searchPatient(value: string | undefined | null) {
+    let temp = tempAllStaff;
+    if (value) {
+      const filteredStaff = temp?.filter((staff) => {
+       return staff.name.toLowerCase().includes(value.toLowerCase());
+      }); // filter the staff based on the search value
+      console.log(value)
+      setAllStaff(filteredStaff);
     } else {
-      return { color: "warning", state: "Waiting" };
+      setAllStaff(temp);
     }
   }
 
   function fetchStaff() {
-    setloading(true)
+    setloading(true);
     firestore.collection("staff").onSnapshot((snapshot) => {
       let docs: any = snapshot.docs.map((doc) => doc.data());
       setAllStaff(docs);
-      setloading(false)
+      setTempAllStaff(docs);
+      setTotalStaff(docs);
+      distributeStaff(docs);
+      setloading(false);
     });
   }
 
-  function viewStaffProfile(data:Staff) {
-    history.push("/view-staff",data);
+  function changeAllStates(staffPosition?: string) {
+    if (staffPosition === "Dr") {
+      setAllStaff(doctors);
+    } else if (staffPosition === "Ns") {
+      setAllStaff(nurses);
+    } else if (staffPosition === "LSc") {
+      setAllStaff(labSci);
+    } else {
+      setAllStaff(totalStaff);
+    }
+  }
+
+  function viewStaffProfile(data: Staff) {
+    history.push("/view-staff", data);
   }
 
   useEffect(() => {
@@ -88,9 +135,7 @@ const Staffs: React.FC = () => {
   return (
     <IonPage>
       <PageHeader name={name}></PageHeader>
-        {
-          loading && <IonProgressBar type="indeterminate"></IonProgressBar>
-        }
+      {loading && <IonProgressBar type="indeterminate"></IonProgressBar>}
       <IonContent color="light">
         <IonToolbar color="light">
           <IonText slot="start" color="primary">
@@ -110,7 +155,7 @@ const Staffs: React.FC = () => {
         <IonGrid>
           <IonRow>
             <IonCol size="12" sizeLg="3" sizeMd="4">
-              <IonCard color="primary">
+              <IonCard color="primary" button onClick={() => changeAllStates()}>
                 <IonItem lines="none" color="dark">
                   <IonButtons>
                     <IonButton slot="start">
@@ -124,7 +169,7 @@ const Staffs: React.FC = () => {
                       </IonCardSubtitle>
                       <IonCardTitle>
                         <span className="h1 fw-bolder">
-                          {allStaff?.length}
+                          {totalStaff?.length}
                         </span>
                       </IonCardTitle>
                     </IonCardHeader>
@@ -146,14 +191,12 @@ const Staffs: React.FC = () => {
                         <span className="text-bold">Doctors</span>
                       </IonCardSubtitle>
                       <IonCardTitle>
-                        <span className="h1 fw-bolder">
-                          {allStaff?.filter((staff) => staff.role === "Doctor").length}
-                        </span>
+                        <span className="h1 fw-bolder">{doctors?.length}</span>
                       </IonCardTitle>
                     </IonCardHeader>
                   </div>
                   <IonButtons slot="end" color="dark">
-                    <IonButton>
+                    <IonButton onClick={() => changeAllStates("Dr")}>
                       <IonIcon slot="icon-only" icon={chevronForward}></IonIcon>
                     </IonButton>
                   </IonButtons>
@@ -174,14 +217,12 @@ const Staffs: React.FC = () => {
                         <span className="text-bold">Nurses</span>
                       </IonCardSubtitle>
                       <IonCardTitle>
-                        <span className="h1 fw-bolder">
-                          {allStaff?.filter((staff) => staff.role === "Nurse").length}
-                        </span>
+                        <span className="h1 fw-bolder">{nurses?.length}</span>
                       </IonCardTitle>
                     </IonCardHeader>
                   </div>
                   <IonButtons slot="end" color="dark">
-                    <IonButton>
+                    <IonButton onClick={() => changeAllStates("Ns")}>
                       <IonIcon slot="icon-only" icon={chevronForward}></IonIcon>
                     </IonButton>
                   </IonButtons>
@@ -202,20 +243,31 @@ const Staffs: React.FC = () => {
                         <span className="text-bold">Lab Scientists</span>
                       </IonCardSubtitle>
                       <IonCardTitle>
-                        <span className="h1 fw-bolder">
-                        
-                        {allStaff?.filter((staff) => staff.role === "Lab").length}
-                        </span>
+                        <span className="h1 fw-bolder">{labSci?.length}</span>
                       </IonCardTitle>
                     </IonCardHeader>
                   </div>
                   <IonButtons slot="end" color="dark">
-                    <IonButton>
+                    <IonButton onClick={() => changeAllStates("LSc")}>
                       <IonIcon slot="icon-only" icon={chevronForward}></IonIcon>
                     </IonButton>
                   </IonButtons>
                 </IonItem>
               </IonCard>
+            </IonCol>
+            <IonCol size="12">
+              <IonSearchbar
+                mode="md"
+                onIonChange={(e) => {
+                  searchPatient(e.detail.value);
+                }}
+                ref={searchBarRef}
+                onKeyUp={(e) => {
+                  if (e.key === "Enter") {
+                    searchPatient(searchBarRef.current?.value);
+                  }
+                }}
+              ></IonSearchbar>
             </IonCol>
           </IonRow>
         </IonGrid>

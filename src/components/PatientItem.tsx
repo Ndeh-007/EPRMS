@@ -29,17 +29,18 @@ import "../styles/Patients.css";
 import { useHistory } from "react-router";
 import { PatientContext } from "../context/AppContent";
 
-const PatientItem: React.FC<{ patient: Patient }> = ({patient}) => {
+const PatientItem: React.FC<{ patient: Patient; color?:string }> = ({ patient, color }) => {
   const history = useHistory();
-  const {setPatient} = useContext(PatientContext)
-
-  function viewPatient(data: Patient) { 
-    setPatient(data)
-    history.push("/view-patient", { patient: data });
+  const { setPatient } = useContext(PatientContext); 
+  function viewPatient(data: Patient) {
+    setPatient(data);
+    console.log(patient)
+    history.push("/view-patient");
+    // history.push("/view-patient", { patient: data });
   }
 
   return (
-    <IonItem lines="full" mode="md" onClick={()=>viewPatient(patient)} button>
+    <IonItem lines="full" mode="md" onClick={() => viewPatient(patient)} button>
       <IonGrid className="d-none d-lg-block d-md-none">
         <IonRow className="align-items-center label-color">
           <IonCol sizeLg="1">
@@ -65,17 +66,20 @@ const PatientItem: React.FC<{ patient: Patient }> = ({patient}) => {
           <IonCol className="text-center">
             <IonText>{patient.sex}</IonText>
           </IonCol>
-          <IonCol className="text-center">
-            <IonText>
-              {patient?.ward}
-            </IonText>
-          </IonCol> 
+          <IonCol className="text-center text-bold">
+            <IonText color={color}>{patient?.ward}</IonText>
+          </IonCol>
         </IonRow>
       </IonGrid>
-      <IonAvatar slot="start" className="br-2 border-primary d-sm-block d-md-block d-lg-none">
+      <IonAvatar
+        slot="start"
+        className="br-2 border-primary d-sm-block d-md-block d-lg-none"
+      >
         <IonImg src={patient.image}></IonImg>
       </IonAvatar>
-      <IonLabel className="d-block d-sm-block d-md-block d-lg-none">{patient.name}</IonLabel>
+      <IonLabel className="d-block d-sm-block d-md-block d-lg-none">
+        {patient.name}
+      </IonLabel>
       <IonButtons slot="end">
         <IonButton color="primary">
           <IonIcon slot="icon-only" icon={chevronForward}></IonIcon>

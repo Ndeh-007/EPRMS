@@ -130,6 +130,7 @@ const NewStaff: React.FC = () => {
     let names: any = staffName?.split(" ");
     let prefix = names[0] + "-";
     let suffix = "-" + names[1];
+    let _date = Date.now()
     let data: Staff = {
       name: staffName,
       tel: staffTel,
@@ -137,15 +138,16 @@ const NewStaff: React.FC = () => {
       biography: staffBiography,
       dateOfBirth: staffDOB,
       email: staffEmail,
-      id: uniqid(prefix, suffix),
+      id: uniqid(prefix),
       image: staffImage,
       maritalStatus: maritalStatus,
       password: Math.random().toString(36).slice(-8),
       role: "staff",
       sex: staffSex,
       username: names[0],
-      position: "Ns",
-      date: Date.now(),
+      position: staffPosition,
+      date: _date,
+      lastSeen:_date.toString(),
     };
 
     var storageRef = storage.ref(`staff/${data.id}/${data.id}-image.jpg`);
@@ -218,13 +220,15 @@ const NewStaff: React.FC = () => {
           message: "Access Modified Successfully",
           color: "success",
         });
-      });
+      }).catch(e=>{
 
-    setOperationSuccessful({
-      state: true,
-      message: "Staff Creation Failed",
-      color: "danger",
-    });
+        console.log("staff modification failed",e)
+        setOperationSuccessful({
+          state: true,
+          message: "Staff Creation Failed",
+          color: "danger",
+        });
+      })
   }
 
   return (
@@ -451,13 +455,13 @@ const NewStaff: React.FC = () => {
                                       setStaffPosition(e.detail.value);
                                     }}
                                   >
-                                    <IonSelectOption value={"doctor"}>
+                                    <IonSelectOption value={"Dr"}>
                                       Doctor
                                     </IonSelectOption>
-                                    <IonSelectOption value={"nurse"}>
+                                    <IonSelectOption value={"Ns"}>
                                       Nurse
                                     </IonSelectOption>
-                                    <IonSelectOption value={"lab-scientist"}>
+                                    <IonSelectOption value={"LSc"}>
                                       Lab Scientist
                                     </IonSelectOption>
                                   </IonSelect>

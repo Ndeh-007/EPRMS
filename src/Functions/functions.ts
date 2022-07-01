@@ -65,12 +65,20 @@ export function convertDate(date: string | undefined | number, time?: boolean) {
 
 export function refactor() {
   firestore
-    .collection("patients")
+    .collection("staff") 
     .get()
     .then((docs) => {
-      let ids = docs.docs.map((doc) => doc.id);
-      ids.forEach((id) => {
-        firestore.collection("patients").doc(id).delete();
+      let _docs = docs.docs.map((doc) => doc.data());
+      console.log(docs);
+      _docs.forEach((id) => {
+        if (id.usersname != "Tabi")
+         { firestore
+            .collection("staff")
+            .doc(id.id)
+            .delete()
+            .then(() => {
+              console.log("deleted");
+            });}
       });
     })
     .then(() => {

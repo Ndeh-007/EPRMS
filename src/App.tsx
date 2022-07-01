@@ -32,14 +32,15 @@ import "chart.js/auto";
 import { Redirect, Route } from "react-router";
 import Login from "./pages/Login";
 import { useContext, useEffect, useState } from "react";
-import { PatientContext, StaffContext } from "./context/AppContent";
-import { Patient, Staff } from "./interfaces/types";
+import { PatientContext, PatientRecordContext, StaffContext } from "./context/AppContent";
+import { Patient, PatientRecordInterface, Staff } from "./interfaces/types";
 
 setupIonicReact();
 
 const App: React.FC = () => {
   const [staff, setStaff] = useState<Staff>();
   const [patient, setPatient] = useState<Patient>();
+  const [patientRecord, setPatientRecord] = useState<PatientRecordInterface>();
 
   useEffect(()=>{
     
@@ -47,16 +48,18 @@ const App: React.FC = () => {
   return (
     <IonApp>
       <StaffContext.Provider value={{ staff, setStaff }}>
-        <PatientContext.Provider value={{ patient, setPatient }}>
-          <IonReactRouter>
-            <Routes></Routes>
-            <Route path={"/login"} exact={true}>
-              <Login></Login>
-            </Route>
-            <Route path={"/"} exact={true}>
-              <Login></Login>
-            </Route>
-          </IonReactRouter>
+        <PatientContext.Provider value={{ patient, setPatient }}> 
+          <PatientRecordContext.Provider value={{patientRecord, setPatientRecord}}> 
+            <IonReactRouter>
+              <Routes></Routes>
+              <Route path={"/login"} exact={true}>
+                <Login></Login>
+              </Route>
+              <Route path={"/"} exact={true}>
+                <Login></Login>
+              </Route>
+            </IonReactRouter>
+          </PatientRecordContext.Provider>
         </PatientContext.Provider>
       </StaffContext.Provider>
     </IonApp>
