@@ -84,6 +84,7 @@ const ViewPatient: React.FC = () => {
   const [viewImagePopover, setviewImagePopover] = useState(false);
   const [patientRecordsModal, setPatientRecordsModal] = useState(false);
   const { patient, setPatient } = useContext(PatientContext);
+  const { patientRecord, setPatientRecord } = useContext(PatientRecordContext);
   const [patientRecords, setPatientRecords] =
     useState<PatientRecordInterface[]>();
   const [FirstRecord, setFirstRecord] = useState<PatientRecordInterface>();
@@ -95,7 +96,7 @@ const ViewPatient: React.FC = () => {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [patientOverview, setPatientOverview] = useState<Overview[]>();
   const [loadingOverview, setLoadingOverview] = useState(false);
-  const RECORD = useContext(PatientRecordContext)
+  const RECORD = useContext(PatientRecordContext);
 
   function getRecords() {
     setLoadingRecords(true);
@@ -133,20 +134,7 @@ const ViewPatient: React.FC = () => {
     if (value) history.push("/patient-record", value);
     else history.push("/patient-record");
   }
-
-  function getPatientImmunity() {
-    setLoadingImmninty(true);
-    firestore
-      .collection("patients")
-      .doc(patient?.id)
-      .collection("immunity")
-      .onSnapshot((snapshot) => {
-        let docs: any = snapshot.docs.map((doc) => doc.data());
-        setPatientImmninty(docs);
-        setLoadingImmninty(false);
-      });
-  }
-
+ 
   function getPatientHistory() {
     setLoadingHistory(true);
     firestore
@@ -176,10 +164,12 @@ const ViewPatient: React.FC = () => {
         setLoadingOverview(false);
       });
   }
+ function editPatient(){
+    history.push("/edit-patient", patient);
+ }
 
-  useEffect(() => { 
-    getRecords();
-    getPatientImmunity();
+  useEffect(() => {
+    getRecords(); 
     getPatientOverview();
     getPatientHistory();
   }, [location]);
@@ -352,7 +342,7 @@ const ViewPatient: React.FC = () => {
                     <IonButton
                       color="primary"
                       size="small"
-                      routerLink="/edit-patient"
+                      onClick={()=>{editPatient()}}
                     >
                       <IonIcon
                         icon={pencil}
@@ -434,7 +424,7 @@ const ViewPatient: React.FC = () => {
                           <IonLabel>{wish}</IonLabel>
                         </IonChip>
                       );
-                    })} 
+                    })}
                     {patient?.wishes?.length === 0 && (
                       <IonChip color="success">
                         <IonLabel>All Permitted</IonLabel>
@@ -511,12 +501,13 @@ const ViewPatient: React.FC = () => {
                   <IonCardSubtitle>Name and Date</IonCardSubtitle>
                 </IonCardHeader>
                 <IonCardContent>
-                  {patientImmninty?.map((immunity, index) => {
+                  {patient?.immunity?.map((immunity, index) => {
                     return (
                       <IonItem lines="full" key={index}>
                         <IonText slot="start">{immunity.name}</IonText>
                         <IonText slot="end">
-                          {convertDate(immunity.date)}
+                          {/* {convertDate(immunity.date)} */}
+                          {immunity.date}
                         </IonText>
                       </IonItem>
                     );
@@ -594,36 +585,74 @@ const ViewPatient: React.FC = () => {
 
         <IonGrid>
           <IonRow>
-            {patientOverview?.map((overview, index) => {
-              return (
-                <IonCol
-                  size="6"
-                  sizeLg="4"
-                  sizeXs="12"
-                  sizeMd="6"
-                  sizeSm="12"
-                  key={index}
-                >
-                  <IonCard>
-                    <IonCardHeader>
-                      <IonCardTitle>{overview.title}</IonCardTitle>
-                    </IonCardHeader>
-                    <IonCardContent>
-                      {overview.attribute.map((attribute, _index) => {
-                        return (
-                          <IonItem lines="full" key={_index}>
-                            <IonText slot="start">{attribute.value}</IonText>
-                            <IonText slot="end">
-                              {attribute.description}
-                            </IonText>
-                          </IonItem>
-                        );
-                      })}
-                    </IonCardContent>
-                  </IonCard>
-                </IonCol>
-              );
-            })}
+            <IonCol size="6" sizeLg="6" sizeXs="12" sizeMd="6" sizeSm="12">
+              <IonCard>
+                <IonCardHeader>
+                  <IonCardTitle>Appearance</IonCardTitle>
+                </IonCardHeader>
+                <IonCardContent>
+                  {patientRecord?.appearance?.map((attribute, _index) => {
+                    return (
+                      <IonItem lines="full" key={_index}>
+                        <IonText slot="start">{attribute.value}</IonText>
+                        <IonText slot="end">{attribute.description}</IonText>
+                      </IonItem>
+                    );
+                  })}
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+            <IonCol size="6" sizeLg="6" sizeXs="12" sizeMd="6" sizeSm="12">
+              <IonCard>
+                <IonCardHeader>
+                  <IonCardTitle>Continence</IonCardTitle>
+                </IonCardHeader>
+                <IonCardContent>
+                  {patientRecord?.continence?.map((attribute, _index) => {
+                    return (
+                      <IonItem lines="full" key={_index}>
+                        <IonText slot="start">{attribute.value}</IonText>
+                        <IonText slot="end">{attribute.description}</IonText>
+                      </IonItem>
+                    );
+                  })}
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+            <IonCol size="6" sizeLg="6" sizeXs="12" sizeMd="6" sizeSm="12">
+              <IonCard>
+                <IonCardHeader>
+                  <IonCardTitle>ADL</IonCardTitle>
+                </IonCardHeader>
+                <IonCardContent>
+                  {patientRecord?.adl?.map((attribute, _index) => {
+                    return (
+                      <IonItem lines="full" key={_index}>
+                        <IonText slot="start">{attribute.value}</IonText>
+                        <IonText slot="end">{attribute.description}</IonText>
+                      </IonItem>
+                    );
+                  })}
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+            <IonCol size="6" sizeLg="6" sizeXs="12" sizeMd="6" sizeSm="12">
+              <IonCard>
+                <IonCardHeader>
+                  <IonCardTitle>IADL</IonCardTitle>
+                </IonCardHeader>
+                <IonCardContent>
+                  {patientRecord?.iadl?.map((attribute, _index) => {
+                    return (
+                      <IonItem lines="full" key={_index}>
+                        <IonText slot="start">{attribute.value}</IonText>
+                        <IonText slot="end">{attribute.description}</IonText>
+                      </IonItem>
+                    );
+                  })}
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
           </IonRow>
         </IonGrid>
       </IonContent>

@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site":"am-records",
     "public": "build",
     "ignore": [
       "firebase.json",

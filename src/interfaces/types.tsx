@@ -81,7 +81,8 @@ export interface Patient {
   dischargedDate?:string;
   admissionDate?:string;
   dischargeStatus?:string;
-  payment?:Payment
+  payment?:Payment;
+  immunity?:Immunity[];
 }
 
 export interface Payment{
@@ -114,7 +115,11 @@ export interface PatientRecordInterface {
   discharged?:boolean;
   ward?: string; 
   physicalExam?:string;
-  payment?:Payment
+  payment?:Payment;
+  adl?: OverviewAttribute[];
+  iadl?: OverviewAttribute[];
+  continence?: OverviewAttribute[];
+  appearance?: OverviewAttribute[];
 }
 
 export interface HistoryInterface {
@@ -141,6 +146,7 @@ export interface Overview {
 export interface OverviewAttribute {
   value: string;
   description: string;
+  id?:string;
 }
 
 export interface HistoryAttribute {

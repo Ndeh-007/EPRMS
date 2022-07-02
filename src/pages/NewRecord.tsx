@@ -34,7 +34,7 @@ import {
   PatientsHistory,
 } from "../components/EditPatientRecordCategories";
 import PageHeader from "../components/PageHeader";
-import { PatientContext } from "../context/AppContent";
+import { PatientContext, PatientRecordContext } from "../context/AppContent";
 import { firestore } from "../Firebase";
 import {
   ADL,
@@ -51,21 +51,38 @@ import uniqid from "uniqid";
 const NewRecord: React.FC = () => {
   const location = useLocation();
   const { patient } = useContext(PatientContext);
-  const [patientRecord, setPatientRecord] = useState<PatientRecordInterface>();
+  const {patientRecord, setPatientRecord} =  useContext(PatientRecordContext);
+  const [_patientRecord, _setPatientRecord] = useState<PatientRecordInterface>();
   const [recordId, setRecordId] = useState<string>();
   const [startRecord, setStartRecord] = useState<boolean>(false);
   const [loading, setloading] = useState(false);
   async function updatePatientRecord(section: string, data: AnyObject) {}
 
   function createRecord() {
-    let rID = uniqid();
+    let rID = uniqid("record-");
+    let _date = Date.now();
+    let data:PatientRecordInterface={
+      id: rID,
+      date: _date,
+      diagnosis: "",
+      patientComplaint: "",
+      treatment: "",
+      vitals:{
+        bloodPressure: "", 
+        temperature: "",
+        weight: "",
+        pulse: "",
+      }
+    }
     setRecordId(rID);
     firestore
       .collection("patients")
       .doc(patient?.id)
       .collection("records")
       .doc(rID)
-      .set({ id: rID, date: Date.now() });
+      .set(data).then(()=>{
+        setPatientRecord(data);
+      });
     setStartRecord(true);
   }
 
@@ -123,7 +140,7 @@ const NewRecord: React.FC = () => {
                         .collection("patients")
                         .doc(patient?.id)
                         .collection("records")
-                        .doc(recordId)
+                        .doc(patientRecord?.id)
                         .update({ vitals: data })
                         .then(() => setloading(false)).catch(()=>setloading(false));
                     }}
@@ -201,7 +218,7 @@ const NewRecord: React.FC = () => {
                       .collection("patients")
                       .doc(patient?.id)
                       .collection("records")
-                      .doc(recordId)
+                      .doc(patientRecord?.id)
                       .update({ patientComplaint: data.patientComplaint })
                       .then(() => {
                         setloading(false);
@@ -248,7 +265,7 @@ const NewRecord: React.FC = () => {
                       .collection("patients")
                       .doc(patient?.id)
                       .collection("records")
-                      .doc(recordId)
+                      .doc(patientRecord?.id)
                       .update({ diagnosis: data.diagnosis })
                       .then(() => {
                         setloading(false);
@@ -293,7 +310,7 @@ const NewRecord: React.FC = () => {
                       .collection("patients")
                       .doc(patient?.id)
                       .collection("records")
-                      .doc(recordId)
+                      .doc(patientRecord?.id)
                       .update({ treatment: data.treatment })
                       .then(() => {
                         setloading(false);

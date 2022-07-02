@@ -66,50 +66,7 @@ const PatientRecord: React.FC = () => {
     setShowEditModal(false);
   }
 
-  async function getAttributes() {
-    let q1 = firestore
-      .collection("patients")
-      .doc(patient?.id)
-      .collection("records")
-      .doc(patientRecord?.id)
-      .collection("appearance")
-      .onSnapshot((docs) => {
-        let temp: any = docs.docs.map((doc) => doc.data());
-        setappearance(temp);
-      });
-
-    let q2 = firestore
-      .collection("patients")
-      .doc(patient?.id)
-      .collection("records")
-      .doc(patientRecord?.id)
-      .collection("adl")
-      .onSnapshot((docs) => {
-        let temp: any = docs.docs.map((doc) => doc.data());
-        setadl(temp);
-      });
-
-    let q3 = firestore
-      .collection("patients")
-      .doc(patient?.id)
-      .collection("records")
-      .doc(patientRecord?.id)
-      .collection("iadl")
-      .onSnapshot((docs) => {
-        let temp: any = docs.docs.map((doc) => doc.data());
-        setiadl(temp);
-      });
-
-    let q4 = firestore
-      .collection("patients")
-      .doc(patient?.id)
-      .collection("records")
-      .doc(patientRecord?.id)
-      .collection("continence")
-      .onSnapshot((docs) => {
-        let temp: any = docs.docs.map((doc) => doc.data());
-        setcontinence(temp);
-      });
+  async function getAttributes() { 
 
     let q5 = firestore
       .collection("patients")
@@ -144,7 +101,7 @@ const PatientRecord: React.FC = () => {
         setlabs(temp);
       });
 
-    await Promise.all([q1, q2, q3, q4, q5, q6, q7]).then(()=>{
+    await Promise.all([q5, q6, q7]).then(()=>{
       console.log("fetch successful")
     }).catch((e)=>{
       console.error(e)
@@ -337,11 +294,11 @@ const PatientRecord: React.FC = () => {
                   </IonToolbar>
                 </IonCardHeader>
                 <IonCardContent>
-                  {appearance?.map((_appearance, index) => {
+                  {patientRecord?.appearance?.map((_appearance, index) => {
                     return (
                       <IonItem lines="full" key={index}>
                         <IonText slot="start">{_appearance.value}</IonText>
-                        <IonText slot="end">{_appearance.value}</IonText>
+                        <IonText slot="end">{_appearance.description}</IonText>
                       </IonItem>
                     );
                   })}
@@ -375,11 +332,11 @@ const PatientRecord: React.FC = () => {
                   </IonToolbar>
                 </IonCardHeader>
                 <IonCardContent>
-                  {iadl?.map((_iadl, index) => {
+                  {patientRecord?.iadl?.map((_iadl, index) => {
                     return (
                       <IonItem lines="full" key={index}>
                         <IonText slot="start">{_iadl.value}</IonText>
-                        <IonText slot="end">{_iadl.value}</IonText>
+                        <IonText slot="end">{_iadl.description}</IonText>
                       </IonItem>
                     );
                   })}
@@ -413,11 +370,11 @@ const PatientRecord: React.FC = () => {
                   </IonToolbar>
                 </IonCardHeader>
                 <IonCardContent>
-                  {adl?.map((_adl, index) => {
+                  {patientRecord?.adl?.map((_adl, index) => {
                     return (
                       <IonItem lines="full" key={index}>
                         <IonText slot="start">{_adl.value}</IonText>
-                        <IonText slot="end">{_adl.value}</IonText>
+                        <IonText slot="end">{_adl.description}</IonText>
                       </IonItem>
                     );
                   })}
@@ -449,11 +406,11 @@ const PatientRecord: React.FC = () => {
                   </IonToolbar>
                 </IonCardHeader>
                 <IonCardContent>
-                  {continence?.map((_continence, index) => {
+                  {patientRecord?.continence?.map((_continence, index) => {
                     return (
                       <IonItem lines="full" key={index}>
                         <IonText slot="start">{_continence.value}</IonText>
-                        <IonText slot="end">{_continence.value}</IonText>
+                        <IonText slot="end">{_continence.description}</IonText>
                       </IonItem>
                     );
                   })}
@@ -485,8 +442,7 @@ const PatientRecord: React.FC = () => {
                 </IonCardHeader>
                 <IonCardContent>
                   <IonAccordionGroup>
-                    {histories?.map((history, index) => {
-                      console.log(history);
+                    {histories?.map((history, index) => { 
                       return (
                         <IonAccordion value={history.title} key={index}>
                           <IonItem slot="header">

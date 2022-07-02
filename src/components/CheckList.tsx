@@ -11,10 +11,11 @@ import {
   IonRadioGroup,
   IonRow,
 } from "@ionic/react";
-import React, { useContext, useState } from "react";
-import { PatientContext } from "../context/AppContent";
+import React, { useContext, useRef, useState } from "react";
+import { PatientContext, PatientRecordContext } from "../context/AppContent";
 import { firestore } from "../Firebase";
 import { OverviewAttribute } from "../interfaces/types";
+import PatientRecord from "../pages/PatientRecord";
 
 const CheckList: React.FC<{
   data: string[];
@@ -25,7 +26,11 @@ const CheckList: React.FC<{
   title: string;
 }> = ({ data, states, catheter, edit, recordId, title }) => {
   const [loading, setloading] = useState(false);
-  const { patient } = useContext(PatientContext);
+  const {patientRecord, setPatientRecord}  = useContext(PatientRecordContext);
+  const { patient,setPatient } = useContext(PatientContext);
+  const listRef = useRef<HTMLIonListElement>(null);
+  const [overview, setOverview] = useState<OverviewAttribute[]>([]);
+
   function setBorder(length: number, checker: number) {
     if (checker === length - 1) {
       return "pt-2 m-0";
@@ -34,56 +39,54 @@ const CheckList: React.FC<{
     }
   }
 
-  // function  (){
+  function assignValues(value:string, index:number) {
+    let temp:OverviewAttribute[]=[];
+    let obj: OverviewAttribute = {
+      value: data[index],
+      description:value,
+      id:data[index]+value,
+    }; 
+    temp = [...overview, obj];
+    let uA:any=[];
+    let tUA:any=[] 
 
-  // }
+    let t = temp.filter((item,index)=>{  
+      const isDuplicate = uA.includes(item.id);   
+      if (!isDuplicate) {
+        uA.push(item.id);  
+        tUA.push(item);
+        return true;
+      } 
+      return false;
+    })  
+   
+    let r = tUA.filter((i:any)=> i.value === obj.value && i.description === obj.description);
+    let h = tUA.filter((i:any)=> i.value !== obj.value)
+    let res = [...r, ...h];
+    console.log(res)
+    setOverview(res) 
+  }
   return (
-    <IonList className={edit ? "px-3" : ""}>
+    <IonList className={edit ? "px-3" : ""} ref={listRef}>
       {loading && <IonProgressBar type="indeterminate"></IonProgressBar>}
       <form
         onSubmit={(e: any) => {
           e.preventDefault();
-          setloading(true);
-          let _data: any = {};
-          let temp: any[] = [];
-
-          // const data = new FormData(e.target); 
-          // const value = Object.fromEntries(data.entries()); 
-          // console.log(value);
-
-          console.log(e.target.test.value)
-
-          // for (let i = 0; i < data.length; i++) {
-          //   let index = states[i] + i;
-          //   _data[data[i]] = e.target.states[i].value;
-          //   temp.push(_data);
-          //   if (i === data.length - 1 && catheter) {
-          //     _data["catheter"] = e.target["catheter"].value;
-          //     temp.push(_data);
-          //   }
-          // }
-
-
-
-          // temp.map((_dt: OverviewAttribute, i: number) => {
-          //   firestore
-          //     .collection("patients")
-          //     .doc(patient?.id)
-          //     .collection("records")
-          //     .doc(recordId)
-          //     .collection(title)
-          //     .doc(_dt.value)
-          //     .set(_dt)
-          //     .then(() => {
-          //       console.log("successfull");
-          //     })
-          //     .catch((e) => console.error(e));
-          // });
-       
-          // setTimeout(() => {
-            
-          //   setloading(false);
-          // }, 500);
+          setloading(true); 
+          let object:any={}
+          object[title] = overview;
+          let tArr = [object]
+          firestore.collection('patients').doc(patient?.id).collection('records').doc(patientRecord?.id).update(tArr[0]).then(()=>{
+            let temp:any = patientRecord;
+            temp[title] = overview;
+            console.log(temp)
+            setPatientRecord(temp);
+            console.log('update successful')
+            setloading(false)
+          }).catch((e)=>{
+            console.log("error_",e);
+            setloading(false)
+          })
         }}
       >
         {data.map((item, index) => {
@@ -91,14 +94,20 @@ const CheckList: React.FC<{
           return (
             <div key={index} className={setBorder(data.length, index)}>
               <IonLabel>{item}</IonLabel>
-              <IonRadioGroup name={item} onIonChange={(e)=>{console.log(e.detail.value)}}>
+              <IonRadioGroup
+                name={item}
+                className="radioGroup"
+                onIonChange={(e) => { 
+                  assignValues(e.detail.value, index);
+                }}
+              >
                 <IonRow>
                   {states.map((state, stateIndex) => {
                     return (
                       <IonCol key={stateIndex}>
                         <IonItem lines="none">
                           <IonLabel>{state}</IonLabel>
-                          <IonRadio name="test"></IonRadio>
+                          <IonRadio value={state}></IonRadio>
                         </IonItem>
                       </IonCol>
                     );
@@ -108,7 +117,11 @@ const CheckList: React.FC<{
               {catheter && data.length === index + 1 && (
                 <IonItem lines="none" className="border-top">
                   <IonLabel>Catheter</IonLabel>
-                  <IonCheckbox name="catheter"></IonCheckbox>
+                  <IonCheckbox name="catheter" onIonChange={(e)=>{if(e.detail.checked){
+                    let t = overview;
+                    t.push({value:'Catheter',description:'Catheter'});
+                    setOverview(t);
+                  }}}></IonCheckbox>
                 </IonItem>
               )}
             </div>

@@ -1052,24 +1052,14 @@ const Management: React.FC<{ recordId?: string }> = ({ recordId }) => {
 const PatientImmunity: React.FC<{ recordId?: string }> = ({ recordId }) => {
   const [newImmunity, setNewImmnunity] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { patient } = useContext(PatientContext);
+  const { patient,setPatient } = useContext(PatientContext);
   const [Immunisations, setImmunisations] = useState<Immunity[]>();
 
-  useEffect(() => {
-    firestore
-      .collection("patients")
-      .doc(patient?.id)
-      .collection("records")
-      .doc(recordId)
-      .collection("immunizations")
-      .onSnapshot((snapshot) => {
-        let docs: any = snapshot.docs.map((doc) => doc.data());
-        setImmunisations(docs);
-      });
+  useEffect(() => { 
   }, []);
   return (
     <div>
-      {Immunisations?.map((immunisation, index) => {
+      {patient?.immunity?.map((immunisation, index) => {
         <IonItem lines="full" key={index}>
           <IonText slot="start">{immunisation.name}</IonText>
           <IonText slot="end">{immunisation.date}</IonText>
@@ -1082,19 +1072,25 @@ const PatientImmunity: React.FC<{ recordId?: string }> = ({ recordId }) => {
               e.preventDefault();
               setLoading(true);
               let data: Immunity = {
-                name: e.target.name.value,
+                name: e.target.title.value,
                 date: e.target.date.value,
-              };
+              }; 
+              let pT:any = [];
+              if(patient?.immunity){
+                pT = patient?.immunity;
+              }
+              let temp = [...pT, data]; 
               firestore
                 .collection("patients")
-                .doc(patient?.id)
-                .collection("records")
-                .doc(recordId)
-                .collection("immunizations")
-                .doc(data.name)
-                .set({ ...data })
+                .doc(patient?.id).update({immunity:temp})
                 .then(() => {
+                  let t:any = patient;
+                  t["immunity"] = temp;
+                  setPatient(t);
                   setLoading(false);
+                }).catch((e)=>{
+                  console.log(e);
+                  setLoading(false)
                 });
             }}
           >
