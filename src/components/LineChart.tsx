@@ -18,25 +18,27 @@ const LineChart: React.FC<{
   let outPatientValues: any[] = [];
 
   function initGraph() {
-    let tempPatients: any = patients?.reverse();
+    let tempPatients: any = patients;
     let dates: any = tempPatients?.map((patient: any) =>
-      new Date(patient.date).toDateString()
+      patient.date
     );
 
     let tempDischargedPatients: any = dischargedPatients?.reverse();
     let dischargedDates: any = tempDischargedPatients?.map((patient: any) =>
-      new Date(patient.dischargedDate).toDateString()
+      patient.dischargedDate
     );
 
-    admittedPatients?.reverse();
 
     let tempAdmittedPatients: any = admittedPatients;
     let admittedDates: any = tempAdmittedPatients?.map((patient: any) =>
-      new Date(patient.admissionDate).toDateString()
+      patient.admissionDate
     );
 
-    allDates = [...dates, ...dischargedDates, ...admittedDates];
-    allDates.sort().reverse();
+    let tempDATES = [...dates, ...dischargedDates, ...admittedDates];
+
+    tempDATES.sort(); 
+    allDates = tempDATES.map((date: any) => new Date(date).toDateString());
+    // admittedPatients?.reverse();
     let uniqueDates = allDates.filter((element, index) => {
       return allDates.indexOf(element) === index;
     });
@@ -65,16 +67,16 @@ const LineChart: React.FC<{
       }
 
       return false;
-    }); 
+    });
     /* Creating an object with the date as the key and the number of patients as the value. */
-    uniquePatients.forEach((patient: any) => {
+    allPatients.forEach((patient: any) => {
       // console.log(patient.status, patient.name, patient.admissionDate)
       if (patient.status == "admitted") {
         objAdmitted[new Date(Number(patient.admissionDate)).toDateString()] =
           objAdmitted[new Date(Number(patient.admissionDate)).toDateString()]
             ? objAdmitted[
-                new Date(Number(patient.admissionDate)).toDateString()
-              ] + 1
+            new Date(Number(patient.admissionDate)).toDateString()
+            ] + 1
             : 1; // If the key exists, increment the value. If not, set the value to 1.
       }
 
@@ -82,8 +84,8 @@ const LineChart: React.FC<{
         objDischarged[new Date(Number(patient.dischargedDate)).toDateString()] =
           objDischarged[new Date(Number(patient.dischargedDate)).toDateString()]
             ? objDischarged[
-                new Date(Number(patient.dischargedDate)).toDateString()
-              ] + 1
+            new Date(Number(patient.dischargedDate)).toDateString()
+            ] + 1
             : 1; // If the key exists, increment the value. If not, set the value to 1.
       }
 
@@ -96,17 +98,20 @@ const LineChart: React.FC<{
     });
 
     for (let i = 0; i < uniqueDates.length; i++) {
-      if (objAdmitted.hasOwnProperty(uniqueDates[i])) { 
-        admittedValues.push(objAdmitted[uniqueDates[i]]);  
+      if (objAdmitted.hasOwnProperty(uniqueDates[i])) {
+        admittedValues.push(objAdmitted[uniqueDates[i]]);
       }
-      if (objDischarged.hasOwnProperty(uniqueDates[i])) { 
-        dischargedValues.push(objDischarged[uniqueDates[i]]); 
+      if (objDischarged.hasOwnProperty(uniqueDates[i])) {
+        dischargedValues.push(objDischarged[uniqueDates[i]]);
       }
       if (objOutPatient.hasOwnProperty(uniqueDates[i])) {
         outPatientValues.push(objOutPatient[uniqueDates[i]]);
       }
     }
-   
+
+    console.log(uniqueDates)
+    console.log(dischargedValues)
+
     setCumulativeAdmitted(admittedValues);
     setCumulativeDischarged(dischargedValues);
     setCumulativeOutPatients(outPatientValues);
@@ -128,8 +133,8 @@ const LineChart: React.FC<{
     datasets: [
       {
         label: "Out Patients",
-        backgroundColor: "#3880ff",
-        borderColor: "#3880ff",
+        backgroundColor: "#ffc409",
+        borderColor: "#ffc409",
         data: cumulativeOutPatients,
         tension: 0.3,
         point: {
@@ -137,9 +142,9 @@ const LineChart: React.FC<{
         },
         fill: {
           target: "origin",
-          above: "#00ade03f",
+          above: "#ffc4093f",
         },
-        pointHoverBackgroundColor: "#3880ff",
+        pointHoverBackgroundColor: "#ffc409",
       },
       {
         label: "Admitted",

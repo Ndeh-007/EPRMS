@@ -54,7 +54,7 @@ import "../styles/NewPatient.css";
 import { save } from "ionicons/icons";
 import uniqid from "../interfaces/uniqid";
 import { firestore, storage } from "../Firebase";
-import { PatientContext } from "../context/AppContent";
+import { PatientContext } from "../context/AppContent"; 
 
 const NewPatient: React.FC = () => {
   const { name } = useParams<{ name: string; mode?: string }>();

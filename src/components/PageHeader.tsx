@@ -72,10 +72,7 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
         console.log("error", e);
       });
   }
-
-  function distrubteNumbers(){
-
-  }
+ 
 
   function handleNavigation(_location: string) {
     console.log("location", _location);
@@ -103,8 +100,12 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
     if (_location == "/new-staff") {
       history.push('/staff')
     }
-    if (_location == "/view-staff") {
-      history.push('/staff')
+    if (_location == "/view-staff" ) {
+      if(staff?.role=='admin'){
+        history.push('/staff')
+      }else{
+        history.push('/dashboard')
+      }
     }
   }
 
@@ -119,7 +120,7 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
       showPopover: false,
       event: undefined,
     });
-    history.push("/view-staff");
+    history.push("/view-staff",staff);
   }
 
   function initStaff() {
@@ -136,11 +137,11 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
   }
 
   useEffect(() => {
-    initStaff();
+    initStaff(); 
     if (location.pathname === "/dashboard") {
       setShowBackButton(false);
     }
-  }, [location]);
+  }, [location.pathname]);
 
   return (
     <IonHeader>
@@ -176,7 +177,9 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
       {/* <IonButton onClick={()=>refactor()}> refactor</IonButton> */}
         <IonCard color="light" slot="end" mode="md">
           <IonButtons>
-            <IonButton color="warning">
+            <IonButton color="warning" 
+              onClick={() => {setModal(true)}}
+            >
               <IonIcon icon={notifications}></IonIcon>
             </IonButton>
           </IonButtons>
@@ -194,7 +197,7 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
         >
           <IonToolbar color="light">
             <IonLabel className="d-none d-md-block px-3">
-              <span className="text-bold">{context.staff?.name}</span> <br />
+              <span className="text-bold">{context.staff?.position}. {context.staff?.name}</span> <br />
               <span>
                 <IonNote
                   className="ion-float-right"
@@ -202,7 +205,7 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
                 >
                   {context.staff?.role}
                 </IonNote>
-              </span>
+              </span>  
             </IonLabel>
             <IonAvatar slot="end">
               <IonImg className="br-2" src={context.staff?.image}></IonImg>

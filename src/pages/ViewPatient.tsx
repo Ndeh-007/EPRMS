@@ -246,7 +246,7 @@ const ViewPatient: React.FC = () => {
             <IonItem
               lines="none"
               button
-              onClick={() => {
+              onClick={() => { 
                 viewPatientRecord(FirstRecord);
               }}
             >
@@ -775,6 +775,7 @@ const ViewPatient: React.FC = () => {
                 .collection("admittedPatients")
                 .doc(patient?.id)
                 .set({ ...data, ...patient });
+
               firestore.collection("patients").doc(patient?.id).update(data);
             },
             role: "confirm",

@@ -1,3 +1,7 @@
+import { peopleCircleSharp, personCircleSharp } from "ionicons/icons";
+import { customIcons } from "../images/images";
+import { AppPage } from "./types";
+
 const ADL: string[] = [
   "Bathing",
   "Dressing",
@@ -36,7 +40,7 @@ const ADL_States: string[] = [
   "Dependent",
 ];
 
-const AppearanceStates: string[] = ["Good","Fair", "Needs Attention",];
+const AppearanceStates: string[] = ["Good", "Fair", "Needs Attention",];
 
 const ContinenceStates: string[] = [
   "Continent",
@@ -44,8 +48,8 @@ const ContinenceStates: string[] = [
   "Incontinent",
 ];
 
-const Wishes:string[] = [
-  "DNR", "No Antibiotics", "No IVs","Do Not Hospitalize","Only Comfort Care", "No Feeding Tube"
+const Wishes: string[] = [
+  "DNR", "No Antibiotics", "No IVs", "Do Not Hospitalize", "Only Comfort Care", "No Feeding Tube"
 ]
 
 export {
@@ -60,3 +64,40 @@ export {
 };
 
 
+
+export const AdminAppPages: AppPage[] = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    iosIcon: customIcons.dashboard,
+    mdIcon: customIcons.dashboard,
+  },
+  {
+    title: "Patients",
+    url: "/patients",
+    iosIcon: personCircleSharp,
+    mdIcon: personCircleSharp,
+  },
+  {
+    title: "Staff",
+    url: "/staff",
+    iosIcon: peopleCircleSharp,
+    mdIcon: peopleCircleSharp,
+  },
+];
+
+export const StaffAppPages: AppPage[] = [
+
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    iosIcon: customIcons.dashboard,
+    mdIcon: customIcons.dashboard,
+  },
+  {
+    title: "Patients",
+    url: "/patients",
+    iosIcon: personCircleSharp,
+    mdIcon: personCircleSharp,
+  },
+]

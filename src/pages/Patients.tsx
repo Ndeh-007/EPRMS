@@ -30,7 +30,7 @@ import {
   IonToolbar,
 } from "@ionic/react";
 import { add, chevronForward } from "ionicons/icons";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import BarChart from "../components/BarChart";
 import DoughnutChart from "../components/DoughnutChart";
@@ -38,8 +38,9 @@ import ExploreContainer from "../components/ExploreContainer";
 import LineChart from "../components/LineChart";
 import PageHeader from "../components/PageHeader";
 import PatientItem from "../components/PatientItem";
+import { StaffContext } from "../context/AppContent";
 import { firestore } from "../Firebase";
-import { capitalizeString } from "../Functions/functions";
+import { canPerformAction, capitalizeString } from "../Functions/functions";
 import { customIcons, localImages } from "../images/images";
 import { MPI, Patient } from "../interfaces/types";
 import "../styles/Page.css";
@@ -48,6 +49,7 @@ const Patients: React.FC = () => {
   const { name } = useParams<{ name: string; mode?: string }>();
   const [fakeMPI, setFakeMPI] = useState<MPI[]>([]);
   const [allPatients, setallPatients] = useState<Patient[]>();
+  const {staff} =  useContext(StaffContext)
   const [loading, setLoading] = useState(false);
   const searchBarRef = useRef<HTMLIonSearchbarElement>(null);
   const [tempAllPatients, setTempAllPatients] = useState<Patient[]>();
@@ -160,6 +162,7 @@ const Patients: React.FC = () => {
                     </IonCardTitle>
                     <IonButton
                       slot="end"
+                      hidden={!canPerformAction(staff,'createPatient')}
                       className="ion-text-capitalize"
                       routerLink="/new-patient"
                     >

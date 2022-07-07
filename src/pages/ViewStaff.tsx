@@ -67,14 +67,12 @@ const ViewStaff: React.FC = () => {
 
   useEffect(()=>{
     if(location.state){
-      let temp:any = location.state
-      console.log(temp)
-      setStaffDetails(temp)
-      console.log(temp.lastSeen)
+      let temp:any = location.state;
+      setStaffDetails(temp) 
       let date = new Date(Number(temp.lastSeen))
       _setLastSeen(date.toLocaleString())
     }
-  },[])
+  },[location])
   return (
     <IonPage>
       <PageHeader name="header"></PageHeader>

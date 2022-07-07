@@ -54,7 +54,7 @@ import "../styles/Page.css";
 import "../styles/NewPatient.css";
 import { informationCircle, save, trashSharp } from "ionicons/icons";
 import { Wishes } from "../interfaces/data";
-import { PatientContext } from "../context/AppContent";
+import { PatientContext, StaffContext } from "../context/AppContent";
 import { PatientImmunity } from "../components/EditPatientRecordCategories";
 import { firestore, storage } from "../Firebase";
 
@@ -62,6 +62,7 @@ const EditPatient: React.FC = () => {
   const { name } = useParams<{ name: string; mode?: string }>();
   const formRef = useRef<HTMLFormElement>(null);
   const { patient, setPatient } = useContext(PatientContext);
+  const { staff, setStaff } = useContext(StaffContext);
   const patientImageInputRef = useRef<HTMLInputElement>(null);
   const [alertDischarge, setAlertDischarge] = useState(false);
   const [alertAdmit, setAlertAdmit] = useState(false);
@@ -189,7 +190,7 @@ const EditPatient: React.FC = () => {
               </p>
             </IonTitle>
           </IonText>
-          <IonButtons slot="end" className="px-2">
+          <IonButtons slot="end" className="px-2" hidden={staff?.role!= "admin"?true:false}>
             <IonButton
               color="danger"
               size="small"

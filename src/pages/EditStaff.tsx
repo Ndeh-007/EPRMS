@@ -42,14 +42,14 @@ import {
   IonToolbar,
 } from "@ionic/react";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useHistory, useParams } from "react-router";
 import BarChart from "../components/BarChart";
 import DoughnutChart from "../components/DoughnutChart";
 import ExploreContainer from "../components/ExploreContainer";
 import LineChart from "../components/LineChart";
 import PageHeader from "../components/PageHeader";
 import PatientItem from "../components/PatientItem";
-import { capitalizeString } from "../Functions/functions";
+import { capitalizeString, sendEmail } from "../Functions/functions";
 import { customIcons, localImages } from "../images/images";
 import { MPI, Staff, StaffAccess } from "../interfaces/types";
 import "../styles/Page.css";
@@ -68,92 +68,120 @@ const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
 }) => {
   // const { name } = useParams<{ name: string; mode?: string }>();
   const formRef = useRef<HTMLFormElement>(null);
-  const patientImageInputRef = useRef<HTMLInputElement>(null); 
+  const patientImageInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const [NewImage, setNewImage] = useState(false);
   const [operationSuccessful, setOperationSuccessful] = useState({
     state: false,
     message: "",
     color: "",
   });
   const [staffImage, setStaffImage] = useState<any>(undefined);
+  const [tImage, setTempImage] = useState<any>(staffDetails?.image)
+  const history = useHistory();
 
   function InitializeImage(file: File | null | undefined) {
     let i: any = file;
     const reader = new FileReader();
 
-    reader.onloadend = () => { 
+    reader.onloadend = () => {
       setStaffImage(reader.result);
+      setNewImage(true);
     };
-    if (file) reader.readAsDataURL(file);
+    if (file) {
+      reader.readAsDataURL(file);
+    };
   }
 
-  async function updateStaffDetails(data: any) { 
+  async function updateStaffDetails(data: any) {
 
     setLoading(true);
 
+    if (NewImage) {
 
-    var storageRef =  storage.refFromURL(staffDetails?.image)
-    let response = await fetch(staffImage);
-    let blob = await response.blob();
-    let query1 = storageRef.put(blob).then((snapshot) => {
-      snapshot.ref.getDownloadURL().then((url) => {
-        data.image = url;
-        firestore
-          .collection("staff")
-          .doc(staffDetails?.id)
-          .update(data)
-          .catch((error) => {
-            console.log("Updating Staff Details Error", error);
+
+      var storageRef = storage.refFromURL(staffDetails?.image)
+      let response = await fetch(staffImage);
+      let blob = await response.blob();
+      let query1 = storageRef.put(blob).then((snapshot) => {
+        snapshot.ref.getDownloadURL().then((url) => {
+          data.image = url;
+          firestore
+            .collection("staff")
+            .doc(staffDetails?.id)
+            .update(data)
+            .catch((error) => {
+              console.log("Updating Staff Details Error", error);
+            });
+        });
+      });
+
+
+      await Promise.all([query1])
+        .then(() => {
+          setLoading(false);
+          setOperationSuccessful({
+            state: true,
+            message: "Staff Created Successfully",
+            color: "success",
           });
-      });
-    });
-
-    await Promise.all([query1])
-      .then(() => {
-        setLoading(false);
-        setOperationSuccessful({
-          state: true,
-          message: "Staff Created Successfully",
-          color: "success",
+          history.goBack()
+        })
+        .catch((e) => {
+          console.error(e);
+          setLoading(false);
+          setOperationSuccessful({
+            state: true,
+            message: "Staff Creation Failed",
+            color: "danger",
+          });
         });
-      })
-      .catch((e) => {
-        console.error(e);
-        setLoading(false);
-        setOperationSuccessful({
-          state: true,
-          message: "Staff Creation Failed",
-          color: "danger",
+    } else {
+      data.image = tImage;
+      firestore
+        .collection("staff")
+        .doc(staffDetails?.id)
+        .update(data)
+        .then(() => {
+          setLoading(false);
+          setOperationSuccessful({
+            state: true,
+            message: "Staff Created Successfully",
+            color: "success",
+          });
+          history.goBack()
+        })
+        .catch((e) => {
+          console.error(e);
+          setLoading(false);
+          setOperationSuccessful({
+            state: true,
+            message: "Staff Creation Failed",
+            color: "danger",
+          });
         });
-      });
+    }
 
     setLoading(false);
   }
 
-  function checkUserName(username: string) {
-    // check if username is taken
-    firestore
-      .collection("staff")
-      .where("username", "==", username)
-      .onSnapshot((snapshot) => {
-        if (snapshot.docs.length > 0) {
-          alert("Username already taken");
-          setLoading(false);
-          return;
-        }
-      });
-  }
 
-  function ModifyStaffAccess(data: any) {
-    setLoading(true);
-    //  check user name
-    checkUserName(data.username);
+  async function ModifyStaffAccess(data: any) {
+
+    let params = {
+      ...data,
+      name: staffDetails?.name,
+      email: staffDetails?.email,
+    }
+    let query2 = await sendEmail(params, true)
 
     // update staff details
-    firestore
+    let q1 = firestore
       .collection("staff")
       .doc(staffDetails?.id)
       .update(data)
+
+    await Promise.all([q1, query2])
       .then(() => {
         setLoading(false);
         setOperationSuccessful({
@@ -161,6 +189,7 @@ const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
           message: "Staff Access Modified Successfully",
           color: "success",
         });
+
       })
       .catch((error) => {
         console.log("Updating Staff Details Error", error);
@@ -181,9 +210,11 @@ const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
           ref={formRef}
           onSubmit={(e: any) => {
             e.preventDefault();
-            let _img =staffDetails?.image;
-            if(staffImage){ 
-               _img = staffImage.length > 0 ? staffImage : staffDetails?.image;
+            let _img = staffDetails?.image;
+            if (staffImage) {
+              _img = staffImage.length > 0 ? staffImage : staffDetails?.image;
+            } else {
+              _img = staffDetails?.image;
             }
             let data = {
               name: e.target.name.value,
@@ -196,6 +227,8 @@ const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
               maritalStatus: e.target.maritalStatus.value,
               sex: e.target.sex.value,
             };
+
+            console.log(data.image)
             updateStaffDetails(data);
           }}
         >
@@ -418,23 +451,41 @@ const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
 
         <form
           action=""
-          onSubmit={(e: any) => {
+          onSubmit={async (e: any) => {
             e.preventDefault();
+
+            setLoading(true);
             // check Passwords
             if (e.target.password.value !== e.target.confirmPassword.value) {
               alert("Make Sure passwords match");
               setLoading(false);
               return;
             }
+
             //  collect access data
             let data: StaffAccess = {
               password: e.target.password.value,
               position: e.target.position.value,
               role: e.target.role.value,
               username: e.target.username.value,
-            }; 
+            };
 
-            ModifyStaffAccess(data)
+            let _un: any = data.username
+
+            //  check user name
+            firestore
+              .collection("staff")
+              .where("username", "==", _un)
+              .get().then((snapshot) => {
+                if (snapshot.docs.length > 0) {
+                  window.alert('username is already taken')
+                  setLoading(false);
+                }
+                else {
+                  ModifyStaffAccess(data)
+                }
+              });
+
           }}
         >
           <IonGrid className="pt-0 mt-0">
@@ -552,19 +603,31 @@ const EditStaff: React.FC<{ staffDetails: Staff | undefined }> = ({
                   <IonLabel>Save</IonLabel>
                 </IonButton>
               </IonCol>
-              <IonCol></IonCol>
+              <IonCol>
+                {/* 
+                <IonButton color="danger" onClick={()=>{
+                  sendEmail(
+                    {
+                      password: "pas22af",
+                      username:'aiser',
+                      email:'ndehngwa@gmail.com',
+                      name:'John Doe',
+                    }
+                  )
+                }}>test</IonButton> */}
+              </IonCol>
             </IonRow>
           </IonGrid>
         </form>
       </div>
 
-      
- 
+
+
       {/* loading */}
       <IonLoading
         isOpen={loading}
         onDidDismiss={() => {
-          setLoading(false); 
+          setLoading(false);
         }}
       ></IonLoading>
 

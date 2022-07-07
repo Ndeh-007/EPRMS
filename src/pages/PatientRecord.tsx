@@ -41,8 +41,8 @@ import {
   OverviewAttribute,
   PatientRecordInterface,
 } from "../interfaces/types";
-import { PatientContext, PatientRecordContext } from "../context/AppContent";
-import { convertDate } from "../Functions/functions";
+import { PatientContext, PatientRecordContext, StaffContext } from "../context/AppContent";
+import { canEdit, convertDate } from "../Functions/functions";
 import { firestore } from "../Firebase";
 
 const PatientRecord: React.FC = () => {
@@ -51,6 +51,7 @@ const PatientRecord: React.FC = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editValue, setEditValue] = useState("");
   const { patient } = useContext(PatientContext);
+  const {staff} = useContext(StaffContext);
   const [appearance, setappearance] = useState<OverviewAttribute[]>();
   const [adl, setadl] = useState<OverviewAttribute[]>();
   const [iadl, setiadl] = useState<OverviewAttribute[]>();
@@ -108,7 +109,7 @@ const PatientRecord: React.FC = () => {
     });
   }
 
-  useEffect(() => { 
+  useEffect(() => {  
     getAttributes();
   }, [location]);
 
@@ -207,6 +208,7 @@ const PatientRecord: React.FC = () => {
                     <IonButtons slot="end">
                       <IonButton
                         color="primary"
+                        hidden={canEdit(staff, 'finance')}
                         size="small"
                         onClick={() => {
                           setEditValue("Finance");
@@ -251,6 +253,7 @@ const PatientRecord: React.FC = () => {
                       <IonButton
                         color="primary"
                         size="small"
+                        hidden={canEdit(staff, 'complaint')}
                         onClick={() => {
                           setEditValue("Patients Complain");
                           setShowEditModal(true);
@@ -279,6 +282,7 @@ const PatientRecord: React.FC = () => {
                       <IonButton
                         size="small"
                         color="primary"
+                        hidden={canEdit(staff, 'appearance')}
                         onClick={() => {
                           setEditValue("Appearance");
                           setShowEditModal(true);
@@ -317,6 +321,7 @@ const PatientRecord: React.FC = () => {
                       <IonButton
                         size="small"
                         color="primary"
+                        hidden={canEdit(staff, 'iadl')}
                         onClick={() => {
                           setEditValue("IADL");
                           setShowEditModal(true);
@@ -355,6 +360,7 @@ const PatientRecord: React.FC = () => {
                       <IonButton
                         size="small"
                         color="primary"
+                        hidden={canEdit(staff, 'adl')}
                         onClick={() => {
                           setEditValue("ADL");
                           setShowEditModal(true);
@@ -395,6 +401,7 @@ const PatientRecord: React.FC = () => {
                         }}
                         size="small"
                         color="primary"
+                        hidden={canEdit(staff, 'continence')}
                       >
                         <IonIcon
                           icon={pencil}
@@ -426,6 +433,7 @@ const PatientRecord: React.FC = () => {
                       <IonButton
                         color="primary"
                         size="small"
+                        hidden={canEdit(staff, 'history')}
                         onClick={() => {
                           setEditValue("Patient History");
                           setShowEditModal(true);
@@ -485,6 +493,7 @@ const PatientRecord: React.FC = () => {
                       <IonButton
                         color="primary"
                         size="small"
+                        hidden={canEdit(staff, 'physicalExam')}
                         onClick={() => {
                           setEditValue("Physical Exam");
                           setShowEditModal(true);
@@ -511,6 +520,7 @@ const PatientRecord: React.FC = () => {
                       <IonButton
                         color="primary"
                         size="small"
+                        hidden={canEdit(staff, 'diagnosis')}
                         onClick={() => {
                           setEditValue("Diagnostics");
                           setShowEditModal(true);
@@ -537,6 +547,7 @@ const PatientRecord: React.FC = () => {
                       <IonButton
                         color="primary"
                         size="small"
+                        hidden={canEdit(staff, 'lab')}
                         onClick={() => {
                           setEditValue("Lab Results");
                           setShowEditModal(true);
@@ -621,6 +632,7 @@ const PatientRecord: React.FC = () => {
                       <IonButton
                         color="primary"
                         size="small"
+                        hidden={canEdit(staff, 'management')}
                         onClick={() => {
                           setEditValue("Management");
                           setShowEditModal(true);

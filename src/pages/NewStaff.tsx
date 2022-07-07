@@ -45,7 +45,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router";
 import PageHeader from "../components/PageHeader";
 import PatientItem from "../components/PatientItem";
-import { capitalizeString, generatePassword } from "../Functions/functions";
+import { capitalizeString, generatePassword, sendEmail } from "../Functions/functions";
 import { customIcons, localImages } from "../images/images";
 import { MPI, Staff, StaffAccess } from "../interfaces/types";
 import "../styles/Page.css";
@@ -126,11 +126,13 @@ const NewStaff: React.FC = () => {
     if (file) reader.readAsDataURL(file);
   }
 
+
   async function CreateStaff() {
     let names: any = staffName?.split(" ");
     let prefix = names[0] + "-";
     let suffix = "-" + names[1];
-    let _date = Date.now()
+    let _date = Date.now();
+    let _pswd = Math.random().toString(36).slice(-8);
     let data: Staff = {
       name: staffName,
       tel: staffTel,
@@ -141,13 +143,13 @@ const NewStaff: React.FC = () => {
       id: uniqid(prefix),
       image: staffImage,
       maritalStatus: maritalStatus,
-      password: Math.random().toString(36).slice(-8),
+      password: _pswd,
       role: "staff",
       sex: staffSex,
       username: names[0],
       position: staffPosition,
       date: _date,
-      lastSeen:_date.toString(),
+      lastSeen: _date.toString(),
     };
 
     var storageRef = storage.ref(`staff/${data.id}/${data.id}-image.jpg`);
@@ -160,7 +162,9 @@ const NewStaff: React.FC = () => {
       });
     });
 
-    await Promise.all([query1])
+    let query2 = await sendEmail(data);
+
+    await Promise.all([query1, query2])
       .then(() => {
         setLoading(false);
         setOperationSuccessful({
@@ -180,7 +184,7 @@ const NewStaff: React.FC = () => {
       });
   }
 
-  function ModfifyAccess() {
+  function ModifyAccess() {
     setLoading(true);
 
     // check Passwords
@@ -215,20 +219,22 @@ const NewStaff: React.FC = () => {
       .update(data)
       .then(() => {
         setLoading(false);
+
         setOperationSuccessful({
           state: true,
           message: "Access Modified Successfully",
           color: "success",
         });
-      }).catch(e=>{
-
-        console.log("staff modification failed",e)
+      })
+      .catch((e) => {
+        console.log("staff modification failed", e);
         setOperationSuccessful({
           state: true,
           message: "Staff Creation Failed",
           color: "danger",
         });
-      })
+      });
+ 
   }
 
   return (
@@ -512,11 +518,13 @@ const NewStaff: React.FC = () => {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              ModfifyAccess();
+              ModifyAccess();
             }}
           >
-            <IonGrid className="pt-0 mt-0" 
-            hidden={location.pathname == "/new-staff" ? true : false}>
+            <IonGrid
+              className="pt-0 mt-0"
+              hidden={location.pathname == "/new-staff" ? true : false}
+            >
               <IonRow>
                 <IonCol size="12">
                   <IonCard mode="ios">

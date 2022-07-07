@@ -198,7 +198,7 @@ const BarChart: React.FC<{
       {
         label: "out-patient",
         data: cumulativeArrayOutPatients,
-        backgroundColor: "#3880ff",
+        backgroundColor: "#ffc409",
       },
     ],
   };

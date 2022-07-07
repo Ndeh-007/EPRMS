@@ -73,7 +73,7 @@ const Dashboard: React.FC = () => {
         });
         setAllPatients(arr);
         getOutPatients(docs);
-        setRecentPatients(docs.splice(0, 8));
+        setRecentPatients(docs.splice(0, 9));
       });
 
       console.log("fetching patients 1");
@@ -183,7 +183,7 @@ const Dashboard: React.FC = () => {
                       </IonCardSubtitle>
                       <IonCardTitle>
                         <span className="h4 fw-bold">
-                          {admittedPatients?.length.toLocaleString()}
+                          {allPatient?.filter((p)=>p.status==="admitted").length}
                         </span>
                       </IonCardTitle>
                     </IonCardHeader>
@@ -209,7 +209,7 @@ const Dashboard: React.FC = () => {
                       </IonCardSubtitle>
                       <IonCardTitle>
                         <span className="h4 fw-bold">
-                          {dischargedPatients?.length.toLocaleString()}
+                          {allPatient?.filter((p)=>p.status==="discharged").length}
                         </span>
                       </IonCardTitle>
                     </IonCardHeader>
