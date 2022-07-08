@@ -132,21 +132,6 @@ const LineChart: React.FC<{
     labels: labels,
     datasets: [
       {
-        label: "Out Patients",
-        backgroundColor: "#ffc409",
-        borderColor: "#ffc409",
-        data: cumulativeOutPatients,
-        tension: 0.3,
-        point: {
-          backgroundColor: "#ffffff",
-        },
-        fill: {
-          target: "origin",
-          above: "#ffc4093f",
-        },
-        pointHoverBackgroundColor: "#ffc409",
-      },
-      {
         label: "Admitted",
         backgroundColor: "#eb445a",
         borderColor: "#eb445a",
@@ -175,6 +160,21 @@ const LineChart: React.FC<{
           above: "#81dd203f",
         },
         pointHoverBackgroundColor: "#28ba62",
+      },
+      {
+        label: "Out Patients",
+        backgroundColor: "#ffc409",
+        borderColor: "#ffc409",
+        data: cumulativeOutPatients,
+        tension: 0.3,
+        point: {
+          backgroundColor: "#ffffff",
+        },
+        fill: {
+          target: "origin",
+          above: "#ffc4093f",
+        },
+        pointHoverBackgroundColor: "#ffc409",
       },
     ],
   };
