@@ -17,6 +17,7 @@ import {
   IonRippleEffect,
   IonText,
   IonTitle,
+  IonToggle,
   IonToolbar,
 } from "@ionic/react";
 import {
@@ -31,15 +32,17 @@ import {
   notifications,
   person,
 } from "ionicons/icons";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { useHistory, useLocation, useParams } from "react-router";
 import { StaffContext } from "../context/AppContent";
 import { firestore } from "../Firebase";
 import {
   capitalizeString,
   DeleteUserData,
+  GetAppColor,
   GetUserData,
   refactor,
+  StoreAppColor,
 } from "../Functions/functions";
 import { localImages } from "../images/images";
 import { Staff } from "../interfaces/types";
@@ -57,6 +60,28 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
   const [modal, setModal] = useState(false);
 
   const { setStaff, staff } = useContext(StaffContext);
+  const [darkMode, setdarkMode] = useState(false);
+  const toggler = useRef<HTMLIonToggleElement>(null);
+
+  function Toggle(value: boolean) {
+    if (value) {
+      document.body.setAttribute("color-theme", "dark")
+      StoreAppColor("dark"); // Store dark mode in local storage
+    } else {
+      document.body.setAttribute("color-theme", "light")
+      StoreAppColor("light"); // Store light mode in local storage
+    }
+  }
+
+  function setAppMode() {
+    GetAppColor().then(color => {
+      if (color === "dark") {
+        setdarkMode(true)
+      } else {
+        setdarkMode(false)
+      }
+    })
+  }
 
   function logOutUser() {
     setShowPopover({
@@ -72,7 +97,7 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
         console.log("error", e);
       });
   }
- 
+
 
   function handleNavigation(_location: string) {
     console.log("location", _location);
@@ -100,10 +125,10 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
     if (_location == "/new-staff") {
       history.push('/staff')
     }
-    if (_location == "/view-staff" ) {
-      if(staff?.role=='admin'){
+    if (_location == "/view-staff") {
+      if (staff?.role == 'admin') {
         history.push('/staff')
-      }else{
+      } else {
         history.push('/dashboard')
       }
     }
@@ -120,24 +145,28 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
       showPopover: false,
       event: undefined,
     });
-    history.push("/view-staff",staff);
+    history.push("/view-staff", staff);
   }
 
   function initStaff() {
     GetUserData().then((data) => {
       if (data) {
         let _lastSeen = Date.now().toString()
-        context.setStaff({...data, lastSeen:_lastSeen});
-        firestore.collection("staff").doc(data.id).update({lastSeen:_lastSeen}).catch((e)=>{console.log("failed to update last seen",e)})
+        context.setStaff({ ...data, lastSeen: _lastSeen });
+        firestore.collection("staff").doc(data.id).update({ lastSeen: _lastSeen }).catch((e) => { console.log("failed to update last seen", e) })
       }
-      if(data == null){
+      if (data == null) {
         history.push('/login')
       }
     });
   }
 
   useEffect(() => {
-    initStaff(); 
+    setAppMode();
+  }, [])
+
+  useEffect(() => {
+    initStaff();
     if (location.pathname === "/dashboard") {
       setShowBackButton(false);
     }
@@ -174,11 +203,11 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
             <IonIcon slot="icon-only" icon={add}></IonIcon>
           </IonButton>
         )}
-      {/* <IonButton onClick={()=>refactor()}> refactor</IonButton> */}
+        {/* <IonButton onClick={()=>refactor()}> refactor</IonButton> */}
         <IonCard color="light" slot="end" mode="md">
           <IonButtons>
-            <IonButton color="warning" 
-              onClick={() => {setModal(true)}}
+            <IonButton color="warning"
+              onClick={() => { setModal(true) }}
             >
               <IonIcon icon={notifications}></IonIcon>
             </IonButton>
@@ -205,7 +234,7 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
                 >
                   {context.staff?.role}
                 </IonNote>
-              </span>  
+              </span>
             </IonLabel>
             <IonAvatar slot="end">
               <IonImg className="br-2" src={context.staff?.image}></IonImg>
@@ -243,9 +272,13 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
               <IonIcon icon={mail} slot="start" size="small"></IonIcon>
               <IonLabel>Mail</IonLabel>
             </IonItem>
-            <IonItem lines="none" button onClick={() => logOutUser()}>
+            <IonItem lines="full" button onClick={() => logOutUser()}>
               <IonIcon icon={logOut} slot="start" size="small"></IonIcon>
               <IonLabel>Logout</IonLabel>
+            </IonItem>
+            <IonItem lines="none">
+              <IonLabel>Dark Mode</IonLabel>
+              <IonToggle checked={darkMode} onIonChange={(e) => { setdarkMode(e.detail.checked); Toggle(e.detail.checked) }} ref={toggler}></IonToggle>
             </IonItem>
           </IonList>
         </IonContent>

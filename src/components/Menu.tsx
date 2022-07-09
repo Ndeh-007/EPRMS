@@ -11,17 +11,18 @@ import {
   IonMenuToggle,
   IonNote,
   IonThumbnail,
+  IonToggle,
   IonToolbar,
 } from "@ionic/react";
 
 import { useLocation } from "react-router-dom";
-import { 
+import {
   peopleCircleSharp,
   peopleSharp,
   person,
   personAddSharp,
   personCircleSharp,
-  personSharp, 
+  personSharp,
 } from "ionicons/icons";
 import "../styles/Menu.css";
 import { customIcons, localImages } from "../images/images";
@@ -29,20 +30,35 @@ import { useContext, useEffect, useState } from "react";
 import { AppPage } from "../interfaces/types";
 import { StaffContext } from "../context/AppContent";
 import { AdminAppPages, StaffAppPages } from "../interfaces/data";
+import { StoreAppColor } from "../Functions/functions";
 
- 
+
 const labels = ["Family", "Friends", "Notes", "Work", "Travel", "Reminders"];
 
 const Menu: React.FC = () => {
   const location = useLocation();
-  const {setStaff,staff} = useContext(StaffContext);
-  const [appPages,setAppPages] = useState<AppPage[]>();
+  const { setStaff, staff } = useContext(StaffContext);
+  const [appPages, setAppPages] = useState<AppPage[]>();
+
+
+  // function Toogle() {
+  //   document.body.classList.toggle(`dark`)
+  //   if (document.body.classList.contains(`dark`)) {
+  //     Plugins.StatusBar.setBackgroundColor({ color: `#152b4d` }).catch(console.log)
+  //     Plugins.Storage.set({ key: `dark`, value: `true` })
+  //     setdarkmode(true)
+  //   } else {
+  //     Plugins.StatusBar.setBackgroundColor({ color: `#0d2c6d` }).catch(console.log)
+  //     Plugins.Storage.set({ key: `dark`, value: `false` })
+  //     setdarkmode(false)
+  //   }
+  // }
 
   useEffect(() => {
-    if(staff?.role?.toLocaleLowerCase() === "staff"){
+    if (staff?.role?.toLocaleLowerCase() === "staff") {
       setAppPages(StaffAppPages);
-    } 
-    if(staff?.role?.toLocaleLowerCase() === "admin"){
+    }
+    if (staff?.role?.toLocaleLowerCase() === "admin") {
       setAppPages(AdminAppPages);
     }
   }, [staff]);
@@ -79,7 +95,9 @@ const Menu: React.FC = () => {
               </IonMenuToggle>
             );
           })}
-        </IonList>
+
+        </IonList> 
+
 
         {/* <IonList id="labels-list">
           <IonListHeader>Labels</IonListHeader>

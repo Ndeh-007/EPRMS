@@ -26,6 +26,19 @@ export async function StoreUserData(Data: Staff) {
   return true;
 }
 
+export async function StoreAppColor(color: string) {
+  await Storage.set({
+    key: "appColor",
+    value: color,
+  });
+  return true;
+}
+
+export async function GetAppColor() {
+  const color = await Storage.get({ key: "appColor" });
+  return color.value;
+}
+
 export async function GetUserData() {
   const { value } = await Storage.get({ key: "staff" });
   if (value) return JSON.parse(value);

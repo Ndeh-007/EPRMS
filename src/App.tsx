@@ -34,6 +34,7 @@ import Login from "./pages/Login";
 import { useContext, useEffect, useState } from "react";
 import { PatientContext, PatientRecordContext, StaffContext } from "./context/AppContent";
 import { Patient, PatientRecordInterface, Staff } from "./interfaces/types";
+import { GetAppColor } from "./Functions/functions";
 
 setupIonicReact();
 
@@ -42,9 +43,18 @@ const App: React.FC = () => {
   const [patient, setPatient] = useState<Patient>();
   const [patientRecord, setPatientRecord] = useState<PatientRecordInterface>();
 
+  function setAppMode(){ 
+    GetAppColor().then(color=>{
+      if(color==="dark"){
+        document.body.setAttribute("color-theme","dark")
+      }else{
+        document.body.setAttribute("color-theme","light")
+      }
+    })  
+  }
   useEffect(()=>{
-    
-  })
+    setAppMode()
+  },[])
   return (
     <IonApp>
       <StaffContext.Provider value={{ staff, setStaff }}>
