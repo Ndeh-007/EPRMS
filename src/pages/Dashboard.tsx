@@ -23,40 +23,106 @@ import {
   IonNote,
   IonPage,
   IonRow,
+  IonSpinner,
   IonText,
   IonTitle,
   IonToolbar,
+  IonProgressBar,
 } from "@ionic/react";
 import { chevronForward } from "ionicons/icons";
-import { useContext } from "react";
-import { useParams } from "react-router";
+import { useContext, useEffect, useState } from "react";
+import { useHistory, useParams } from "react-router";
 import BarChart from "../components/BarChart";
 import DoughnutChart from "../components/DoughnutChart";
 import ExploreContainer from "../components/ExploreContainer";
 import LineChart from "../components/LineChart";
 import PageHeader from "../components/PageHeader";
-import { StaffContext } from "../context/AppContent";
+import { PatientContext, StaffContext } from "../context/AppContent";
+import { firestore } from "../Firebase";
 import { capitalizeString } from "../Functions/functions";
 import { customIcons, localImages } from "../images/images";
+import { Patient } from "../interfaces/types";
 import "../styles/Page.css";
+import GREETINGS from "../interfaces/greeting";
 
 const Dashboard: React.FC = () => {
   const { name } = useParams<{ name: string; mode?: string }>();
   const STAFF = useContext(StaffContext);
-  console.log(STAFF.staff);
+  const PATIENT =  useContext(PatientContext);
+  const [allPatient, setAllPatients] = useState<Patient[]>();
+  const [admittedPatients, setAdmittedPatients] = useState<Patient[]>();
+  const [dischargedPatients, setDischargedPatients] = useState<Patient[]>();
+  const [outPatients, setOutPatients] = useState<Patient[]>();
+  const [recentPatients, setRecentPatients] = useState<Patient[]>();
+  const [greetings, setGreetings] = useState<string>();
+  const [loading, setLoading] = useState(false);
+  const history = useHistory();
 
-  function checkPatientState(value: number) {
-    if (value === 0) {
+  function fetchPatients() {
+    console.log("fetching patients");
+    firestore
+      .collection("patients")
+      .orderBy("date", "desc")
+      .onSnapshot((snap) => {
+        let arr: any[] = [];
+        let docs: any[] = snap.docs.map((doc) => {
+          return doc.data();
+        });
+        snap.docs.forEach((sp) => {
+          arr.push(sp.data());
+        });
+        setAllPatients(arr);
+        getOutPatients(docs);
+        setRecentPatients(docs.splice(0, 9));
+      });
+
+      console.log("fetching patients 1");
+    firestore.collection("dischargedPatients").onSnapshot((snap) => {
+      let docs: any = snap.docs.map((doc) => doc.data());
+      setDischargedPatients(docs);
+    });
+
+    console.log("fetching patients 2");
+    firestore.collection("admittedPatients").onSnapshot((snap) => {
+      let docs: any = snap.docs.map((doc) => doc.data());
+      setAdmittedPatients(docs);
+    });
+    console.log('finished fetching patients')
+  }
+
+  function getOutPatients(pts: any[]) {
+    let docs: any[] = pts.filter((patient) => patient.status == "out-patient");
+    setOutPatients(docs);
+  }
+
+  function getGreetings() {
+    let greeting = GREETINGS(new Date());
+    setGreetings(greeting);
+    setLoading(false);
+  }
+
+  function navigateToPatient(data: Patient) {
+    PATIENT.setPatient(data)
+    history.push("/view-patient", {patient:data});
+  }
+
+  function checkPatientState(value: string | undefined) {
+    if (value === "discharged") {
       return { color: "success", state: "Discharged" };
-    } else if (value === 1) {
+    } else if (value === "admitted") {
       return { color: "danger", state: "Admitted" };
-    } else if (value === 2) {
-      return { color: "warning", state: "Waiting" };
+    } else if (value === "out-patient") {
+      return { color: "warning", state: "Out Patient" };
     } else {
-      return { color: "warning", state: "Waiting" };
+      return { color: "warning", state: "Out Patient" };
     }
   }
 
+  useEffect(() => {
+    setLoading(true);
+    fetchPatients();
+    getGreetings();
+  }, []);
 
   return (
     <IonPage>
@@ -66,12 +132,8 @@ const Dashboard: React.FC = () => {
           <IonText slot="start" color="primary">
             <IonTitle className="ion-padding-top ion-padding-horizontal">
               <p className="text-bold">
-                <span>Good Morning {STAFF.staff?.position} {STAFF.staff?.name}</span>
-                <br />
-                <span className="text-regular">
-                  <IonNote className="text-small">
-                    [Random Daily quote/greeting]
-                  </IonNote>
+                <span>
+                  {greetings} {STAFF.staff?.position}. {STAFF.staff?.name}
                 </span>
               </p>
             </IonTitle>
@@ -96,9 +158,7 @@ const Dashboard: React.FC = () => {
                         <span className="text-bold">Patients</span>
                       </IonCardSubtitle>
                       <IonCardTitle>
-                        <span className="h4">
-                          {Number("10236").toLocaleString()}
-                        </span>
+                        <span className="h4 fw-bold">{allPatient?.length}</span>
                       </IonCardTitle>
                     </IonCardHeader>
                   </div>
@@ -119,11 +179,11 @@ const Dashboard: React.FC = () => {
                   <div>
                     <IonCardHeader>
                       <IonCardSubtitle>
-                        <span className="text-bold">Admitted</span>
+                        <span className="text-bold">In Patients</span>
                       </IonCardSubtitle>
                       <IonCardTitle>
                         <span className="h4 fw-bold">
-                          {Number("336").toLocaleString()}
+                          {allPatient?.filter((p)=>p.status==="admitted").length}
                         </span>
                       </IonCardTitle>
                     </IonCardHeader>
@@ -148,8 +208,8 @@ const Dashboard: React.FC = () => {
                         <span className="text-bold">Discharged</span>
                       </IonCardSubtitle>
                       <IonCardTitle>
-                        <span className="h4">
-                          {Number("9026").toLocaleString()}
+                        <span className="h4 fw-bold">
+                          {allPatient?.filter((p)=>p.status==="discharged").length}
                         </span>
                       </IonCardTitle>
                     </IonCardHeader>
@@ -171,11 +231,11 @@ const Dashboard: React.FC = () => {
                   <div>
                     <IonCardHeader>
                       <IonCardSubtitle>
-                        <span className="text-bold">Waiting</span>
+                        <span className="text-bold">Out Patients</span>
                       </IonCardSubtitle>
                       <IonCardTitle>
-                        <span className="h4">
-                          {Number("30").toLocaleString()}
+                        <span className="h4 fw-bold">
+                          {outPatients?.length.toLocaleString()}
                         </span>
                       </IonCardTitle>
                     </IonCardHeader>
@@ -192,7 +252,14 @@ const Dashboard: React.FC = () => {
                 </IonCardHeader>
                 <hr className="p-none m-0" />
                 <IonCardContent mode="md">
-                  <LineChart></LineChart>
+                  {loading && <IonProgressBar type="indeterminate"></IonProgressBar>}
+                  {!loading && (
+                    <LineChart
+                      patients={allPatient}
+                      admittedPatients={admittedPatients}
+                      dischargedPatients={dischargedPatients}
+                    ></LineChart>
+                  )}
                 </IonCardContent>
               </IonCard>
             </IonCol>
@@ -201,45 +268,52 @@ const Dashboard: React.FC = () => {
               <IonCard mode="ios">
                 <IonCardHeader mode="md">
                   <IonCardTitle className="pt-2 fw-bold">
-                    Today's Patients
+                    Recent Patients
                   </IonCardTitle>
                 </IonCardHeader>
                 <hr className="p-none m-0" />
                 <IonCardContent mode="md">
                   <IonList>
-                    {Array.from(Array(8).keys()).map(
-                      (patient: any, index: number) => {
-                        let number = Math.floor((Math.random() * 10) / 2);
-                        return (
-                          <IonItem lines="inset" key={index} button routerLink="/view-patient">
-                            <IonAvatar slot="start">
-                              <IonImg src={localImages.doc}></IonImg>
-                            </IonAvatar>
-                            <div>
-                              <IonLabel color="dark" className="fw-bold">
-                                {faker.name.findName()}
-                              </IonLabel>
-                              <IonLabel color="medium">
-                                <span className="text-small">
-                                  <IonText
-                                    color={checkPatientState(number)?.color}
-                                    className="fw-bold"
-                                  >
-                                    {checkPatientState(number)?.state}
-                                  </IonText>{" "}
-                                  - Dr. {faker.name.findName()}
-                                </span>
-                              </IonLabel>
-                            </div>
-                            <IonButtons slot="end">
-                              <IonButton>
-                                <IonIcon icon={chevronForward} slot="icon-only"></IonIcon>
-                              </IonButton>
-                            </IonButtons>
-                          </IonItem>
-                        );
-                      }
-                    )}
+                    {recentPatients?.map((patient, index) => {
+                      return (
+                        <IonItem
+                          lines="inset"
+                          key={index}
+                          button
+                          onClick={() => navigateToPatient(patient)}
+                        >
+                          <IonAvatar slot="start">
+                            <IonImg src={patient.image}></IonImg>
+                          </IonAvatar>
+                          <div>
+                            <IonLabel color="dark" className="fw-bold">
+                              {patient.name}
+                            </IonLabel>
+                            <IonLabel color="medium">
+                              <span className="text-small">
+                                <IonText
+                                  color={
+                                    checkPatientState(patient.status)?.color
+                                  }
+                                  className="fw-bold"
+                                >
+                                  {checkPatientState(patient.status)?.state}
+                                </IonText>{" "}
+                                - {new Date(patient.date).toLocaleDateString()}
+                              </span>
+                            </IonLabel>
+                          </div>
+                          <IonButtons slot="end">
+                            <IonButton>
+                              <IonIcon
+                                icon={chevronForward}
+                                slot="icon-only"
+                              ></IonIcon>
+                            </IonButton>
+                          </IonButtons>
+                        </IonItem>
+                      );
+                    })}
                   </IonList>
                 </IonCardContent>
               </IonCard>
@@ -249,12 +323,15 @@ const Dashboard: React.FC = () => {
               <IonCard mode="ios">
                 <IonCardHeader mode="md">
                   <IonCardTitle className="pt-2 fw-bold">
-                    Top Diseases
+                    Population
                   </IonCardTitle>
                 </IonCardHeader>
                 <hr className="p-none m-0" />
                 <IonCardContent mode="md">
-                  <DoughnutChart></DoughnutChart>
+                  {loading && <IonProgressBar  type="indeterminate"></IonProgressBar>}
+                  {!loading && (
+                    <DoughnutChart patients={allPatient}></DoughnutChart>
+                  )}
                 </IonCardContent>
               </IonCard>
             </IonCol>
@@ -263,12 +340,16 @@ const Dashboard: React.FC = () => {
               <IonCard mode="ios">
                 <IonCardHeader mode="md">
                   <IonCardTitle className="pt-2 fw-bold">
-                    Patients Per Day
+                    Monthly Statistics
                   </IonCardTitle>
                 </IonCardHeader>
                 <hr className="p-none m-0" />
                 <IonCardContent mode="md">
-                  <BarChart></BarChart>
+                  {loading && <IonProgressBar type="indeterminate"></IonProgressBar>}
+                  {!loading && <BarChart 
+                      patients={allPatient}
+                      admittedPatients={admittedPatients}
+                      dischargedPatients={dischargedPatients}></BarChart>}
                 </IonCardContent>
               </IonCard>
             </IonCol>
@@ -285,11 +366,7 @@ const Dashboard: React.FC = () => {
                   {Array.from(Array(1).keys()).map(
                     (patient: any, index: number) => {
                       let number = Math.floor((Math.random() * 10) / 2);
-                      return (
-                        <IonToolbar key={index}> 
-
-                        </IonToolbar>
-                      );
+                      return <IonToolbar key={index}></IonToolbar>;
                     }
                   )}
                 </IonCardContent>

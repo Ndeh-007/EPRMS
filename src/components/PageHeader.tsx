@@ -17,6 +17,7 @@ import {
   IonRippleEffect,
   IonText,
   IonTitle,
+  IonToggle,
   IonToolbar,
 } from "@ionic/react";
 import {
@@ -31,11 +32,20 @@ import {
   notifications,
   person,
 } from "ionicons/icons";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { useHistory, useLocation, useParams } from "react-router";
 import { StaffContext } from "../context/AppContent";
-import { capitalizeString } from "../Functions/functions";
+import { firestore } from "../Firebase";
+import {
+  capitalizeString,
+  DeleteUserData,
+  GetAppColor,
+  GetUserData,
+  refactor,
+  StoreAppColor,
+} from "../Functions/functions";
 import { localImages } from "../images/images";
+import { Staff } from "../interfaces/types";
 import "../styles/PageHeader.css";
 const PageHeader: React.FC<{ name: string }> = (props) => {
   const [popoverState, setShowPopover] = useState({
@@ -46,20 +56,87 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
   const location = useLocation();
   const history = useHistory();
   const [showModal, setShowModal] = useState(false);
-  const context = useContext(StaffContext)
-  console.log(context.staff)
+  const context = useContext(StaffContext);
+  const [modal, setModal] = useState(false);
+
+  const { setStaff, staff } = useContext(StaffContext);
+  const [darkMode, setdarkMode] = useState(false);
+  const toggler = useRef<HTMLIonToggleElement>(null);
+
+  function Toggle(value: boolean) {
+    if (value) {
+      document.body.setAttribute("color-theme", "dark")
+      StoreAppColor("dark"); // Store dark mode in local storage
+    } else {
+      document.body.setAttribute("color-theme", "light")
+      StoreAppColor("light"); // Store light mode in local storage
+    }
+  }
+
+  function setAppMode() {
+    GetAppColor().then(color => {
+      if (color === "dark") {
+        setdarkMode(true)
+      } else {
+        setdarkMode(false)
+      }
+    })
+  }
 
   function logOutUser() {
     setShowPopover({
       showPopover: false,
       event: undefined,
     });
-    history.push("/login");
+    DeleteUserData()
+      .then(() => {
+        setStaff(null);
+        history.push("/login");
+      })
+      .catch((e) => {
+        console.log("error", e);
+      });
+  }
+
+
+  function handleNavigation(_location: string) {
+    console.log("location", _location);
+    if (_location == "/patient-record") {
+      history.push('/view-patient')
+    }
+    if (_location == "/view-patient") {
+      history.push('/patients')
+    }
+    if (_location == "/new-record") {
+      history.push('/view-patient')
+    }
+    if (_location == "/new-patient") {
+      history.push('/patients')
+    }
+    if (_location == "/edit-patient") {
+      history.push('/view-patient')
+    }
+    if (_location == "/staff") {
+      history.push('/dashboard')
+    }
+    if (_location == "/patients") {
+      history.push('/dashboard')
+    }
+    if (_location == "/new-staff") {
+      history.push('/staff')
+    }
+    if (_location == "/view-staff") {
+      if (staff?.role == 'admin') {
+        history.push('/staff')
+      } else {
+        history.push('/dashboard')
+      }
+    }
   }
 
   function goBack() {
-    if (location.pathname !== "/dashboard") { 
-      history.goBack();
+    if (location.pathname !== "/dashboard") {
+      handleNavigation(location.pathname);
     }
   }
 
@@ -68,14 +145,32 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
       showPopover: false,
       event: undefined,
     });
-    history.push("/view-staff");
+    history.push("/view-staff", staff);
+  }
+
+  function initStaff() {
+    GetUserData().then((data) => {
+      if (data) {
+        let _lastSeen = Date.now().toString()
+        context.setStaff({ ...data, lastSeen: _lastSeen });
+        firestore.collection("staff").doc(data.id).update({ lastSeen: _lastSeen }).catch((e) => { console.log("failed to update last seen", e) })
+      }
+      if (data == null) {
+        history.push('/login')
+      }
+    });
   }
 
   useEffect(() => {
+    setAppMode();
+  }, [])
+
+  useEffect(() => {
+    initStaff();
     if (location.pathname === "/dashboard") {
       setShowBackButton(false);
     }
-  }, [location]);
+  }, [location.pathname]);
 
   return (
     <IonHeader>
@@ -95,15 +190,6 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
             </IonButton>
           </IonButtons>
         )}
-        {/* <IonTitle slot="start">{capitalizeString(props.name)}</IonTitle> */}
-
-        {/*  <IonCard button color="tertiary" mode="ios" className="card-header-button">
-           <IonIcon className="ion-padding" icon={addCircle}></IonIcon> 
-          <IonText  className="ion-padding text-bold">
-            Announcements
-          </IonText>
-        </IonCard>
-          */}
         {!backButton && (
           <IonButton
             slot="start"
@@ -117,10 +203,12 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
             <IonIcon slot="icon-only" icon={add}></IonIcon>
           </IonButton>
         )}
-
+        {/* <IonButton onClick={()=>refactor()}> refactor</IonButton> */}
         <IonCard color="light" slot="end" mode="md">
           <IonButtons>
-            <IonButton color="warning">
+            <IonButton color="warning"
+              onClick={() => { setModal(true) }}
+            >
               <IonIcon icon={notifications}></IonIcon>
             </IonButton>
           </IonButtons>
@@ -138,7 +226,7 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
         >
           <IonToolbar color="light">
             <IonLabel className="d-none d-md-block px-3">
-              <span className="text-bold">{context.staff?.name}</span> <br />
+              <span className="text-bold">{context.staff?.position}. {context.staff?.name}</span> <br />
               <span>
                 <IonNote
                   className="ion-float-right"
@@ -184,9 +272,13 @@ const PageHeader: React.FC<{ name: string }> = (props) => {
               <IonIcon icon={mail} slot="start" size="small"></IonIcon>
               <IonLabel>Mail</IonLabel>
             </IonItem>
-            <IonItem lines="none" button onClick={() => logOutUser()}>
+            <IonItem lines="full" button onClick={() => logOutUser()}>
               <IonIcon icon={logOut} slot="start" size="small"></IonIcon>
               <IonLabel>Logout</IonLabel>
+            </IonItem>
+            <IonItem lines="none">
+              <IonLabel>Dark Mode</IonLabel>
+              <IonToggle checked={darkMode} onIonChange={(e) => { setdarkMode(e.detail.checked); Toggle(e.detail.checked) }} ref={toggler}></IonToggle>
             </IonItem>
           </IonList>
         </IonContent>

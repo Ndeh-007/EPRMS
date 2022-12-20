@@ -31,9 +31,10 @@ import {
 } from "./EditPatientRecordCategories";
 
 const EditPatientRecord: React.FC<{
+  recordId?:string,
   category: string;
   closeModal: Function;
-}> = ({ category, closeModal }) => {
+}> = ({ category, closeModal, recordId }) => {
   const [content, setContent] = useState<any>();
 
   useEffect(() => {
@@ -42,7 +43,7 @@ const EditPatientRecord: React.FC<{
       setContent(temp);
     }
     if (category === "Patients Complain") {
-      let temp = <PatientsComplaint />;
+      let temp = <PatientsComplaint recordId={recordId} />;
       setContent(temp);
     }
     if (category === "Patient History") {
@@ -50,19 +51,19 @@ const EditPatientRecord: React.FC<{
       setContent(temp);
     }
     if (category === "Diagnostics") {
-      let temp = <Diagnostics />;
+      let temp = <Diagnostics  recordId={recordId}/>;
       setContent(temp);
     }
     if (category === "Physical Exam") {
-      let temp = <PhysicalExam />;
+      let temp = <PhysicalExam recordId={recordId} />;
       setContent(temp);
     }
     if (category === "Lab Results") {
-      let temp = <LabResults />;
+      let temp = <LabResults recordId = {recordId} />;
       setContent(temp);
     }
     if (category === "Management") {
-      let temp = <Management />;
+      let temp = <Management recordId = {recordId} />;
       setContent(temp);
     }
 
@@ -72,20 +73,20 @@ const EditPatientRecord: React.FC<{
     }
 
     if (category === "Appearance") {
-      let temp = <CheckList edit data={Appearance} states={AppearanceStates} />;
+      let temp = <CheckList edit recordId={recordId} data={Appearance} states={AppearanceStates} title="appearance"/>;
       setContent(temp);
     }
     if (category === "IADL") {
-      let temp = <CheckList edit data={IADL} states={ADL_States} />;
+      let temp = <CheckList edit recordId={recordId} data={IADL} states={ADL_States} title="iadl"/>;
       setContent(temp);
     }
     if (category === "ADL") {
-      let temp = <CheckList edit data={ADL} states={ADL_States} />;
+      let temp = <CheckList edit recordId={recordId} data={ADL} states={ADL_States} title="adl"/>;
       setContent(temp);
     }
     if (category === "Continence") {
       let temp = (
-        <CheckList edit data={Continence} states={ContinenceStates} catheter />
+        <CheckList edit recordId={recordId} data={Continence} states={ContinenceStates} catheter title="continence" />
       );
       setContent(temp);
     }

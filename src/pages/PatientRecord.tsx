@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useContext, useRef } from "react";
 import faker from "@faker-js/faker";
 import {
   IonAccordion,
@@ -16,36 +16,102 @@ import {
   IonCol,
   IonContent,
   IonGrid,
-  IonIcon,
-  IonImg,
+  IonHeader,
+  IonIcon, 
   IonItem,
-  IonLabel,
-  IonList,
+  IonLabel, 
   IonModal,
   IonPage,
   IonRow,
   IonText,
-  IonTitle,
-  IonToast,
+  IonTitle, 
   IonToolbar,
 } from "@ionic/react";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useLocation, useParams } from "react-router";
 import PageHeader from "../components/PageHeader";
 import "../styles/Page.css";
 import "../styles/NewPatient.css";
-import { chevronForward, pencil } from "ionicons/icons";
+import { arrowBack, chevronForward, pencil, recording } from "ionicons/icons";
 import EditPatientRecord from "../components/EditPatientRecord";
+import {
+  HistoryInterface,
+  Labs,
+  ManagementInterface,
+  OverviewAttribute,
+  PatientRecordInterface,
+} from "../interfaces/types";
+import { PatientContext, PatientRecordContext, StaffContext } from "../context/AppContent";
+import { canEdit, convertDate } from "../Functions/functions";
+import { firestore } from "../Firebase";
 
 const PatientRecord: React.FC = () => {
   const { name } = useParams<{ name: string; mode?: string }>();
   const [isMobileView, setIsMobileView] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editValue, setEditValue] = useState("");
+  const { patient } = useContext(PatientContext);
+  const {staff} = useContext(StaffContext);
+  const [appearance, setappearance] = useState<OverviewAttribute[]>();
+  const [adl, setadl] = useState<OverviewAttribute[]>();
+  const [iadl, setiadl] = useState<OverviewAttribute[]>();
+  const [continence, setcontinence] = useState<OverviewAttribute[]>();
+  const [histories, sethistories] = useState<HistoryInterface[]>();
+  const [managements, setmanagements] = useState<ManagementInterface[]>();
+  const {patientRecord,setPatientRecord} =  useContext(PatientRecordContext);
+  // const [patientRecord, _setPatientRecord] = useState<PatientRecordInterface>();
+  const [labs, setlabs] = useState<Labs[]>();
+  const location = useLocation();
 
   function closeEditModal() {
     setShowEditModal(false);
   }
+
+  async function getAttributes() { 
+
+    let q5 = firestore
+      .collection("patients")
+      .doc(patient?.id)
+      .collection("records")
+      .doc(patientRecord?.id)
+      .collection("history")
+      .onSnapshot((docs) => {
+        let temp: any = docs.docs.map((doc) => doc.data());
+        sethistories(temp);
+      });
+
+    let q6 = firestore
+      .collection("patients")
+      .doc(patient?.id)
+      .collection("records")
+      .doc(patientRecord?.id)
+      .collection("management")
+      .onSnapshot((docs) => {
+        let temp: any = docs.docs.map((doc) => doc.data());
+        setmanagements(temp);
+      });
+
+    let q7 = firestore
+      .collection("patients")
+      .doc(patient?.id)
+      .collection("records")
+      .doc(patientRecord?.id)
+      .collection("labs")
+      .onSnapshot((docs) => {
+        let temp: any = docs.docs.map((doc) => doc.data()); 
+        setlabs(temp);
+      });
+
+    await Promise.all([q5, q6, q7]).then(()=>{
+      console.log("fetch successful")
+    }).catch((e)=>{
+      console.error(e)
+    });
+  }
+
+  useEffect(() => {  
+    getAttributes();
+  }, [location]);
 
   useEffect(() => {
     window.onresize = (e) => {
@@ -64,12 +130,12 @@ const PatientRecord: React.FC = () => {
           <IonText slot="start" color="primary">
             <IonTitle className="ion-padding-horizontal">
               <p className="text-bold">
-                <span>{faker.name.findName()}</span>{" "}
+                <span>{patient?.name}</span>{" "}
                 <span className="fw-light">
                   <IonText>~</IonText>
                 </span>{" "}
                 <span>
-                  <IonText color="medium">[Record ID]</IonText>
+                  <IonText color="medium">{patientRecord?.id}</IonText>
                 </span>
               </p>
             </IonTitle>
@@ -82,15 +148,14 @@ const PatientRecord: React.FC = () => {
                 <IonCardHeader>
                   <IonCardTitle color="primary"></IonCardTitle>
                   <IonCardSubtitle className="pt-1">
-                    <span>Male</span>,{" "}
-                    <span>{faker.date.recent().toLocaleDateString()}</span>
+                    <span>{patient?.sex}</span>,{" "}
+                    <span>{convertDate(patient?.dateOfBirth)}</span>
                   </IonCardSubtitle>
                   <IonCardSubtitle className="text-lowercase pt-1">
-                    <span>{6723339123}</span>,{" "}
-                    <span>{"email@awakedom.com"}</span>
+                    <span>{patient?.tel}</span>, <span>{patient?.email}</span>
                   </IonCardSubtitle>
                   <IonCardSubtitle className="text-lowercase text-capitalize pt-1">
-                    {faker.address.state()}
+                    {patient?.address}
                   </IonCardSubtitle>
                 </IonCardHeader>
               </IonCard>
@@ -100,27 +165,32 @@ const PatientRecord: React.FC = () => {
                 <IonCardHeader>
                   <IonCardTitle color="primary">Medical</IonCardTitle>
                   <IonCardSubtitle>
-                    <b>On Call :</b> Dr. {faker.name.findName()}
+                    <b>On Call :</b>{" "}
+                    {patient?.handlers?.map((handler) => handler).join(", ")}
                   </IonCardSubtitle>
                   <IonCardSubtitle>
                     <b>Admission Date :</b>{" "}
-                    <IonText>{faker.date.recent().toLocaleString()}</IonText>
+                    <IonText>{convertDate(patient?.date, true)}</IonText>
                   </IonCardSubtitle>
                   <IonCardSubtitle>
                     <b>Status :</b>{" "}
-                    <IonText color="primary">{"discharged"}</IonText>
+                    <IonText color="primary">{patient?.status}</IonText>
                   </IonCardSubtitle>
                   <IonCardSubtitle>
                     <b>Discharge Date :</b>{" "}
-                    <IonText>{faker.date.recent().toLocaleString()}</IonText>
+                    <IonText>
+                      {convertDate(Number(patient?.dischargedDate))}
+                    </IonText>
                   </IonCardSubtitle>
                   <IonCardSubtitle>
                     <b>Discharge Status :</b>{" "}
-                    <IonText color="success">Alive</IonText>
+                    <IonText color="success">
+                      {patient?.dischargeStatus}
+                    </IonText>
                   </IonCardSubtitle>
                   <IonCardSubtitle>
                     <b>Ward :</b>{" "}
-                    <IonText color="secondary">wm-7</IonText>
+                    <IonText color="secondary">{patient?.ward}</IonText>
                   </IonCardSubtitle>
                 </IonCardHeader>
               </IonCard>
@@ -138,6 +208,7 @@ const PatientRecord: React.FC = () => {
                     <IonButtons slot="end">
                       <IonButton
                         color="primary"
+                        hidden={canEdit(staff, 'finance')}
                         size="small"
                         onClick={() => {
                           setEditValue("Finance");
@@ -153,32 +224,36 @@ const PatientRecord: React.FC = () => {
                     </IonButtons>{" "}
                   </IonToolbar>
                   <IonCardSubtitle>
-                    <b>Mode :</b> Bank
+                    <b>Mode :</b> {patient?.cardNumber}
                   </IonCardSubtitle>
                   <IonCardSubtitle>
                     <b>Amount :</b> {Date.now().toLocaleString()} XAF.
                   </IonCardSubtitle>
                   <IonCardSubtitle>
-                    <b>Details :</b> [Card Number]
+                    <b>Details :</b> {patient?.cardNumber}
                   </IonCardSubtitle>
+                  {/* <IonCardSubtitle>
+                    <b>Details :</b> {patient?.cardNumber}
+                  </IonCardSubtitle> */}
                   <IonCardSubtitle>
-                    <b>status :</b> <IonText color="success">complete</IonText>
+                    <b>status :</b> <IonText color="warning">pending</IonText>
                   </IonCardSubtitle>
                 </IonCardHeader>
               </IonCard>
-            </IonCol> 
+            </IonCol>
 
             <IonCol size="12" sizeLg="8">
               <IonCard>
                 <IonCardHeader>
                   <IonToolbar>
                     <IonCardTitle color="primary">
-                      Patient's Complain
+                      Patient's Complaint
                     </IonCardTitle>
                     <IonButtons slot="end">
                       <IonButton
                         color="primary"
                         size="small"
+                        hidden={canEdit(staff, 'complaint')}
                         onClick={() => {
                           setEditValue("Patients Complain");
                           setShowEditModal(true);
@@ -194,61 +269,7 @@ const PatientRecord: React.FC = () => {
                   </IonToolbar>
                 </IonCardHeader>
                 <IonCardContent>
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam
-                  cumque distinctio hic. Consequuntur cum aperiam nesciunt
-                  ratione fuga voluptates deserunt repudiandae, labore nihil
-                  quaerat, beatae nisi accusantium animi exercitationem neque
-                  iste soluta blanditiis in voluptatum. Velit provident quasi
-                  officiis voluptas fugiat. Possimus voluptatem reiciendis, sunt
-                  et dicta nisi est veritatis? Dolorem expedita doloribus
-                  adipisci labore. Commodi fugit omnis iure suscipit atque earum
-                  voluptates odio pariatur nostrum cupiditate! Ea dolores fugiat
-                  mollitia voluptas nihil quis quasi quae corporis voluptatem,
-                  unde laborum vitae aut error, magnam expedita doloremque,
-                  nostrum repellat exercitationem! Illum adipisci sed rerum,
-                  similique officia deleniti tempora velit natus esse.
-                </IonCardContent>
-              </IonCard>
-            </IonCol>
-            <IonCol size="6" sizeLg="4" sizeXs="12" sizeMd="6" sizeSm="12">
-              <IonCard>
-                <IonCardHeader>
-                  <IonToolbar>
-                    <IonCardTitle color="primary">
-                      Immunity & Immunizations
-                    </IonCardTitle>
-                    <IonCardSubtitle>Name and Date</IonCardSubtitle>
-                    <IonButtons slot="end">
-                      <IonButton
-                        color="primary"
-                        size="small"
-                        onClick={() => {
-                          setEditValue("Immunity");
-                          setShowEditModal(true);
-                        }}
-                      >
-                        <IonIcon
-                          slot="icon-only"
-                          icon={pencil}
-                          size="small"
-                        ></IonIcon>
-                      </IonButton>
-                    </IonButtons>{" "}
-                  </IonToolbar>
-                </IonCardHeader>
-                <IonCardContent>
-                  <IonItem lines="full">
-                    <IonText slot="start">Flu Shot</IonText>
-                    <IonText slot="end">
-                      {faker.date.recent().toLocaleDateString()}
-                    </IonText>
-                  </IonItem>
-                  <IonItem lines="full">
-                    <IonText slot="start">Tetanus</IonText>
-                    <IonText slot="end">
-                      {faker.date.recent().toLocaleDateString()}
-                    </IonText>
-                  </IonItem>
+                  {patientRecord?.patientComplaint}
                 </IonCardContent>
               </IonCard>
             </IonCol>
@@ -261,6 +282,7 @@ const PatientRecord: React.FC = () => {
                       <IonButton
                         size="small"
                         color="primary"
+                        hidden={canEdit(staff, 'appearance')}
                         onClick={() => {
                           setEditValue("Appearance");
                           setShowEditModal(true);
@@ -276,14 +298,14 @@ const PatientRecord: React.FC = () => {
                   </IonToolbar>
                 </IonCardHeader>
                 <IonCardContent>
-                  <IonItem lines="full">
-                    <IonText slot="start">Communication</IonText>
-                    <IonText slot="end">Good</IonText>
-                  </IonItem>
-                  <IonItem lines="full">
-                    <IonText slot="start">Dental Health</IonText>
-                    <IonText slot="end">Needs Attention</IonText>
-                  </IonItem>
+                  {patientRecord?.appearance?.map((_appearance, index) => {
+                    return (
+                      <IonItem lines="full" key={index}>
+                        <IonText slot="start">{_appearance.value}</IonText>
+                        <IonText slot="end">{_appearance.description}</IonText>
+                      </IonItem>
+                    );
+                  })}
                 </IonCardContent>
               </IonCard>
             </IonCol>
@@ -299,6 +321,7 @@ const PatientRecord: React.FC = () => {
                       <IonButton
                         size="small"
                         color="primary"
+                        hidden={canEdit(staff, 'iadl')}
                         onClick={() => {
                           setEditValue("IADL");
                           setShowEditModal(true);
@@ -313,7 +336,16 @@ const PatientRecord: React.FC = () => {
                     </IonButtons>
                   </IonToolbar>
                 </IonCardHeader>
-                <IonCardContent></IonCardContent>
+                <IonCardContent>
+                  {patientRecord?.iadl?.map((_iadl, index) => {
+                    return (
+                      <IonItem lines="full" key={index}>
+                        <IonText slot="start">{_iadl.value}</IonText>
+                        <IonText slot="end">{_iadl.description}</IonText>
+                      </IonItem>
+                    );
+                  })}
+                </IonCardContent>
               </IonCard>
             </IonCol>
 
@@ -328,6 +360,7 @@ const PatientRecord: React.FC = () => {
                       <IonButton
                         size="small"
                         color="primary"
+                        hidden={canEdit(staff, 'adl')}
                         onClick={() => {
                           setEditValue("ADL");
                           setShowEditModal(true);
@@ -343,14 +376,14 @@ const PatientRecord: React.FC = () => {
                   </IonToolbar>
                 </IonCardHeader>
                 <IonCardContent>
-                  <IonItem lines="full">
-                    <IonText slot="start">Bathing</IonText>
-                    <IonText slot="end">Independent</IonText>
-                  </IonItem>
-                  <IonItem lines="full">
-                    <IonText slot="start">Eating</IonText>
-                    <IonText slot="end">Dependent</IonText>
-                  </IonItem>
+                  {patientRecord?.adl?.map((_adl, index) => {
+                    return (
+                      <IonItem lines="full" key={index}>
+                        <IonText slot="start">{_adl.value}</IonText>
+                        <IonText slot="end">{_adl.description}</IonText>
+                      </IonItem>
+                    );
+                  })}
                 </IonCardContent>
               </IonCard>
             </IonCol>
@@ -368,6 +401,7 @@ const PatientRecord: React.FC = () => {
                         }}
                         size="small"
                         color="primary"
+                        hidden={canEdit(staff, 'continence')}
                       >
                         <IonIcon
                           icon={pencil}
@@ -379,14 +413,14 @@ const PatientRecord: React.FC = () => {
                   </IonToolbar>
                 </IonCardHeader>
                 <IonCardContent>
-                  <IonItem lines="full">
-                    <IonText slot="start">Urine</IonText>
-                    <IonText slot="end">Continent</IonText>
-                  </IonItem>
-                  <IonItem lines="full">
-                    <IonText slot="start">Stool</IonText>
-                    <IonText slot="end">Continent</IonText>
-                  </IonItem>
+                  {patientRecord?.continence?.map((_continence, index) => {
+                    return (
+                      <IonItem lines="full" key={index}>
+                        <IonText slot="start">{_continence.value}</IonText>
+                        <IonText slot="end">{_continence.description}</IonText>
+                      </IonItem>
+                    );
+                  })}
                 </IonCardContent>
               </IonCard>
             </IonCol>
@@ -399,6 +433,7 @@ const PatientRecord: React.FC = () => {
                       <IonButton
                         color="primary"
                         size="small"
+                        hidden={canEdit(staff, 'history')}
                         onClick={() => {
                           setEditValue("Patient History");
                           setShowEditModal(true);
@@ -415,44 +450,36 @@ const PatientRecord: React.FC = () => {
                 </IonCardHeader>
                 <IonCardContent>
                   <IonAccordionGroup>
-                    <IonAccordion value="Medical History">
-                      <IonItem slot="header">
-                        <IonLabel>Medication History</IonLabel>
-                      </IonItem>
-                      <p slot="content" className="p-3">
-                        <IonText>
-                          Lorem ipsum dolor sit amet consectetur adipisicing
-                          elit. Laudantium itaque dignissimos similique beatae
-                          deserunt molestias. Iure, exercitationem? Eius numquam
-                          quibusdam sequi, impedit in, illum reiciendis hic,
-                          nihil esse ea ratione!
-                        </IonText>
-                      </p>
-                    </IonAccordion>
-                    <IonAccordion value="Surgical History">
-                      <IonItem slot="header">
-                        <IonLabel>Surgical History</IonLabel>
-                      </IonItem>
-                      <div slot="content" className="p-3 history-attributes">
-                        <div className="history-attribute">
-                          <IonText>
-                            <div className="h6 text-bold history-attribute-heading">
-                              {" "}
-                              Lorem Section
-                            </div>
-                          </IonText>
-                          <IonText>
-                            <div className="ms-2 ps-2 history-attribute-description">
-                              Lorem ipsum dolor sit amet consectetur adipisicing
-                              elit. Laudantium itaque dignissimos similique
-                              beatae deserunt molestias. Iure, exercitationem?
-                              Eius numquam quibusdam sequi, impedit in, illum
-                              reiciendis hic, nihil esse ea ratione!
-                            </div>
-                          </IonText>
-                        </div>
-                      </div>
-                    </IonAccordion>
+                    {histories?.map((history, index) => { 
+                      return (
+                        <IonAccordion value={history.title} key={index}>
+                          <IonItem slot="header">
+                            <IonLabel>{history.title}</IonLabel>
+                          </IonItem>
+                          <div
+                            slot="content"
+                            className="p-3 history-attributes"
+                          >
+                            {history.attributes.map((attribute, index) => {
+                              return (
+                                <div className="history-attribute">
+                                  <IonText>
+                                    <div className="h6 text-bold history-attribute-heading">
+                                      {attribute.title}
+                                    </div>
+                                  </IonText>
+                                  <IonText>
+                                    <div className="ms-2 ps-2 history-attribute-description">
+                                      {attribute.description}
+                                    </div>
+                                  </IonText>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </IonAccordion>
+                      );
+                    })}
                   </IonAccordionGroup>
                 </IonCardContent>
               </IonCard>
@@ -466,6 +493,7 @@ const PatientRecord: React.FC = () => {
                       <IonButton
                         color="primary"
                         size="small"
+                        hidden={canEdit(staff, 'physicalExam')}
                         onClick={() => {
                           setEditValue("Physical Exam");
                           setShowEditModal(true);
@@ -480,32 +508,19 @@ const PatientRecord: React.FC = () => {
                     </IonButtons>{" "}
                   </IonToolbar>
                 </IonCardHeader>
-                <IonCardContent>
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam
-                  cumque distinctio hic. Consequuntur cum aperiam nesciunt
-                  ratione fuga voluptates deserunt repudiandae, labore nihil
-                  quaerat, beatae nisi accusantium animi exercitationem neque
-                  iste soluta blanditiis in voluptatum. Velit provident quasi
-                  officiis voluptas fugiat. Possimus voluptatem reiciendis, sunt
-                  et dicta nisi est veritatis? Dolorem expedita doloribus
-                  adipisci labore. Commodi fugit omnis iure suscipit atque earum
-                  voluptates odio pariatur nostrum cupiditate! Ea dolores fugiat
-                  mollitia voluptas nihil quis quasi quae corporis voluptatem,
-                  unde laborum vitae aut error, magnam expedita doloremque,
-                  nostrum repellat exercitationem! Illum adipisci sed rerum,
-                  similique officia deleniti tempora velit natus esse.
-                </IonCardContent>
+                <IonCardContent>{patientRecord?.physicalExam}</IonCardContent>
               </IonCard>
             </IonCol>
             <IonCol size="12">
               <IonCard>
                 <IonCardHeader>
                   <IonToolbar>
-                    <IonCardTitle color="primary"> Diagnostics </IonCardTitle>
+                    <IonCardTitle color="primary"> Diagnosis </IonCardTitle>
                     <IonButtons slot="end">
                       <IonButton
                         color="primary"
                         size="small"
+                        hidden={canEdit(staff, 'diagnosis')}
                         onClick={() => {
                           setEditValue("Diagnostics");
                           setShowEditModal(true);
@@ -520,21 +535,7 @@ const PatientRecord: React.FC = () => {
                     </IonButtons>{" "}
                   </IonToolbar>
                 </IonCardHeader>
-                <IonCardContent>
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam
-                  cumque distinctio hic. Consequuntur cum aperiam nesciunt
-                  ratione fuga voluptates deserunt repudiandae, labore nihil
-                  quaerat, beatae nisi accusantium animi exercitationem neque
-                  iste soluta blanditiis in voluptatum. Velit provident quasi
-                  officiis voluptas fugiat. Possimus voluptatem reiciendis, sunt
-                  et dicta nisi est veritatis? Dolorem expedita doloribus
-                  adipisci labore. Commodi fugit omnis iure suscipit atque earum
-                  voluptates odio pariatur nostrum cupiditate! Ea dolores fugiat
-                  mollitia voluptas nihil quis quasi quae corporis voluptatem,
-                  unde laborum vitae aut error, magnam expedita doloremque,
-                  nostrum repellat exercitationem! Illum adipisci sed rerum,
-                  similique officia deleniti tempora velit natus esse.
-                </IonCardContent>
+                <IonCardContent>{patientRecord?.diagnosis}</IonCardContent>
               </IonCard>
             </IonCol>
             <IonCol size="12">
@@ -546,6 +547,7 @@ const PatientRecord: React.FC = () => {
                       <IonButton
                         color="primary"
                         size="small"
+                        hidden={canEdit(staff, 'lab')}
                         onClick={() => {
                           setEditValue("Lab Results");
                           setShowEditModal(true);
@@ -574,38 +576,49 @@ const PatientRecord: React.FC = () => {
                       </IonCol>
                     </IonRow>
                   )}
-                  {!isMobileView && (
-                    <IonRow className="text-center">
-                      <IonCol className="border">Test 1</IonCol>
-                      <IonCol className="border">Test result 1</IonCol>
-                      <IonCol className="border">Handler 1</IonCol>
-                    </IonRow>
+                  {!isMobileView ? (
+                    <>
+                      {labs?.map((lab, index) => {
+                      return  <IonRow className="text-center" key={index}>
+                          <IonCol className="border">{lab.test}</IonCol>
+                          <IonCol className="border">{lab.result}</IonCol>
+                          <IonCol className="border">{lab.handler}</IonCol>
+                        </IonRow>
+                      })}
+                    </>
+                  ) : (
+                    ""
                   )}
 
                   {isMobileView && (
-                    <div>
-                      <IonItem lines="full" button>
-                        <IonLabel slot="start">
-                          Lorem ipsum, dolor sit amet consectetur adipisicing
-                          elit. Omnis, perferendis.
-                        </IonLabel>
-                        <IonIcon slot="end" icon={chevronForward}></IonIcon>
-                      </IonItem>
-                      <IonItem lines="full" button>
-                        <IonLabel slot="start">
-                          Lorem ipsum, dolor sit amet consectetur adipisicing
-                          elit. Omnis, perferendis.
-                        </IonLabel>
-                        <IonIcon slot="end" icon={chevronForward}></IonIcon>
-                      </IonItem>
-                      <IonItem lines="full" button>
-                        <IonLabel slot="start">
-                          Lorem ipsum, dolor sit amet consectetur adipisicing
-                          elit. Omnis, perferendis.
-                        </IonLabel>
-                        <IonIcon slot="end" icon={chevronForward}></IonIcon>
-                      </IonItem>
-                    </div>
+                    <IonAccordionGroup>
+                      {labs?.map((lab, index) => { 
+                        return (
+                          <IonAccordion key={index}>
+                            <IonItem lines="full" button slot="header">
+                              <IonLabel slot="start">{lab.test}</IonLabel>
+                            </IonItem>
+                            <div
+                              slot="content"
+                              className="p-3 history-attributes"
+                            >
+                              <div className="history-attribute">
+                                <IonText>
+                                  <div className="h6 text-bold history-attribute-heading">
+                                    {lab.test}
+                                  </div>
+                                </IonText>
+                                <IonText>
+                                  <div className="ms-2 ps-2 history-attribute-description">
+                                    {lab.result}
+                                  </div>
+                                </IonText>
+                              </div>
+                            </div>
+                          </IonAccordion>
+                        );
+                      })}
+                    </IonAccordionGroup>
                   )}
                 </IonCardContent>
               </IonCard>
@@ -619,6 +632,7 @@ const PatientRecord: React.FC = () => {
                       <IonButton
                         color="primary"
                         size="small"
+                        hidden={canEdit(staff, 'management')}
                         onClick={() => {
                           setEditValue("Management");
                           setShowEditModal(true);
@@ -643,17 +657,18 @@ const PatientRecord: React.FC = () => {
                         <IonText>Solution</IonText>
                       </IonCol>
                     </IonRow>
-                    <IonRow>
-                      <IonCol className="border">
-                        Lorem ipsum dolor sit amet.
-                      </IonCol>
-                      <IonCol className="border">
-                        {" "}
-                        Lorem ipsum dolor sit amet, consectetur adipisicing
-                        elit. Obcaecati asperiores est natus perferendis soluta
-                        dolores.
-                      </IonCol>
-                    </IonRow>
+                    {managements?.map((management, index) => {
+                      return (
+                        <IonRow key={index}>
+                          <IonCol className="border">
+                            {management.problem}
+                          </IonCol>
+                          <IonCol className="border">
+                            {management.solution}
+                          </IonCol>
+                        </IonRow>
+                      );
+                    })}
                   </IonGrid>
                 </IonCardContent>
               </IonCard>
@@ -669,6 +684,7 @@ const PatientRecord: React.FC = () => {
         <EditPatientRecord
           category={editValue}
           closeModal={closeEditModal}
+          recordId={patientRecord?.id}
         ></EditPatientRecord>
       </IonModal>
     </IonPage>

@@ -44,15 +44,67 @@ import {
   trash,
   trashBin,
 } from "ionicons/icons";
-import React, { useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import {
+  PatientContext,
+  PatientRecordContext,
+  StaffContext,
+} from "../context/AppContent";
+import { firestore } from "../Firebase";
+import {
+  HistoryAttribute,
+  HistoryInterface,
+  Immunity,
+  Labs,
+  ManagementInterface,
+  PatientRecordInterface,
+  Payment,
+} from "../interfaces/types";
+import uniqid from "uniqid";
 
 const Finance: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState("cash");
+  const { patient, setPatient } = useContext(PatientContext);
+  const { patientRecord, setPatientRecord } = useContext(PatientRecordContext);
+  function updatePaymentInfo(payment: Payment) {
+    let q1 = firestore.collection("patients").doc(patient?.id).update({
+      payment: payment,
+    });
+    let q2 = firestore
+      .collection("patients")
+      .doc(patient?.id)
+      .collection("records")
+      .doc(patientRecord?.id)
+      .update({ payment: payment });
 
+    return Promise.all([q1, q2]).then(()=>{
+      let tr:any = patientRecord;
+      tr.payment = payment;
+      let tp:any = patient;
+      tp.payment = payment;
+      setPatientRecord(tr);
+      setPatient(tp);
+    }).catch((error)=>{
+      console.log('updating payment error: ',error);
+    });
+  }
   return (
     <form
-      onSubmit={(e) => {
+      onSubmit={(e: any) => {
         e.preventDefault();
+        let data: Payment = {
+          date: Date.now().toString(),
+          mode: e.target.mode.value,
+          amount: e.target.amount.title,
+          details: e.target.details.value,
+          status: "pending",
+          momoNumber: e.target.momoNumber.value || " ",
+          cardNumber: e.target.cardNumber.value || " ",
+          cvc: e.target.cvc.value || " ",
+          expirationDate: e.target.expirationDate.value || " ",
+          insuranceID: e.target.insuranceID.value || " ",
+        };
+        updatePaymentInfo(data);
         alert("submitted");
       }}
     >
@@ -61,6 +113,7 @@ const Finance: React.FC = () => {
           <IonLabel position="floating">Name</IonLabel>
           <IonInput
             required
+            value={patient?.name}
             name="name"
             type="text"
             placeholder="Name of Payer (Bank Card Name, Mobile Money)"
@@ -70,25 +123,17 @@ const Finance: React.FC = () => {
           <IonLabel position="floating">Amount</IonLabel>
           <IonInput
             required
+            value={patientRecord?.payment?.amount}
             name="amount"
             type="number"
             placeholder="Amount to be paid"
           ></IonInput>
         </IonItem>
         <IonItem lines="full">
-          <IonLabel position="floating">Date</IonLabel>
-          <IonInput
-            required
-            name="date"
-            type="date"
-            placeholder="Payment Date"
-          ></IonInput>
-        </IonItem>
-        <IonItem lines="full">
           <IonLabel position="floating">Status</IonLabel>
-          <IonSelect value={"unpaid"}>
-            <IonSelectOption value={"unpaid"}>Unpaid</IonSelectOption>
-            <IonSelectOption value={"paid"}>Paid</IonSelectOption>
+          <IonSelect value={patientRecord?.payment?.status} name='status'>
+            <IonSelectOption value={"pending"}>Pending</IonSelectOption>
+            <IonSelectOption value={"completed"}>Completed</IonSelectOption>
           </IonSelect>
         </IonItem>
 
@@ -96,6 +141,7 @@ const Finance: React.FC = () => {
           <IonLabel position="floating">Mode</IonLabel>
           <IonSelect
             value={paymentMethod}
+            name='mode'
             onIonChange={(e) => {
               setPaymentMethod(e.detail.value);
             }}
@@ -117,6 +163,7 @@ const Finance: React.FC = () => {
               <IonLabel position="floating">Acc Number</IonLabel>
               <IonInput
                 required
+                value={patientRecord?.payment?.cardNumber}
                 name="accountNumber"
                 type="number"
                 placeholder="Account Number"
@@ -126,7 +173,8 @@ const Finance: React.FC = () => {
               <IonLabel position="floating">CVC</IonLabel>
               <IonInput
                 required
-                name="cvcNumber"
+                value={patientRecord?.payment?.cvc}
+                name="cvc"
                 type="number"
                 placeholder="CVC Number"
               ></IonInput>
@@ -140,20 +188,12 @@ const Finance: React.FC = () => {
               <IonLabel position="floating">Ins Number</IonLabel>
               <IonInput
                 required
-                name="insuranceNumber"
+                name="insuranceID"
+                value={patientRecord?.payment?.insuranceID}
                 type="number"
                 placeholder="Insurance Number"
               ></IonInput>
-            </IonItem>
-            <IonItem lines="full">
-              <IonLabel position="floating">Ins Company</IonLabel>
-              <IonInput
-                required
-                name="insuranceCompany"
-                type="text"
-                placeholder="Insurance Company"
-              ></IonInput>
-            </IonItem>
+            </IonItem> 
           </>
         )}
 
@@ -163,8 +203,9 @@ const Finance: React.FC = () => {
               <IonLabel position="floating">Account Number</IonLabel>
               <IonInput
                 required
-                name="mobileMoneyAccountNumber"
+                name="momoNumber"
                 type="tel"
+                value={patientRecord?.payment?.momoNumber}
                 placeholder="Account Number"
               ></IonInput>
             </IonItem>
@@ -183,15 +224,40 @@ const Finance: React.FC = () => {
  *
  */
 
-const PatientsComplaint: React.FC = () => {
+const PatientsComplaint: React.FC<{ recordId?: string }> = ({ recordId }) => {
   const [summary, setSummary] = useState<string | null | undefined>("");
   const summaryRef = useRef<HTMLIonTextareaElement>(null);
+  const { patient,setPatient } = useContext(PatientContext); 
+  const { patientRecord, setPatientRecord } = useContext(PatientRecordContext);
+
+  useEffect(() => {
+    firestore
+      .collection("patients")
+      .doc(patient?.id)
+      .collection("records")
+      .doc(recordId)
+      .onSnapshot((snap) => {
+        let doc: any = snap.data();
+        setSummary(doc.patientComplaint ? doc.patientComplaint : "");
+      });
+  }, []);
+
   return (
     <form
-      action=""
-      onSubmit={(e) => {
+      onSubmit={(e: any) => {
         e.preventDefault();
-        alert("submitted");
+        firestore
+          .collection("patients")
+          .doc(patient?.id)
+          .collection("records")
+          .doc(recordId)
+          .update({ patientComplaint: e.target.complaint.value })
+          .then(() => {
+            console.log("updated");
+            let tr: any = patientRecord;
+            tr.patientComplaint = e.target.complaint.value;
+            setPatientRecord(tr);
+          });
       }}
     >
       <IonCard>
@@ -203,12 +269,11 @@ const PatientsComplaint: React.FC = () => {
           <IonTextarea
             placeholder="Patient's Complaint"
             required
+            name="complaint"
             ref={summaryRef}
+            // value={summary}
             onIonChange={(e) => {
               setSummary(summaryRef.current?.value);
-              let text = summaryRef.current?.value;
-              var regex = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/g;
-              console.log(text?.match(regex));
             }}
           ></IonTextarea>
         </IonItem>
@@ -226,194 +291,256 @@ const PatientsComplaint: React.FC = () => {
  *
  */
 
-const PatientsHistory: React.FC = () => {
+const PatientsHistory: React.FC<{ recordId?: string }> = ({ recordId }) => {
+  const { patient,setPatient } = useContext(PatientContext); 
+  const { patientRecord, setPatientRecord } = useContext(PatientRecordContext);
   const [loading, setLoading] = useState(false);
   const [newHistory, setNewHistory] = useState(false);
   const [newHistoryAttribute, setNewHistoryAttribute] = useState(false);
+  const [allHistories, setAllHistories] = useState<HistoryInterface[]>();
+
+  function getHistories() {
+    firestore
+      .collection("patients")
+      .doc(patient?.id)
+      .collection("records")
+      .doc(patientRecord?.id)
+      .collection("history")
+      .onSnapshot((snap) => {
+        let docs: any = snap.docs.map((doc) => doc.data());
+        setAllHistories(docs);
+      });
+  }
+
+  useEffect(() => {
+    getHistories();
+  }, []);
   return (
     <>
       <IonAccordionGroup>
-        <IonAccordion value="Medical History">
-          <IonItem slot="header">
-            <IonLabel>Medication History</IonLabel>
-          </IonItem>
-          <div slot="content" className="p-3 history-attributes">
-            <IonToolbar color="clear">
-              {newHistoryAttribute ? (
+        {allHistories?.map((_history, index) => {
+          return (
+            <IonAccordion value={_history.title} key={index}>
+              <IonItem slot="header">
+                <IonLabel>{_history.title}</IonLabel>
+              </IonItem>
+              <div slot="content" className="p-3 history-attributes">
+                <IonToolbar color="clear">
+                  {newHistoryAttribute ? (
+                    <IonButton
+                      slot="end"
+                      color="danger"
+                      size="small"
+                      onClick={() => {
+                        setNewHistoryAttribute(false);
+                      }}
+                    >
+                      <IonIcon icon={closeOutline} slot="start"></IonIcon>
+                      <IonLabel>cancel</IonLabel>
+                    </IonButton>
+                  ) : (
+                    <IonButton
+                      slot="end"
+                      color="medium"
+                      size="small"
+                      onClick={() => {
+                        setNewHistoryAttribute(true);
+                      }}
+                    >
+                      <IonIcon icon={addOutline} slot="start"></IonIcon>
+                      <IonLabel>Add Attribute</IonLabel>
+                    </IonButton>
+                  )}
+                </IonToolbar>
+                {newHistoryAttribute && (
+                  <IonCard className="mb-4" color="light">
+                    <form
+                      onSubmit={(e: any) => {
+                        e.preventDefault();
+                        setLoading(true);
+                        let data: HistoryAttribute = {
+                          date: e.target.date.value,
+                          description: e.target.description.value,
+                          title: e.target.title.value,
+                          id: uniqid(),
+                        }; 
+                        firestore
+                          .collection("patients")
+                          .doc(patient?.id)
+                          .collection("records")
+                          .doc(patientRecord?.id)
+                          .collection("history")
+                          .doc(_history.id)
+                          .update({
+                            attributes: [..._history.attributes, data],
+                          })
+                          .then(() => {
+                            setNewHistoryAttribute(false);
+                            setLoading(false);
+                          });
+                      }}
+                    >
+                      {loading && (
+                        <IonProgressBar type="indeterminate"></IonProgressBar>
+                      )}
+                      <IonCardHeader>
+                        <IonCardTitle>New Attribute</IonCardTitle>
+                      </IonCardHeader>
+                      <IonCardContent>
+                        <IonItem
+                          lines="full"
+                          fill="outline"
+                          className="ion-margin-bottom"
+                        >
+                          <IonLabel position="floating">title</IonLabel>
+                          <IonInput
+                            type="text"
+                            required
+                            placeholder="Title of Attribute"
+                            name="title"
+                          ></IonInput>
+                        </IonItem>
+                        <IonItem
+                          lines="full"
+                          fill="outline"
+                          className="ion-margin-bottom"
+                        >
+                          <IonLabel position="floating">date</IonLabel>
+                          <IonInput
+                            type="date"
+                            name="date"
+                            required
+                            placeholder="Date of Activity"
+                          ></IonInput>
+                        </IonItem>
+                        <IonItem
+                          lines="full"
+                          fill="outline"
+                          className="ion-margin-bottom"
+                        >
+                          <IonLabel position="floating">Description</IonLabel>
+                          <IonTextarea
+                            required
+                            name="description"
+                          ></IonTextarea>
+                        </IonItem>
+                      </IonCardContent>
+
+                      <div className="text-center pt-2 pb-2">
+                        <IonButton size="small" type="submit">
+                          Add Attribute
+                        </IonButton>
+                      </div>
+                    </form>
+                  </IonCard>
+                )}
+                {_history.attributes.map((attribute, key) => {
+                  <div className="history-attribute" key={key}>
+                    <IonText>
+                      <div className="h6 text-bold history-attribute-heading">
+                        {attribute.title} <span className="text-muted fw-light fw-h6"> - {attribute.date}</span>
+                      </div>
+                    </IonText>
+                    <IonText>
+                      <div className="ms-2 ps-2 history-attribute-description">
+                        {attribute.description}
+                      </div>
+                    </IonText>
+                    <IonToolbar color="clear">
+                      <IonButtons slot="end">
+                        <IonButton
+                          color="danger"
+                          size="small"
+                          onClick={() => {
+                            setLoading(true);
+                            let index = key;
+                            let temp = _history.attributes;
+                            temp.splice(index, 1);
+                            firestore
+                              .collection("patients")
+                              .doc(patient?.id)
+                              .collection("records")
+                              .doc(patientRecord?.id)
+                              .collection("history")
+                              .doc(_history.id)
+                              .update({ attributes: temp });
+                            setLoading(false);
+                          }}
+                        >
+                          <IonIcon
+                            slot="icon-only"
+                            icon={trash}
+                            size="small"
+                          ></IonIcon>
+                        </IonButton>
+                      </IonButtons>
+                    </IonToolbar>
+                    <hr />
+                  </div>;
+                })}
+              </div>
+            </IonAccordion>
+          );
+        })}
+      </IonAccordionGroup>
+
+      {newHistory && (
+        <IonCard color="light">
+          <form
+            onSubmit={(e: any) => {
+              e.preventDefault();
+              setLoading(true);
+              let data: HistoryInterface = {
+                id: e.target.title.value,
+                title: e.target.title.value,
+                attributes: [],
+              };
+              firestore
+                .collection("patients")
+                .doc(patient?.id)
+                .collection("records")
+                .doc(patientRecord?.id)
+                .collection("history")
+                .doc(data.id)
+                .set(data)
+                .then(() => {
+                  setLoading(false);
+                  setNewHistory(false);
+                });
+            }}
+          >
+            {loading && <IonProgressBar type="indeterminate"></IonProgressBar>}
+            <IonCardHeader>
+              <IonToolbar color="light">
+                <IonCardTitle>New History</IonCardTitle>
                 <IonButton
                   slot="end"
                   color="danger"
                   size="small"
                   onClick={() => {
-                    setNewHistoryAttribute(false);
+                    setNewHistory(false);
                   }}
                 >
                   <IonIcon icon={closeOutline} slot="start"></IonIcon>
-                  <IonLabel>cancel</IonLabel>
+                  cancel
                 </IonButton>
-              ) : (
-                <IonButton
-                  slot="end"
-                  color="medium"
-                  size="small"
-                  onClick={() => {
-                    setNewHistoryAttribute(true);
-                  }}
-                >
-                  <IonIcon icon={addOutline} slot="start"></IonIcon>
-                  <IonLabel>Add Attribute</IonLabel>
+              </IonToolbar>
+            </IonCardHeader>
+            <IonCardContent>
+              <IonItem fill="outline" lines="full">
+                <IonLabel position="floating">History Title</IonLabel>
+                <IonInput
+                  placeholder="e.g Hospitalization History"
+                  name="title"
+                ></IonInput>
+              </IonItem>
+              <div className="text-center pt-2">
+                <IonButton size="small" type="submit">
+                  Create
                 </IonButton>
-              )}
-            </IonToolbar>
-            {newHistoryAttribute && (
-              <IonCard className="mb-4" color="light">
-                {loading && (
-                  <IonProgressBar type="indeterminate"></IonProgressBar>
-                )}
-                <IonCardHeader>
-                  <IonCardTitle>New Attribute</IonCardTitle>
-                </IonCardHeader>
-                <IonCardContent>
-                  <IonItem lines="full" fill="outline">
-                    <IonLabel position="floating">title</IonLabel>
-                    <IonInput
-                      type="text"
-                      required
-                      placeholder="Title of Attribute"
-                    ></IonInput>
-                  </IonItem>
-                  <IonItem
-                    lines="full"
-                    fill="outline"
-                    className="ion-padding-top"
-                  >
-                    <IonLabel position="floating">Description</IonLabel>
-                    <IonTextarea required></IonTextarea>
-                  </IonItem>
-                </IonCardContent>
-
-                <div className="text-center pt-2 pb-2">
-                  <IonButton size="small">Add Attribute</IonButton>
-                </div>
-              </IonCard>
-            )}
-            <div className="history-attribute">
-              <IonText>
-                <div className="h6 text-bold history-attribute-heading">
-                  {" "}
-                  Lorem Section
-                </div>
-              </IonText>
-              <IonText>
-                <div className="ms-2 ps-2 history-attribute-description">
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                  Laudantium itaque dignissimos similique beatae deserunt
-                  molestias. Iure, exercitationem? Eius numquam quibusdam sequi,
-                  impedit in, illum reiciendis hic, nihil esse ea ratione!
-                </div>
-              </IonText>
-              <IonToolbar color="clear">
-                <IonButtons slot="end">
-                  <IonButton color="danger" size="small">
-                    <IonIcon
-                      slot="icon-only"
-                      icon={trash}
-                      size="small"
-                    ></IonIcon>
-                  </IonButton>
-                </IonButtons>
-              </IonToolbar>
-              <hr />
-            </div>
-            <div className="history-attribute">
-              <IonText>
-                <div className="h6 text-bold history-attribute-heading">
-                  {" "}
-                  Lorem Section
-                </div>
-              </IonText>
-              <IonText>
-                <div className="ms-2 ps-2 history-attribute-description">
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                  Laudantium itaque dignissimos similique beatae deserunt
-                  molestias. Iure, exercitationem? Eius numquam quibusdam sequi,
-                  impedit in, illum reiciendis hic, nihil esse ea ratione!
-                </div>
-              </IonText>
-              <IonToolbar color="clear">
-                <IonButtons slot="end">
-                  <IonButton color="danger" size="small">
-                    <IonIcon
-                      slot="icon-only"
-                      icon={trash}
-                      size="small"
-                    ></IonIcon>
-                  </IonButton>
-                </IonButtons>
-              </IonToolbar>
-              <hr />
-            </div>{" "}
-            <div className="history-attribute">
-              <IonText>
-                <div className="h6 text-bold history-attribute-heading">
-                  {" "}
-                  Lorem Section
-                </div>
-              </IonText>
-              <IonText>
-                <div className="ms-2 ps-2 history-attribute-description">
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                  Laudantium itaque dignissimos similique beatae deserunt
-                  molestias. Iure, exercitationem? Eius numquam quibusdam sequi,
-                  impedit in, illum reiciendis hic, nihil esse ea ratione!
-                </div>
-              </IonText>
-              <IonToolbar color="clear">
-                <IonButtons slot="end">
-                  <IonButton color="danger" size="small">
-                    <IonIcon
-                      slot="icon-only"
-                      icon={trash}
-                      size="small"
-                    ></IonIcon>
-                  </IonButton>
-                </IonButtons>
-              </IonToolbar>
-              <hr />
-            </div>
-          </div>
-        </IonAccordion>
-      </IonAccordionGroup>
-
-      {newHistory && (
-        <IonCard color="light">
-          {loading && <IonProgressBar type="indeterminate"></IonProgressBar>}
-          <IonCardHeader>
-            <IonToolbar color="light">
-            <IonCardTitle>New History</IonCardTitle>
-            
-          <IonButton
-            slot="end"
-            color="danger"
-            size="small"
-            onClick={() => {
-              setNewHistory(false);
-            }}
-          >
-            <IonIcon icon={closeOutline} slot="start"></IonIcon>
-            cancel
-          </IonButton>
-            </IonToolbar>
-          </IonCardHeader>
-          <IonCardContent>
-            <IonItem fill="outline" lines="full">
-              <IonLabel position="floating">History Title</IonLabel>
-              <IonInput placeholder="e.g Hospitalization History"></IonInput>
-            </IonItem>
-            <div className="text-center pt-2">
-              <IonButton size="small">Create</IonButton>
-            </div>
-          </IonCardContent>
+              </div>
+            </IonCardContent>
+          </form>
         </IonCard>
       )}
 
@@ -439,32 +566,66 @@ const PatientsHistory: React.FC = () => {
  *
  */
 
-const Diagnostics: React.FC = () => {
-  const [diagnostics, setDiagnostics] = useState<string | null | undefined>("");
-  const diagnosticsRef = useRef<HTMLIonTextareaElement>(null);
+const Diagnostics: React.FC<{ recordId?: string }> = ({ recordId }) => {
+  const [diagnosis, setdiagnosis] = useState<any>("");
+  const [loading, setLoading] = useState(false);
+  const { patient,setPatient } = useContext(PatientContext); 
+  const { patientRecord, setPatientRecord } = useContext(PatientRecordContext);
+  const diagnosisRef = useRef<HTMLIonTextareaElement>(null);
+
+  function fetchDiagnosis() {
+    firestore
+      .collection("patients")
+      .doc(patient?.id)
+      .collection("records")
+      .doc(recordId)
+      .onSnapshot((snapshot) => {
+        let docs: any = snapshot.data();
+        setdiagnosis(docs.diagnosis);
+      });
+  }
+
+  useEffect(() => {
+    fetchDiagnosis();
+  }, []);
+
   return (
     <form
-      action=""
       onSubmit={(e) => {
         e.preventDefault();
-        alert("submitted");
+        setLoading(true);
+        firestore
+          .collection("patients")
+          .doc(patient?.id)
+          .collection("records")
+          .doc(recordId)
+          .update({ diagnosis: diagnosis })
+          .then(() => {
+            setLoading(false);
+            let tr:any = patientRecord;
+            tr.diagnosis = diagnosis;
+            setPatientRecord(tr);
+          })
+          .catch((e) => {
+            console.error(e);
+            setLoading(false);
+          });
       }}
     >
       <IonCard>
-        <IonCardContent>{diagnostics}</IonCardContent>
+        {loading && <IonProgressBar type="indeterminate"></IonProgressBar>}
+        <IonCardContent>{diagnosis}</IonCardContent>
       </IonCard>
       <IonList>
         <IonItem>
-          <IonLabel position="floating">Diagnostics</IonLabel>
+          <IonLabel position="floating">diagnosis</IonLabel>
           <IonTextarea
-            placeholder="Diagnostics"
+            placeholder="diagnosis"
             required
-            ref={diagnosticsRef}
+            name="diagnosis"
+            ref={diagnosisRef}
             onIonChange={(e) => {
-              setDiagnostics(diagnosticsRef.current?.value);
-              let text = diagnosticsRef.current?.value;
-              var regex = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/g;
-              console.log(text?.match(regex));
+              setdiagnosis(diagnosisRef.current?.value);
             }}
           ></IonTextarea>
         </IonItem>
@@ -482,20 +643,56 @@ const Diagnostics: React.FC = () => {
  *
  */
 
-const PhysicalExam: React.FC = () => {
+const PhysicalExam: React.FC<{ recordId?: string }> = ({ recordId }) => {
   const [physicalExam, setPhysicalExam] = useState<string | null | undefined>(
     ""
   );
   const physicalExamRef = useRef<HTMLIonTextareaElement>(null);
+  const [loading, setLoading] = useState(false);
+  const { patient,setPatient } = useContext(PatientContext); 
+  const { patientRecord, setPatientRecord } = useContext(PatientRecordContext);
+  useEffect(() => {
+    firestore
+      .collection("patients")
+      .doc(patient?.id)
+      .collection("records")
+      .doc(recordId)
+      .onSnapshot((doc) => {
+        let _doc: any = doc.data();
+        setPhysicalExam(_doc.physicalExam);
+      });
+  }, []);
+
   return (
     <form
       action=""
       onSubmit={(e) => {
         e.preventDefault();
+        setLoading(true);
         alert("submitted");
+        let data = physicalExamRef.current?.value;
+
+        firestore
+          .collection("patients")
+          .doc(patient?.id)
+          .collection("records")
+          .doc(recordId)
+          .update({ physicalExam: data })
+          .then(() => {
+            setLoading(false);
+            let tr:any = patientRecord;
+            tr.physicalExam = data;
+            setPatientRecord(tr);
+            console.log("completed");
+          })
+          .catch((e) => {
+            console.error(e);
+            setLoading(false);
+          });
       }}
     >
       <IonCard>
+        {loading && <IonProgressBar type="indeterminate"></IonProgressBar>}
         <IonCardContent>{physicalExam}</IonCardContent>
       </IonCard>
       <IonList>
@@ -505,11 +702,9 @@ const PhysicalExam: React.FC = () => {
             placeholder="Physical Exam"
             required
             ref={physicalExamRef}
+            name={"physicalExam"}
             onIonChange={(e) => {
-              setPhysicalExam(physicalExamRef.current?.value);
-              let text = physicalExamRef.current?.value;
-              var regex = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/g;
-              console.log(text?.match(regex));
+              setPhysicalExam(physicalExamRef.current?.value); 
             }}
           ></IonTextarea>
         </IonItem>
@@ -522,70 +717,135 @@ const PhysicalExam: React.FC = () => {
   );
 };
 
-const LabResults: React.FC = () => {
+const LabResults: React.FC<{ recordId?: string }> = ({ recordId }) => {
   const [newTest, setNewTest] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [LabResults, setLabResults] = useState<Labs[]>();
+  const { staff } = useContext(StaffContext);
+  const { patient } = useContext(PatientContext);
+
+  useEffect(() => {
+    firestore
+      .collection("patients")
+      .doc(patient?.id)
+      .collection("records")
+      .doc(recordId)
+      .collection("labs")
+      .onSnapshot((snap) => {
+        let docs: any = snap.docs.map((doc) => {
+          return doc.data();
+        });
+        setLabResults(docs);
+      });
+  }, []);
   return (
     <>
-      <IonCard>
-        <IonCardHeader>
-          <IonToolbar>
-            <IonCardTitle>Malaria</IonCardTitle>
-            <IonCardSubtitle>Ns Comfort</IonCardSubtitle>
-            <IonButtons slot="end">
-              <IonButton color="danger">
-                <IonIcon icon={trash} slot="icon-only" size="small"></IonIcon>
-              </IonButton>
-            </IonButtons>
-          </IonToolbar>
-        </IonCardHeader>
-        <IonCardContent>
-          Positive Lorem ipsum dolor sit amet consectetur adipisicing elit.
-          Delectus provident sint pariatur temporibus quaerat beatae doloribus
-          libero debitis eius quas illo, id impedit illum placeat autem minus
-          expedita ducimus voluptate?
-        </IonCardContent>
-      </IonCard>
+      {LabResults?.map((labs, index) => {
+        return (
+          <IonCard key={index}>
+            <IonCardHeader>
+              <IonToolbar>
+                <IonCardTitle>{labs?.test}</IonCardTitle>
+                <IonCardSubtitle>{labs?.handler}</IonCardSubtitle>
+                <IonButtons slot="end">
+                  <IonButton color="danger">
+                    <IonIcon
+                      icon={trash}
+                      slot="icon-only"
+                      size="small"
+                    ></IonIcon>
+                  </IonButton>
+                </IonButtons>
+              </IonToolbar>
+            </IonCardHeader>
+            <IonCardContent>{labs?.result}</IonCardContent>
+          </IonCard>
+        );
+      })}
 
       {newTest && (
         <IonCard>
-          {loading && <IonProgressBar type="indeterminate"></IonProgressBar>}
-          <IonCardHeader>
-            <IonToolbar>
-              <IonCardTitle>New Test</IonCardTitle>
-              <IonButton
-                size="small"
-                slot="end"
-                color="danger"
-                onClick={() => {
-                  setNewTest(false);
-                }}
-              >
-                <IonIcon slot="start" icon={closeSharp}></IonIcon>
-                <IonLabel>Close</IonLabel>
+          <form
+            onSubmit={(e: any) => {
+              e.preventDefault();
+              setLoading(true);
+              let _handler = e.target.handler.value
+                ? e.target.handler.value
+                : staff?.name;
+              let data: Labs = {
+                date: Date.now(),
+                test: e.target.test.value,
+                handler: _handler,
+                result: e.target.results.value,
+              };
+              firestore
+                .collection("patients")
+                .doc(patient?.id)
+                .collection("records")
+                .doc(recordId)
+                .collection("labs")
+                .doc(data.test)
+                .set(data)
+                .then(() => {
+                  setLoading(false);
+                })
+                .catch((e) => {
+                  setLoading(false);
+                  console.error(e);
+                });
+            }}
+          >
+            {loading && <IonProgressBar type="indeterminate"></IonProgressBar>}
+            <IonCardHeader>
+              <IonToolbar>
+                <IonCardTitle>New Test</IonCardTitle>
+                <IonButton
+                  size="small"
+                  slot="end"
+                  color="danger"
+                  onClick={() => {
+                    setNewTest(false);
+                  }}
+                >
+                  <IonIcon slot="start" icon={closeSharp}></IonIcon>
+                  <IonLabel>Close</IonLabel>
+                </IonButton>
+              </IonToolbar>
+            </IonCardHeader>
+            <IonCardContent>
+              <IonItem lines="full" fill="outline">
+                <IonLabel position="floating">Title</IonLabel>
+                <IonInput
+                  type="text"
+                  name="test"
+                  required
+                  placeholder="Title"
+                ></IonInput>
+              </IonItem>
+              <IonItem lines="full" fill="outline" className="ion-padding-top">
+                <IonLabel position="floating">Handler</IonLabel>
+                <IonInput
+                  type="text"
+                  name="handler"
+                  placeholder="Handler"
+                ></IonInput>
+              </IonItem>
+              <IonItem lines="full" fill="outline" className="ion-padding-top">
+                <IonLabel position="floating">Result</IonLabel>
+                <IonTextarea
+                  required
+                  name="results"
+                  placeholder="Test Results"
+                ></IonTextarea>
+              </IonItem>
+            </IonCardContent>
+            <div className="text-center pt-2 pb-2">
+              <IonButton size="small" type="submit">
+                {" "}
+                <IonIcon icon={addOutline} slot="start"></IonIcon> Create
               </IonButton>
-            </IonToolbar>
-          </IonCardHeader>
-          <IonCardContent>
-            <IonItem lines="full" fill="outline">
-              <IonLabel position="floating">Title</IonLabel>
-              <IonInput type="text" required placeholder="Title"></IonInput>
-            </IonItem>
-            <IonItem lines="full" fill="outline" className="ion-padding-top">
-              <IonLabel position="floating">Handler</IonLabel>
-              <IonInput type="text" required placeholder="Handler"></IonInput>
-            </IonItem>
-            <IonItem lines="full" fill="outline" className="ion-padding-top">
-              <IonLabel position="floating">Result</IonLabel>
-              <IonTextarea required placeholder="Test Results"></IonTextarea>
-            </IonItem>
-          </IonCardContent>
-          <div className="text-center pt-2 pb-2">
-            <IonButton size="small">
-              {" "}
-              <IonIcon icon={addOutline} slot="start"></IonIcon> Create
-            </IonButton>
-          </div>
+            </div>
+          </form>
         </IonCard>
       )}
 
@@ -601,107 +861,181 @@ const LabResults: React.FC = () => {
   );
 };
 
-const Management: React.FC = () => {
-  const slidesRef = useRef<HTMLIonSlidesElement>(null);
+const Management: React.FC<{ recordId?: string }> = ({ recordId }) => {
+  const [loading, setloading] = useState(false);
+  const { patient } = useContext(PatientContext);
+  const [management, setManagement] = useState<ManagementInterface[]>();
   const [newManagmentItem, setNewManangementItem] = useState(false);
+
+  useEffect(() => {
+    firestore
+      .collection("patients")
+      .doc(patient?.id)
+      .collection("records")
+      .doc(recordId)
+      .collection("management")
+      .onSnapshot((snap) => {
+        let docs: any = snap.docs.map((doc) => doc.data());
+        setManagement(docs);
+      });
+  }, []);
+
+  function deleteItem(item: ManagementInterface) {
+    setloading(true);
+    if (item) {
+      let _item = item.date.toString();
+      firestore
+        .collection("patients")
+        .doc(patient?.id)
+        .collection("records")
+        .doc(recordId)
+        .collection("management")
+        .doc(_item)
+        .delete()
+        .then(() => {
+          console.log("deleted");
+          setloading(false);
+        });
+    }
+  }
   return (
     <div>
-      <IonAccordionGroup>
-        <IonAccordion value="Medical History">
-          <IonItem slot="header" color="clear">
-            <IonToolbar color="clear">
-              <IonLabel slot="start">
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Vel
-                nulla tempora facere aliquid quisquam,
-              </IonLabel>
-            </IonToolbar>
-          </IonItem>
-          <div slot="content">
-            <IonCard>
-              <IonCardHeader>
-                <IonCardTitle>Problem</IonCardTitle>
-              </IonCardHeader>
-              <IonCardContent>
-                <IonText>
-                  <p className="p">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Quae obcaecati.
-                  </p>
-                </IonText>
-              </IonCardContent>
-            </IonCard>
-            <IonCard>
-              <IonCardHeader>
-                <IonCardTitle>Solution</IonCardTitle>
-              </IonCardHeader>
-              <IonCardContent>
-                <IonText>
-                  <p className="p">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Quae obcaecati dolore perspiciatis repellendus dolores
-                    maxime. Iure consequatur eaque accusantium fugit repudiandae
-                    obcaecati eos, unde blanditiis dicta doloribus laudantium
-                    laborum excepturi.
-                  </p>
-                </IonText>
-              </IonCardContent>
-            </IonCard>
-            <IonCardContent className="ion-no-padding-vertical">
-              <IonToolbar color="clear">
-                <IonChip slot="end" color="danger">
-                  <IonIcon icon={trash}></IonIcon>
-                  <IonLabel>Delete</IonLabel>
-                </IonChip>
-              </IonToolbar>
-            </IonCardContent>
-          </div>
-        </IonAccordion>
-      </IonAccordionGroup>
+      {loading && <IonProgressBar type="indeterminate"></IonProgressBar>}
+      {management?.map((mgtItem, index) => {
+        return (
+          <IonAccordionGroup key={index}>
+            <IonAccordion value={mgtItem.problem}>
+              <IonItem slot="header" color="clear">
+                <IonToolbar color="clear">
+                  <IonLabel slot="start">{mgtItem.problem}</IonLabel>
+                </IonToolbar>
+              </IonItem>
+              <div slot="content">
+                <IonCard>
+                  <IonCardHeader>
+                    <IonCardTitle>Problem</IonCardTitle>
+                  </IonCardHeader>
+                  <IonCardContent>
+                    <IonText>
+                      <p className="p">{mgtItem.problem}</p>
+                    </IonText>
+                  </IonCardContent>
+                </IonCard>
+                <IonCard>
+                  <IonCardHeader>
+                    <IonCardTitle>Solution</IonCardTitle>
+                  </IonCardHeader>
+                  <IonCardContent>
+                    <IonText>
+                      <p className="p">{mgtItem.solution}</p>
+                    </IonText>
+                  </IonCardContent>
+                </IonCard>
+                <IonCardContent className="ion-no-padding-vertical">
+                  <IonToolbar color="clear">
+                    <IonChip
+                      slot="end"
+                      color="danger"
+                      onClick={() => {
+                        deleteItem(mgtItem);
+                      }}
+                    >
+                      <IonIcon icon={trash}></IonIcon>
+                      <IonLabel>Delete</IonLabel>
+                    </IonChip>
+                  </IonToolbar>
+                </IonCardContent>
+              </div>
+            </IonAccordion>
+          </IonAccordionGroup>
+        );
+      })}
 
       {newManagmentItem && (
-        <IonCard>
-          <IonCardHeader>
-            <IonToolbar>
-              <IonCardTitle slot="start">New Management Item</IonCardTitle>
-              <IonButton
-                slot="end"
-                color="danger"
-                size="small"
-                onClick={() => {
-                  setNewManangementItem(false);
-                }}
-              >
-                <IonIcon icon={close} slot="start"></IonIcon>
-                <IonLabel>Close</IonLabel>
-              </IonButton>
-            </IonToolbar>
-          </IonCardHeader>
-          <IonCardContent>
-            <IonItem lines="full" fill="outline">
-              <IonLabel position="floating">Problem</IonLabel>
-              <IonTextarea placeholder="Enter Problem"></IonTextarea>
-            </IonItem>
-            <IonItem lines="full" fill="outline" className="ion-padding-top">
-              <IonLabel position="floating">Solution</IonLabel>
-              <IonTextarea placeholder="Enter Solution"></IonTextarea>
-            </IonItem>
-            <div className="text-center pt-2 pb-2">
-              <IonButton
-                size="small"
-                onClick={() => setNewManangementItem(true)}
-              >
-                {" "}
-                <IonIcon icon={cloudUpload} slot="start"></IonIcon> submit
-              </IonButton>
-            </div>
-          </IonCardContent>
-        </IonCard>
+        <form
+          onSubmit={(e: any) => {
+            e.preventDefault();
+            setloading(true);
+            let data: ManagementInterface = {
+              date: Date.now().toString(),
+              problem: e.target.problem.value,
+              solution: e.target.solution.value,
+            };
+
+            firestore
+              .collection("patients")
+              .doc(patient?.id)
+              .collection("records")
+              .doc(recordId)
+              .collection("management")
+              .doc(data.date)
+              .set(data)
+              .then(() => {
+                setloading(false);
+                console.log("management updated");
+              })
+              .catch((e) => {
+                console.error(e);
+                setloading(false);
+              });
+          }}
+        >
+          <IonCard>
+            <IonCardHeader>
+              <IonToolbar>
+                <IonCardTitle slot="start">New Management Item</IonCardTitle>
+                <IonButton
+                  slot="end"
+                  color="danger"
+                  size="small"
+                  onClick={() => {
+                    setNewManangementItem(false);
+                  }}
+                >
+                  <IonIcon icon={close} slot="start"></IonIcon>
+                  <IonLabel>Close</IonLabel>
+                </IonButton>
+              </IonToolbar>
+            </IonCardHeader>
+            <IonCardContent>
+              <IonItem lines="full" fill="outline">
+                <IonLabel position="floating">Problem</IonLabel>
+                <IonTextarea
+                  placeholder="Enter Problem"
+                  required
+                  name="problem"
+                ></IonTextarea>
+              </IonItem>
+              <IonItem lines="full" fill="outline" className="ion-padding-top">
+                <IonLabel position="floating">Solution</IonLabel>
+                <IonTextarea
+                  placeholder="Enter Solution"
+                  name="solution"
+                  required
+                ></IonTextarea>
+              </IonItem>
+              <div className="text-center pt-2 pb-2">
+                <IonButton
+                  size="small"
+                  type="submit"
+                  onClick={() => setNewManangementItem(true)}
+                >
+                  {" "}
+                  <IonIcon icon={cloudUpload} slot="start"></IonIcon> submit
+                </IonButton>
+              </div>
+            </IonCardContent>
+          </IonCard>
+        </form>
       )}
 
       {!newManagmentItem && (
         <div className="text-center pt-2 pb-2">
-          <IonButton size="small" onClick={() => setNewManangementItem(true)} 
-            color="success">
+          <IonButton
+            size="small"
+            onClick={() => setNewManangementItem(true)}
+            color="success"
+          >
             {" "}
             <IonIcon icon={addOutline} slot="start"></IonIcon> Add
           </IonButton>
@@ -715,56 +1049,94 @@ const Management: React.FC = () => {
  *Immunity & Immunizations
  */
 
-const PatientImmunity: React.FC = () => {
+const PatientImmunity: React.FC<{ recordId?: string }> = ({ recordId }) => {
   const [newImmunity, setNewImmnunity] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { patient,setPatient } = useContext(PatientContext);
+  const [Immunisations, setImmunisations] = useState<Immunity[]>();
+
+  useEffect(() => { 
+  }, []);
   return (
     <div>
-      <IonItem lines="full" >
-        <IonText slot="start">Tetanus</IonText>
-        <IonText slot="end">{faker.date.recent().toLocaleDateString()}</IonText>
-      </IonItem>
+      {patient?.immunity?.map((immunisation, index) => {
+        <IonItem lines="full" key={index}>
+          <IonText slot="start">{immunisation.name}</IonText>
+          <IonText slot="end">{immunisation.date}</IonText>
+        </IonItem>;
+      })}
       {newImmunity && (
         <IonCard mode="md" color="light">
-          {loading && <IonProgressBar type="indeterminate"></IonProgressBar>}
-          <IonCardHeader>
-            <IonToolbar color="light">
-
-            <IonCardTitle>New Immuninty</IonCardTitle>
-            <IonCardSubtitle>Name & Date</IonCardSubtitle> 
-          <IonButton
-            className="text-small"
-            size="small"
-            color="danger"
-            onClick={() => setNewImmnunity(false)}
-            slot="end"
-            >
-            <IonIcon slot="start" icon={close}></IonIcon>
-            <IonLabel>Cancel</IonLabel>
-          </IonButton>
-            </IonToolbar>
-          </IonCardHeader>
-          <IonCardContent>
-            <IonItem lines="full" fill="outline" className="ion-padding-top">
-              <IonLabel position="floating">Name</IonLabel>
-              <IonInput
-                type="text"
-                required
-                placeholder="e.g tetanus"
-              ></IonInput>
-            </IonItem>
-            <IonItem lines="full" fill="outline" className="ion-padding-top">
-              <IonLabel position="floating">Date Taken</IonLabel>
-              <IonInput
-                type="date"
-                required
-                placeholder="Date Taken"
-              ></IonInput>
-            </IonItem>
-            <div className="text-center py-1">
-              <IonButton size="small">Create</IonButton>
-            </div>
-          </IonCardContent>
+          <form
+            onSubmit={(e: any) => {
+              e.preventDefault();
+              setLoading(true);
+              let data: Immunity = {
+                name: e.target.title.value,
+                date: e.target.date.value,
+              }; 
+              let pT:any = [];
+              if(patient?.immunity){
+                pT = patient?.immunity;
+              }
+              let temp = [...pT, data]; 
+              firestore
+                .collection("patients")
+                .doc(patient?.id).update({immunity:temp})
+                .then(() => {
+                  let t:any = patient;
+                  t["immunity"] = temp;
+                  setPatient(t);
+                  setLoading(false);
+                }).catch((e)=>{
+                  console.log(e);
+                  setLoading(false)
+                });
+            }}
+          >
+            {loading && <IonProgressBar type="indeterminate"></IonProgressBar>}
+            <IonCardHeader>
+              <IonToolbar color="light">
+                <IonCardTitle>New Immuninty</IonCardTitle>
+                <IonCardSubtitle>Name & Date</IonCardSubtitle>
+                <IonButton
+                  className="text-small"
+                  size="small"
+                  color="danger"
+                  onClick={() => setNewImmnunity(false)}
+                  slot="end"
+                >
+                  <IonIcon slot="start" icon={close}></IonIcon>
+                  <IonLabel>Cancel</IonLabel>
+                </IonButton>
+              </IonToolbar>
+            </IonCardHeader>
+            <IonCardContent>
+              <IonItem lines="full" fill="outline" className="ion-padding-top">
+                <IonLabel position="floating">Name</IonLabel>
+                <IonInput
+                  type="text"
+                  required
+                  name="title"
+                  placeholder="e.g tetanus"
+                ></IonInput>
+              </IonItem>
+              <IonItem lines="full" fill="outline" className="ion-padding-top">
+                <IonLabel position="floating">Date Taken</IonLabel>
+                <IonInput
+                  type="date"
+                  required
+                  name="date"
+                  placeholder="Date Taken"
+                ></IonInput>
+              </IonItem>
+              <div className="text-center py-1">
+                <IonButton size="small" type="submit">
+                  Create
+                </IonButton>
+              </div>
+            </IonCardContent>
+          </form>
         </IonCard>
       )}
       <div className="text-center">

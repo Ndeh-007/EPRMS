@@ -1,22 +1,31 @@
 import {
+  IonBackButton,
   IonButton,
+  IonButtons,
+  IonCardContent,
   IonCol,
   IonContent,
   IonGrid,
+  IonHeader,
+  IonIcon,
   IonInput,
   IonItem,
   IonLabel,
+  IonLoading,
+  IonModal,
   IonPage,
   IonRow,
   IonSpinner,
   IonText,
   IonTitle,
+  IonToolbar,
 } from "@ionic/react";
+import { arrowBack, lockClosed, lockClosedSharp, logoAlipay } from "ionicons/icons";
 import React, { useContext, useEffect } from "react";
 import { useHistory, useLocation } from "react-router";
 import { StaffContext } from "../context/AppContent";
-import { firestore } from "../Firebase";
-import { GetUserData, StoreUserData } from "../Functions/functions";
+import { auth, firestore } from "../Firebase";
+import { GetUserData, sendEmail, StoreUserData } from "../Functions/functions";
 import { localImages } from "../images/images";
 import "../styles/Login.css";
 
@@ -26,14 +35,17 @@ const Login: React.FC = () => {
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [loading, setloading] = React.useState(false);
+  const [loadingReset, setloadingReset] = React.useState(false);
+  const [showmodal, setshowmodal] = React.useState(false);
   const context = useContext(StaffContext);
 
-  async function AuthenticateUser(username: string, password: string) {
+  function AuthenticateUser(username: string, password: string) {
+
     firestore
       .collection("staff")
       .where("username", "==", username)
       .where("password", "==", password)
-      .onSnapshot((Snapshot) => {
+      .get().then((Snapshot) => {
         if (Snapshot.empty) {
           console.log("No user found");
           alert("Invalid Username or Password");
@@ -42,7 +54,9 @@ const Login: React.FC = () => {
         }
         let doc = Snapshot.docs[0];
         let data: any = doc.data();
-        context.setStaff(data);
+        let _lastSeen = Date.now().toString()
+        context.setStaff({ ...data, lastSeen: _lastSeen });
+        firestore.collection("staff").doc(data.id).update({ lastSeen: _lastSeen }).catch((e) => { console.log("failed to update last seen", e) })
         StoreUserData(data);
         console.log(data);
         setloading(false);
@@ -50,13 +64,13 @@ const Login: React.FC = () => {
       });
   }
 
-  useEffect(() => { 
-    GetUserData().then((data)=>{
-      if(data){
-        context.setStaff(data); 
+  useEffect(() => {
+    GetUserData().then((data) => {
+      if (data) {
+        context.setStaff(data);
         history.push("/dashboard");
       }
-    })
+    });
   }, []);
 
   return (
@@ -154,12 +168,87 @@ const Login: React.FC = () => {
               </IonRow>
               <IonRow className="ion-justify-content-center ion-align-items-center">
                 <IonCol size="12">
-                  <IonButton fill="clear" expand="block" size="small">
+                  <IonButton fill="clear" expand="block" size="small" onClick={() => { setshowmodal(true) }}>
                     Forgotten Password?
                   </IonButton>
                 </IonCol>
               </IonRow>
             </IonGrid>
+            <IonModal isOpen={showmodal} onDidDismiss={() => setshowmodal(false)}>
+              <IonHeader>
+                <IonToolbar>
+                  <IonButtons slot='start' > 
+                  <IonButton onClick={()=>{setshowmodal(false)}} color='primary'>
+                    <IonIcon icon={arrowBack} slot="icon-only"></IonIcon>
+                  </IonButton>
+                  </IonButtons>
+                  <IonTitle color="primary">Reset Password</IonTitle>
+                </IonToolbar>
+              </IonHeader>
+              <IonContent>
+                <div className="main-center">
+                  <form className="mx-5" onSubmit={(e: any) => {
+                    e.preventDefault();
+                    setloadingReset(true)
+                    let email = e.target.email.value;
+                    let username = e.target.username.value;
+                    let _pswd = Math.random().toString(36).slice(-8);
+                    firestore.collection("staff").where("username", "==", username).get().then((Snapshot) => {
+                      let id = Snapshot.docs[0].id;
+                      firestore.collection('staff').doc(id).update({ password: _pswd }).then(() => {
+                        let data={
+                          email, username, name:username, password: _pswd
+                        }
+                        sendEmail(data,true).then(()=>{
+                          alert("Password has been reset. Please check your email");
+                          setloadingReset(false)
+                          setshowmodal(false);
+                        }).catch((e) => {
+                          console.log(e);
+                          alert("Failed to reset password");
+                          setloadingReset(false)
+                          setshowmodal(false);
+                        })
+                      }).catch((e) => {
+                        console.log(e);
+                        alert("Failed to reset password");
+                        setloadingReset(false)
+                        setshowmodal(false);
+                      })
+                    }).catch((e) => {
+                      console.log(e);
+                      alert("Failed to reset password");
+                      setloadingReset(false)
+                      setshowmodal(false);
+                    })
+                  }}>
+                    <div className="text-center">
+                      <div>
+                        <IonIcon icon={lockClosedSharp} size='large' color="primary"></IonIcon>
+                      </div>
+                      <IonCardContent>
+
+                        <IonText>
+                          <p>A new password will be sent to the email address entered. Please enter a secure email.</p>
+                        </IonText>
+                      </IonCardContent>
+                    </div>
+                    <IonItem fill="outline">
+                      <IonLabel position="floating">Username</IonLabel>
+                      <IonInput type="text" required placeholder="Your account Username" name="username"></IonInput>
+                    </IonItem>
+                    <IonItem fill="outline" className="mt-2">
+                      <IonLabel position="floating">Email</IonLabel>
+                      <IonInput type="email" required placeholder="example@email.com" name="email"></IonInput>
+                    </IonItem>
+                    <div className="text-center pt-3">
+                      <IonButton type="submit">Reset Password</IonButton>
+                    </div>
+                  </form>
+                  <IonLoading isOpen={loadingReset} onDidDismiss={()=>setloadingReset(false)} message="Resetting Password"></IonLoading>
+                </div>
+              </IonContent>
+            </IonModal>
           </form>
         </div>
       </IonContent>

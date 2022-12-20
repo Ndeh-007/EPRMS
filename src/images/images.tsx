@@ -6,7 +6,7 @@ import dashboard from "../images/dashboard.svg";
 import logoPNG from "../images/AHMpng.png";
 import logoSVG from "../images/AHMsvg.svg";
 import commy from "../images/comy.jpeg";
-import logo from "../images/logo.png";
+import logo from "../images/AMR.svg";
 import doc from "../images/doc.png";
 import patient from "../images/patient.svg";
 import pendingPatient from "../images/patientPending.svg";

@@ -1,0 +1,6 @@
+{
+	"appId": "io.ionic.amr",
+	"appName": "AMR",
+	"webDir": "build",
+	"bundledWebRuntime": false
+}
